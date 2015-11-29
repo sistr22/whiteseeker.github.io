@@ -4,8 +4,11 @@ title: About
 permalink: /about/
 ---
 
-This is the base Jekyll theme. You can find out more info about customizing your Jekyll theme, as well as basic Jekyll usage documentation at [jekyllrb.com](http://jekyllrb.com/)
+I'm a developper advocate @ Google focusing on mobile gaming.
+On my free time I write about indie mobile games that are either forgotten or never discovered.
 
-You can find the source code for the Jekyll new theme at: [github.com/jglovier/jekyll-new](https://github.com/jglovier/jekyll-new)
+I also love graphics programming. Years ago I co-founded [opengl-tutorial.org](http://www.opengl-tutorial.org) and now I can't wait for [Vulkan](https://www.khronos.org/vulkan) to be released !
 
-You can find the source code for Jekyll at [github.com/jekyll/jekyll](https://github.com/jekyll/jekyll)
+This blog is made with [Jekyll](https://jekyllrb.com/), hosted on [GitHub Pages](https://pages.github.com/) and use a custom theme based on the [Material Design Lite](http://www.getmdl.io/) library.
+
+
