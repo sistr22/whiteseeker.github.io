@@ -270,8 +270,11 @@ html, body {
   width: 194px;
   display: inline-block;
 }
-
 .apple_badge {
   width: 194px;
   display: inline-block;
+}
+
+.home_sections {
+  margin-bottom: 8px !important;
 }
