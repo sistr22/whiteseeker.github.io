@@ -17,3 +17,7 @@ Monetisation is done through pack of cards you can either purchase with real mon
 
 Cards and Castles is made by Bit Mass, an indie studio of 5 game developers based in San Diego. 
 Oh and BTW the game is cross platform Android, iOS and PC (steam).
+
+[![](https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png "Get it on Google Play"){: .play_badge}]({{page.link_play}}){: target="_blank"}
+[![]({{site.baseurl}}/assets/images/apple_badge.svg "Download on the App Store"){: .apple_badge}]({{page.link_apple}}){: target="_blank"}
+{: .store_badges}

@@ -19,3 +19,7 @@ They have their own programming language called HaXe. It can be compiled into C+
 They made a ton of great web browser games with a unique gameplay that you've NEVER seen anywhere else. If I had to pick one: Mush, but there are more, a lot more.
 11 frogs. Errrr employees I mean (^_^)
 Go try uppercup football ! You have no excuse it's free to install !
+
+[![](https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png "Get it on Google Play"){: .play_badge}]({{page.link_play}}){: target="_blank"}
+[![]({{site.baseurl}}/assets/images/apple_badge.svg "Download on the App Store"){: .apple_badge}]({{page.link_apple}}){: target="_blank"}
+{: .store_badges}
