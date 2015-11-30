@@ -1,3 +1,5 @@
+---
+---
 <!DOCTYPE html>
 <html lang="en">
 
@@ -14,6 +16,9 @@
 	      <div class="mdl-card mdl-cell mdl-cell--12-col">
 	        <div class="mdl-card__supporting-text">
 	          <h4>{{ page.title }}</h4>
+            {% if page.image %}
+            <img src="{{site.baseurl}}/assets/images/{{ page.image }}" alt="Gameplay gif" class="top_gif">
+            {% endif %}
 	          {{ content }}
 	        </div>
 	      </div>

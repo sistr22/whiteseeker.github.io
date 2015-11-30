@@ -5,7 +5,6 @@ date:   2015-07-15 21:44:13
 categories: mobile game
 image: "hth.gif"
 ---
-![]({{site.baseurl}}/assets/images/hth.gif "Gameplay gif"){: .top_gif}
 In Haunt the house: Terrortown you play a mischievous ghost and scare people by possessing object, moving them around, making scary sounds or even spooking dinosaurs!<!--more--> You like the tranquility of your house and they dare to come and disturb you! As they start freaking out, running away, their fear make you even more powerful, and you'll eventually make them flee the house and leave you alone!
 
 The art style is really beautiful, funny and child friendly. Each animations create a marvelous atmosphere where you want to explore every objects, discover what you can do with them, and see the reaction on your "guests". You can play at your own peace or compete for the first place in the leaderboard! There are also many achievements that help you discover every possibilities offered by the game if you want.

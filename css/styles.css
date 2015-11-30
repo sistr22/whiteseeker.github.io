@@ -256,6 +256,13 @@ html, body {
 .top_gif {
   float:right;
 }
+
+@media screen and (min-width:760px){
+  .top_gif {
+    min-width: 200px;
+  }
+}
+
 .store_badges {
   text-align: center;
 }
