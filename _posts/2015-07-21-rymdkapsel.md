@@ -3,7 +3,8 @@ layout: post
 title:  "Rymdkapsel"
 date:   2015-07-21 14:28:45
 categories: mobile game
-image: "rd.gif"
+image: "rymd/rd.gif"
+screenshots: ['rymd/screenshot_0.png', 'rymd/screenshot_1.png', 'rymd/screenshot_2.png', 'rymd/screenshot_3.png']
 link_play: https://play.google.com/store/apps/details?id=com.grapefrukt.games.rymdkapsel1
 link_apple: https://itunes.apple.com/us/app/rymdkapsel/id663547503
 ---
@@ -14,7 +15,3 @@ If you know about RTS you can hardly imagine be playing one on mobile given the 
 As the gameplay, the art style is minimalist. It is relaxing and the design help you focus on what matters: taking decisions quickly, and reading easily what is happening in your station. Regarding the lenght of the game, Rymdkapsel offer 3 different modes: the normal mode, a harder mode called "Plus" and a "Zen" mode without enemies where you just play at your own pace. It also offer some achievements, and a leaderboard to compete for the longest resistance time.
 
 Grapefrukt Games is the Sweden studio behind this game. Grapefrukt Games consist of exactly one guy: Martin Jonasson. Finally Rymdkapsel is a premium title, so as usually, no bad surprise: no ads, no in app purchase, no hidden cost !
-
-[![](https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png "Get it on Google Play"){: .play_badge}]({{page.link_play}}){: target="_blank"}
-[![]({{site.baseurl}}/assets/images/apple_badge.svg "Download on the App Store"){: .apple_badge}]({{page.link_apple}}){: target="_blank"}
-{: .store_badges}

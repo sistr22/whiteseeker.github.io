@@ -3,7 +3,8 @@ layout: post
 title:  "Haunt the house: Terrortown"
 date:   2015-07-15 21:44:13
 categories: mobile game
-image: "hth.gif"
+image: "hth/hth.gif"
+screenshots: ['hth/screenshot_0.png', 'hth/screenshot_1.png', 'hth/screenshot_2.png', 'hth/screenshot_3.png']
 link_play: https://play.google.com/store/apps/details?id=air.com.sfbgames.HauntTheHouseTerrortown
 link_apple: https://itunes.apple.com/gb/app/haunt-the-house-terrortown/id930868205
 ---
@@ -12,7 +13,3 @@ In Haunt the house: Terrortown you play a mischievous ghost and scare people by 
 The art style is really beautiful, funny and child friendly. Each animations create a marvelous atmosphere where you want to explore every objects, discover what you can do with them, and see the reaction on your "guests". You can play at your own peace or compete for the first place in the leaderboard! There are also many achievements that help you discover every possibilities offered by the game if you want.
 
 Haunt the house was made by SFB Games, a British independent game studio, founded by two brothers, Tom and Adam Vian, who have been making games together since 2003. As Haunt the house is a premium title, you'll have no bad surprise after the initial purchase: no ads, no in-app-purchase.
-
-[![](https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png "Get it on Google Play"){: .play_badge}]({{page.link_play}}){: target="_blank"}
-[![]({{site.baseurl}}/assets/images/apple_badge.svg "Download on the App Store"){: .apple_badge}]({{page.link_apple}}){: target="_blank"}
-{: .store_badges}

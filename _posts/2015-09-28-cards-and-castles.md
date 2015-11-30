@@ -3,7 +3,8 @@ layout: post
 title:  "Cards and Castles"
 date:   2015-09-28 10:27:11
 categories: mobile game
-image: "cac.gif"
+image: "cards_and_castles/cac.gif"
+screenshots: ['cards_and_castles/screenshot_0.png', 'cards_and_castles/screenshot_1.png', 'cards_and_castles/screenshot_2.png', 'cards_and_castles/screenshot_3.png']
 link_play: https://play.google.com/store/apps/details?id=air.com.cardsandcastles.game
 link_apple: https://itunes.apple.com/gb/app/cards-and-castles/id674210616
 ---
@@ -17,7 +18,3 @@ Monetisation is done through pack of cards you can either purchase with real mon
 
 Cards and Castles is made by Bit Mass, an indie studio of 5 game developers based in San Diego. 
 Oh and BTW the game is cross platform Android, iOS and PC (steam).
-
-[![](https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png "Get it on Google Play"){: .play_badge}]({{page.link_play}}){: target="_blank"}
-[![]({{site.baseurl}}/assets/images/apple_badge.svg "Download on the App Store"){: .apple_badge}]({{page.link_apple}}){: target="_blank"}
-{: .store_badges}

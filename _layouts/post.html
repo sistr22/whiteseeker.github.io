@@ -20,6 +20,21 @@
             <img src="{{site.baseurl}}/assets/images/{{ page.image }}" alt="Gameplay gif" class="top_gif">
             {% endif %}
 	          {{ content }}
+            {% if page.link_play AND page.link_apple %}
+            <div class="store_badges">
+            <a href="{{page.link_play}}" target="_blank"><img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" alt="Get it on Google Play" class="play_badge"/></a>
+            <a href="{{page.link_apple}}" target="_blank"><img src="{{site.baseurl}}/assets/images/apple_badge.svg" alt="Download on the App Store" class="apple_badge"/></a>
+            </div>
+            {% endif %}
+            {% if page.screenshots %}
+            <div class="mdl-grid">
+              {% for scr in page.screenshots %}
+                <div class="mdl-cell mdl-cell--4-col">
+                  <img src="{{site.baseurl}}/assets/images/{{scr}}" alt="Screenshot" width="100%"/>
+                </div>
+              {% endfor %}
+              </div>
+            {% endif %}
 	        </div>
 	      </div>
 	    </section> 
