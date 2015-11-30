@@ -251,3 +251,20 @@ html, body {
 .mdl-demo .mdl-menu__container {
   z-index: 99;
 }
+
+
+.top_gif {
+  float:right;
+}
+.store_badges {
+  text-align: center;
+}
+.play_badge {
+  width: 194px;
+  display: inline-block;
+}
+
+.apple_badge {
+  width: 194px;
+  display: inline-block;
+}
