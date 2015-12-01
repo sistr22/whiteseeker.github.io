@@ -255,11 +255,13 @@ html, body {
 
 .top_gif {
   float:right;
+    max-width: 300px;
 }
 
 @media screen and (min-width:760px){
   .top_gif {
     min-width: 200px;
+    max-width: 400px;
   }
 }
 
@@ -277,4 +279,9 @@ html, body {
 
 .home_sections {
   margin-bottom: 8px !important;
+}
+.image_post_link {
+  align-self: stretch;
+  flex-grow: 1;
+  text-decoration: none;
 }

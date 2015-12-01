@@ -9,13 +9,13 @@ layout: default
       <header class="section__play-btn mdl-cell mdl-cell--3-col-desktop mdl-cell--2-col-tablet mdl-cell--4-col-phone mdl-color-text--white" style="background-image: url('/assets/images/{{ post.screenshots[0] }}'); background-repeat: no-repeat; background-position: center; -webkit-background-size: cover;
         -moz-background-size: cover;
         -o-background-size: cover;
-        background-size: cover; background-color:#c6cceb">
+        background-size: cover; background-color:#c6cceb" ><a href="{{ post.url | prepend: site.baseurl }}" class="image_post_link"></a>
       </header>
       {% elsif post.image %}
       <header class="section__play-btn mdl-cell mdl-cell--3-col-desktop mdl-cell--2-col-tablet mdl-cell--4-col-phone mdl-color-text--white" style="background-image: url('/assets/images/{{ post.image }}'); background-repeat: no-repeat; background-position: center; -webkit-background-size: cover;
         -moz-background-size: cover;
         -o-background-size: cover;
-        background-size: cover; background-color:#c6cceb">
+        background-size: cover; background-color:#c6cceb"><a href="{{ post.url | prepend: site.baseurl }}" class="image_post_link"></a>
       </header>
       {% endif%}
       <div class="mdl-card mdl-cell mdl-cell--9-col-desktop mdl-cell--6-col-tablet mdl-cell--4-col-phone">
