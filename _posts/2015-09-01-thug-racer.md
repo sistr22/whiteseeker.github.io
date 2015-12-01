@@ -4,7 +4,7 @@ title:  "Thug Racer"
 date:   2015-09-01 19:48:53
 categories: mobile game
 image: "thug_racer/thug_racer.gif"
-screenshots: ['thug_racer/screenshot_0.png', 'thug_racer/screenshot_1.png', 'thug_racer/screenshot_2.png', 'thug_racer/screenshot_3.png']
+screenshots: ['thug_racer/screenshot_0', 'thug_racer/screenshot_1', 'thug_racer/screenshot_2', 'thug_racer/screenshot_3']
 link_play: https://play.google.com/store/apps/details?id=air.com.sfbgames.HauntTheHouseTerrortown
 link_apple: https://itunes.apple.com/gb/app/haunt-the-house-terrortown/id930868205
 ---

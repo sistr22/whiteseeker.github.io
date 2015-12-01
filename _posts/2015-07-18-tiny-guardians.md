@@ -4,7 +4,7 @@ title:  "Tiny Guardians"
 date:   2015-07-18 04:41:17
 categories: mobile game
 image: "tinyg/tg.gif"
-screenshots: ['tinyg/screenshot_0.png', 'tinyg/screenshot_1.png', 'tinyg/screenshot_2.png', 'tinyg/screenshot_3.png']
+screenshots: ['tinyg/screenshot_0', 'tinyg/screenshot_1', 'tinyg/screenshot_2', 'tinyg/screenshot_3']
 link_play: https://play.google.com/store/apps/details?id=com.kurechii.tinyguardians
 link_apple: https://itunes.apple.com/app/id893448956
 ---
