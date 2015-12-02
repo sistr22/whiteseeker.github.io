@@ -40,12 +40,7 @@
          - .png and .svg icons sprite, 
          - preloader.gif (for browsers that do not support CSS animations) -->
     <link rel="stylesheet" href="/css/photoswipe/default-skin/default-skin.css"> 
-    <!-- Core JS file -->
-    <script src="/css/photoswipe/photoswipe.min.js"></script> 
-    <!-- UI JS file -->
-    <script src="/css/photoswipe/photoswipe-ui-default.min.js"></script> 
-
-    <script src="/css/material.min.js"></script>
+    
     {% if page.custom_css %}
         {% for css_file in page.custom_css%}
          <link rel="stylesheet" href="{{site.baseurl}}/{{css_file}}">
