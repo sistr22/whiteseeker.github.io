@@ -5,6 +5,7 @@ date:   2015-09-28 10:27:11
 categories: mobile game
 image: "cards_and_castles/cac.gif"
 screenshots: ['cards_and_castles/screenshot_0', 'cards_and_castles/screenshot_1', 'cards_and_castles/screenshot_2', 'cards_and_castles/screenshot_3']
+screenshots_size: [1600, 900, 1600, 900, 1600, 900, 1600, 900]
 link_play: https://play.google.com/store/apps/details?id=air.com.cardsandcastles.game
 link_apple: https://itunes.apple.com/gb/app/cards-and-castles/id674210616
 ---

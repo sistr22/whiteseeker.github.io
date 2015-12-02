@@ -5,6 +5,7 @@ date:   2015-07-15 21:44:13
 categories: mobile game
 image: "hth/hth.gif"
 screenshots: ['hth/screenshot_0', 'hth/screenshot_1', 'hth/screenshot_2', 'hth/screenshot_3']
+screenshots_size: [1600, 900, 1600, 900, 1600, 900, 1600, 900]
 link_play: https://play.google.com/store/apps/details?id=air.com.sfbgames.HauntTheHouseTerrortown
 link_apple: https://itunes.apple.com/gb/app/haunt-the-house-terrortown/id930868205
 ---

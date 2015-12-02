@@ -5,6 +5,7 @@ date:   2015-08-09 06:21:03
 categories: mobile game
 image: "uppercup/up.gif"
 screenshots: ['uppercup/screenshot_0', 'uppercup/screenshot_1', 'uppercup/screenshot_2', 'uppercup/screenshot_3']
+screenshots_size: [1509, 900, 1506, 900, 1509, 900, 1509, 900]
 link_play: https://play.google.com/store/apps/details?id=air.com.motiontwin.UppercupFootball
 link_apple: https://itunes.apple.com/us/app/uppercup-football-soccer/id881006708
 ---

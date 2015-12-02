@@ -5,6 +5,7 @@ date:   2015-07-21 14:28:45
 categories: mobile game
 image: "rymd/rd.gif"
 screenshots: ['rymd/screenshot_0', 'rymd/screenshot_1', 'rymd/screenshot_2', 'rymd/screenshot_3']
+screenshots_size: [2560, 1440, 1600, 900, 1600, 900, 1600, 900]
 link_play: https://play.google.com/store/apps/details?id=com.grapefrukt.games.rymdkapsel1
 link_apple: https://itunes.apple.com/us/app/rymdkapsel/id663547503
 ---
