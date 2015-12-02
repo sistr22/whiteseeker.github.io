@@ -17,7 +17,7 @@
 	        <div class="mdl-card__supporting-text">
 	          <h4>{{ page.title }}</h4>
             {% if page.image %}
-            <img src="{{site.baseurl}}/assets/images/{{ page.image }}" alt="Gameplay gif" class="top_gif">
+            <a href="{{site.baseurl}}/assets/images/{{ page.image }}" onclick="screenshotOnClick(1);return false;" target="_blank"><img src="{{site.baseurl}}/assets/images/{{ page.image }}" alt="Gameplay gif" class="top_gif gameScreenshotSmall"></a>
             {% endif %}
 	          {{ content }}
             {% if page.link_play AND page.link_apple %}
@@ -30,7 +30,7 @@
             <div class="mdl-grid">
               {% for scr in page.screenshots %}
                 <div class="mdl-cell mdl-cell--4-col">
-                  <a href="{{site.baseurl}}/assets/images/{{scr}}.png" onclick="screenshotOnClick({{forloop.index}});return false;" target="_blank"><img src="{{site.baseurl}}/assets/images/{{scr}}_small.png" alt="Screenshot" width="100%" class="gameScreenshotSmall"/></a>
+                  <a href="{{site.baseurl}}/assets/images/{{scr}}.png" onclick="screenshotOnClick({{forloop.index | plus: 1}});return false;" target="_blank"><img src="{{site.baseurl}}/assets/images/{{scr}}_small.png" alt="Screenshot" width="100%" class="gameScreenshotSmall"/></a>
                 </div>
               {% endfor %}
               </div>
@@ -96,6 +96,16 @@
       
       // build items array
       var items = [
+          {% if page.gif_size %}
+          {
+              src: '{{site.baseurl}}/assets/images/{{page.image}}',
+              {% assign widx = forloop.index0 | times: 2 %}
+              {% assign hidx = forloop.index0 | times: 2 | plus: 1 %}
+              w: {{page.gif_size[0]}},
+              h: {{page.gif_size[1]}},
+              msrc: '{{site.baseurl}}/assets/images/{{page.image}}'
+          },
+          {% endif %}
           {% for scr in page.screenshots %}
           {
               src: '{{site.baseurl}}/assets/images/{{scr}}.png',
