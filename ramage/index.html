@@ -12,20 +12,20 @@ tags : [gamedev, procedural, beginner]
     <canvas id="mapCanvas" width="300" height="300" style="margin: auto; display: block; padding: 0px 0px 5px 0px;">Your browser does not support the HTML5 canvas tag.</canvas>
   </div>
 	<div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
-  		<div class="mdl-tabs__tab-bar">
-    		<a href="#simple_algo" class="mdl-tabs__tab is-active">Simple algo</a>
-    		<a href="#fractal_2d" class="mdl-tabs__tab">Fractal 2D</a>
-    		<a href="#fractal_3d" class="mdl-tabs__tab">Fractal 3D</a>
-  		</div>
-  	<div class="mdl-tabs__panel is-active" id="simple_algo">
+		<div class="mdl-tabs__tab-bar">
+      <a href="#fractal_3d" class="mdl-tabs__tab is-active">Fractal 3D</a>
+  		<a href="#simple_algo" class="mdl-tabs__tab">Simple algo</a>
+  		<a href="#fractal_2d" class="mdl-tabs__tab">Fractal 2D</a>
+		</div>
+    <div class="mdl-tabs__panel is-active" id="fractal_3d">
+      {% include_relative map_fractal_3d/index.html %}
+    </div>
+  	<div class="mdl-tabs__panel" id="simple_algo">
     	{% include_relative map2d_simple/index.html %}
   	</div>
-	<div class="mdl-tabs__panel" id="fractal_2d">
-		{% include_relative map_fractal_2d/index.html %}
-  </div>
-  <div class="mdl-tabs__panel" id="fractal_3d">
-    {% include_relative map_fractal_3d/index.html %}
-  </div>
+  	<div class="mdl-tabs__panel" id="fractal_2d">
+  		{% include_relative map_fractal_2d/index.html %}
+    </div>
 </div>
 </body>
 </html>
