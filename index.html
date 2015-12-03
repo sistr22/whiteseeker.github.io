@@ -4,33 +4,35 @@ layout: default
 <div class="mdl-layout__tab-panel is-active" style="padding: 10px">
 
   {% for post in site.posts %}
-    <section class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp home_sections">
-      {% if post.screenshots %}
-      <header class="section__play-btn mdl-cell mdl-cell--3-col-desktop mdl-cell--2-col-tablet mdl-cell--4-col-phone mdl-color-text--white" style="background-image: url('/assets/images/{{ post.screenshots[0] }}_small.png'); background-repeat: no-repeat; background-position: center; -webkit-background-size: cover;
-        -moz-background-size: cover;
-        -o-background-size: cover;
-        background-size: cover; background-color:#c6cceb" ><a href="{{ post.url | prepend: site.baseurl }}" class="image_post_link"></a>
-      </header>
-      {% elsif post.image %}
-      <header class="section__play-btn mdl-cell mdl-cell--3-col-desktop mdl-cell--2-col-tablet mdl-cell--4-col-phone mdl-color-text--white" style="background-image: url('/assets/images/{{ post.image }}'); background-repeat: no-repeat; background-position: center; -webkit-background-size: cover;
-        -moz-background-size: cover;
-        -o-background-size: cover;
-        background-size: cover; background-color:#c6cceb"><a href="{{ post.url | prepend: site.baseurl }}" class="image_post_link"></a>
-      </header>
-      {% endif%}
-      <div class="mdl-card mdl-cell mdl-cell--9-col-desktop mdl-cell--6-col-tablet mdl-cell--4-col-phone">
-      <!--div class="mdl-card mdl-cell mdl-cell--12-col"-->
-        <div class="mdl-card__supporting-text">
-          <h4>{{ post.title }}</h4>
-          {% if post.excerpt %}
-            {{ post.excerpt }}
-          {% endif %}
+    {% if post.status == null or post.status == 'published' %}
+      <section class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp home_sections">
+        {% if post.screenshots %}
+        <header class="section__play-btn mdl-cell mdl-cell--3-col-desktop mdl-cell--2-col-tablet mdl-cell--4-col-phone mdl-color-text--white" style="background-image: url('/assets/images/{{ post.screenshots[0] }}_small.png'); background-repeat: no-repeat; background-position: center; -webkit-background-size: cover;
+          -moz-background-size: cover;
+          -o-background-size: cover;
+          background-size: cover; background-color:#c6cceb" ><a href="{{ post.url | prepend: site.baseurl }}" class="image_post_link"></a>
+        </header>
+        {% elsif post.image %}
+        <header class="section__play-btn mdl-cell mdl-cell--3-col-desktop mdl-cell--2-col-tablet mdl-cell--4-col-phone mdl-color-text--white" style="background-image: url('/assets/images/{{ post.image }}'); background-repeat: no-repeat; background-position: center; -webkit-background-size: cover;
+          -moz-background-size: cover;
+          -o-background-size: cover;
+          background-size: cover; background-color:#c6cceb"><a href="{{ post.url | prepend: site.baseurl }}" class="image_post_link"></a>
+        </header>
+        {% endif%}
+        <div class="mdl-card mdl-cell mdl-cell--9-col-desktop mdl-cell--6-col-tablet mdl-cell--4-col-phone">
+        <!--div class="mdl-card mdl-cell mdl-cell--12-col"-->
+          <div class="mdl-card__supporting-text">
+            <h4>{{ post.title }}</h4>
+            {% if post.excerpt %}
+              {{ post.excerpt }}
+            {% endif %}
+          </div>
+          <div class="mdl-card__actions">
+            <a href="{{ post.url | prepend: site.baseurl }}" class="mdl-button">Read</a>
+          </div>
         </div>
-        <div class="mdl-card__actions">
-          <a href="{{ post.url | prepend: site.baseurl }}" class="mdl-button">Read</a>
-        </div>
-      </div>
-    </section> 
+      </section>
+    {% endif %}
   {% endfor %}
   
 </div>
