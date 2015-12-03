@@ -23,6 +23,6 @@ They again bring creativity in Monster Hotel: The gameplay is a new **mix betwee
    * Short term boost.
    While I personnaly don't like short term boost, I enjoy purchasing the long term items because it just feel paying for the full game.
  * Music ! It's a **really cool music** that get in your head. I just wish they add more music & variation!
- * Features: Cloud save, achievement, a bit of social/friends but not too much, oh and BTW the game is playable in your browser [here](http://monster-hotel.net/){: target="_blank"}.
+ * Features: **Cloud save**, achievement, a bit of social/friends but not too much, oh and BTW the game is **playable in your browser** [here](http://monster-hotel.net/){: target="_blank"}.
 
 Usually I finish with a word about the dev, but it's already done in [Uppercup Football]({{site.baseurl}}/mobile/game/2015/08/09/uppercup-football.html). I won't stop talking about them until they got the attention they deserve. It's really rare to find a game studio bringing such creativity in mobile games.
