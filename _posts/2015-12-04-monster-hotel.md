@@ -1,11 +1,11 @@
 ---
 layout: post
 title:  "Monster Hotel"
-status: draft
+status: published
 date:   2015-12-04 21:10:31
 categories: mobile game
-image: "thug_racer/thug_racer.gif"
-gif_size: [399, 223]
+image: "mh/mh_small.gif"
+gif_size: [384, 229]
 screenshots: ['mh/screenshot_3', 'mh/screenshot_1', 'mh/screenshot_2', 'mh/screenshot_0']
 screenshots_size: [2391, 1440, 2391, 1440, 2392, 1440, 2391, 1440]
 link_play: https://play.google.com/store/apps/details?id=com.motiontwin.monsterhotel

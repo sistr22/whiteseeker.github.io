@@ -4,6 +4,8 @@ title: About
 permalink: /about/
 ---
 
+*This is my personal blog. The views expressed on these pages are mine alone and not those of my employer.*
+
 I'm a developper advocate @ Google focusing on mobile gaming.
 On my free time I write about indie mobile games that are either forgotten or never discovered.
 

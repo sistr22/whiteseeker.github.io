@@ -254,6 +254,7 @@ html, body {
 .top_gif {
   float:right;
     max-width: 300px;
+    margin-left: 10px;
 }
 
 @media screen and (min-width:760px){
@@ -282,4 +283,7 @@ html, body {
   align-self: stretch;
   flex-grow: 1;
   text-decoration: none;
+}
+.formField {
+  margin-bottom: 10px;
 }
