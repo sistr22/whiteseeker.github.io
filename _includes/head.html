@@ -3,7 +3,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="description" content="A front-end template that helps you build fast, modern mobile web apps.">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sistr's blog</title>
+  <title>{{site.title}}</title>
 
   <!-- Add to homescreen for Chrome on Android -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -29,17 +29,7 @@
   <link href="https://fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
     rel="stylesheet">
-  <link rel="stylesheet" href="/css/material.min.css">
-  <link rel="stylesheet" href="/css/styles.css">
-  <link rel="stylesheet" href="/css/syntax-highlighting.css">
-
-  <!-- Core CSS file -->
-  <link rel="stylesheet" href="/css/photoswipe/photoswipe.css"> 
-  <!-- Skin CSS file (styling of UI - buttons, caption, etc.)
-       In the folder of skin CSS file there are also:
-       - .png and .svg icons sprite, 
-       - preloader.gif (for browsers that do not support CSS animations) -->
-  <link rel="stylesheet" href="/css/photoswipe/default-skin/default-skin.css"> 
+  <link rel="stylesheet" href="/css/merged.css">
   
   {% if page.custom_css %}
       {% for css_file in page.custom_css%}
