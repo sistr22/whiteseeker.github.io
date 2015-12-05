@@ -264,6 +264,16 @@ html, body {
   }
 }
 
+
+.mdl-demo .mdl-layout.is-small-screen .site_title {
+	flex-grow: 1;
+    text-align: center;
+  }
+
+.mdl-demo .mdl-layout.is-small-screen .mdl-layout-spacer {
+	display:none;
+}
+
 .store_badges {
   text-align: center;
 }
