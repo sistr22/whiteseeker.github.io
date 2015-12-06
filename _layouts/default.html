@@ -17,12 +17,24 @@
       </div>
 
 
-      <!-- Core JS file -->
-    <script src="/css/photoswipe/photoswipe.min.js" defer></script> 
-    <!-- UI JS file -->
-    <script src="/css/photoswipe/photoswipe-ui-default.min.js" defer></script> 
-
-    <script src="/css/material.min.js" defer></script>
+    <script type="text/javascript">
+    function downloadJSAtOnload() {
+    var element = document.createElement("script");
+    element.src = "/css/photoswipe/photoswipe.min.js";
+    document.body.appendChild(element);
+    element = document.createElement("script");
+    element.src = "/css/photoswipe/photoswipe-ui-default.min.js";
+    document.body.appendChild(element);
+    element = document.createElement("script");
+    element.src = "/css/material.min.js";
+    document.body.appendChild(element);
+    }
+    if (window.addEventListener)
+    window.addEventListener("load", downloadJSAtOnload, false);
+    else if (window.attachEvent)
+    window.attachEvent("onload", downloadJSAtOnload);
+    else window.onload = downloadJSAtOnload;
+    </script>
 
     <link rel="stylesheet" href="/css/merged.min.css">
   </body>
