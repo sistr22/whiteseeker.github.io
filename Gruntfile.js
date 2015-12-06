@@ -28,16 +28,8 @@ module.exports = function(grunt) {
 	      safe: true,
 	      draft: false
 	    },
-      build: {                             // Target
-        options: {                        // Target options
-        }
+      build: {
       },
-	    serve: {                            // Another target
-        options: {
-          serve: true,
-          drafts: true
-        }
-      }
     },
 
     buildcontrol: {
@@ -53,7 +45,33 @@ module.exports = function(grunt) {
           branch: 'master'
         }
       }
-  	}
+  	}, 
+
+    htmlmin: {
+      build: {
+        options: {
+          removeComments: true,
+          collapseWhitespace: true,
+        },
+        files: [{
+          expand: true, 
+          cwd: '_site/',
+          src: '**/*.html',
+          dest: '_site/'
+        }]
+      }
+    },
+
+    connect: {
+      server: {
+        options: {
+          port: 9001,
+          base: 'www-root',
+          keepalive: true,
+          base: '_site'
+        }
+      }
+    }
   });
 
   // Uglify plugin (to minify javascript)
@@ -62,16 +80,20 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-jekyll-pages');
   // Plugin to deploy on github pages
   grunt.loadNpmTasks('grunt-build-control');
+  // Plugin to minify html
+  grunt.loadNpmTasks('grunt-contrib-htmlmin');
+
+  grunt.loadNpmTasks('grunt-contrib-connect');
 
   grunt.registerTask('build', [
     'uglify',
-    'pages:serve'
+    'pages',
+    'htmlmin'
   ]);
 
   // Default task(s).
-  grunt.registerTask('default', ['build']);
+  grunt.registerTask('default', ['build', 'connect']);
 
   grunt.registerTask('deploy', ['buildcontrol']);
-
 
 }
