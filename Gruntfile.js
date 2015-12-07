@@ -15,9 +15,9 @@ module.exports = function(grunt) {
       },
       build: {
       	files: {
-        	'css/photoswipe/photoswipe-ui-default.min.js': ['css/photoswipe/photoswipe-ui-default.js'],
-        	'css/photoswipe/photoswipe.min.js': ['css/photoswipe/photoswipe.js'],
-        	'css/material.min.js': ['css/material.js']
+        	'_site/css/photoswipe/photoswipe-ui-default.min.js': ['css/photoswipe/photoswipe-ui-default.js'],
+        	'_site/css/photoswipe/photoswipe.min.js': ['css/photoswipe/photoswipe.js'],
+        	'_site/css/material.min.js': ['css/material.js']
       	}
       }
     },
@@ -30,6 +30,13 @@ module.exports = function(grunt) {
 	    },
       build: {
       },
+      serve: {
+        options: {
+          serve: true,
+          drafts: true,
+          watch: true
+        }
+      }
     },
 
     buildcontrol: {
@@ -62,13 +69,26 @@ module.exports = function(grunt) {
       }
     },
 
-    connect: {
-      server: {
-        options: {
-          port: 9001,
-          base: 'www-root',
-          keepalive: true,
-          base: '_site'
+    penthouse: {
+      extract : {
+        outfile : './css/critical.css',
+        css : './_site/css/merged.min.css',
+        url : 'http://localhost:4000',
+        width : 1200,
+        height : 900,
+        skipErrors : false // this is the default
+      }
+    },
+
+    cssmin: {
+      options: {
+        shorthandCompacting: false,
+        roundingPrecision: -1
+      },
+      target: {
+        files: {
+          '_site/css/merged.min.css': ['css/material.css', 'css/fonts.css', 'css/icon.css', 'css/photoswipe.css', 'css/style.css', 'css/default-skin.css', 'css/syntax-hightlighting.css'],
+          '_site/css/critical.min.css': ['css/critical.css']
         }
       }
     }
@@ -82,18 +102,25 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-build-control');
   // Plugin to minify html
   grunt.loadNpmTasks('grunt-contrib-htmlmin');
-
-  grunt.loadNpmTasks('grunt-contrib-connect');
+  // Get critical above the fold css
+  grunt.loadNpmTasks('grunt-penthouse');
+  // Minify css
+  grunt.loadNpmTasks('grunt-contrib-cssmin');
 
   grunt.registerTask('build', [
-    'uglify',
-    'pages',
-    'htmlmin'
+    'pages:build',
+    'htmlmin',
+    'cssmin',
+    'uglify'
   ]);
 
+  grunt.registerTask('css', ['build', 'penthouse']);
+
   // Default task(s).
-  grunt.registerTask('default', ['build', 'connect']);
+  grunt.registerTask('default', ['build']);
 
   grunt.registerTask('deploy', ['buildcontrol']);
+
+  grunt.registerTask('connect', ['pages:serve']);
 
 }

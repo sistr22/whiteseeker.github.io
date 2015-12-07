@@ -10,15 +10,10 @@ url: "https://whiteseeker.github.io" # the base hostname & protocol for your sit
 twitter_username: yindie
 github_username:  jekyll
 excerpt_separator: <!--more-->
+exclude: ['node_modules', 'css']
 
 # Build settings
 markdown: kramdown
 
 sass:
     sass_dir: _sass
-
-jekyll-press:
-  exclude: 'atom.xml' # Exclude files from processing - file name, glob pattern or array of file names and glob patterns
-  js_options: {}      # js minifier options
-  css_options: {}     # css minifier options
-  html_options: {}    # html minifier options
