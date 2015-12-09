@@ -31,9 +31,17 @@
     "grunt-contrib-connect": "^0.11.2",
     "grunt-contrib-cssmin": "^0.14.0",
     "grunt-contrib-htmlmin": "^0.6.0",
+    "grunt-contrib-imagemin": "^1.0.0",
     "grunt-contrib-uglify": "^0.11.0",
     "grunt-criticalcss": "^0.6.0",
+    "grunt-imagemagick": "^0.1.5",
     "grunt-jekyll-pages": "^1.0.3",
-    "grunt-penthouse": "^0.3.0"
+    "grunt-modernizr": "^1.0.1",
+    "grunt-penthouse": "^0.3.0",
+    "grunt-responsive-images": "^0.1.7",
+    "grunt-webp-compress": "0.0.4"
+  },
+  "dependencies": {
+    "imagemin-mozjpeg": "^5.1.0"
   }
 }

@@ -297,3 +297,17 @@ html, body {
 .formField {
   margin-bottom: 10px;
 }
+
+.section__play-btn {
+  background-repeat: no-repeat;
+  background-position: center;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  background-color:#c6cceb
+}
+/*
+.webp .section__play-btn {
+  background-image: url('/assets/images/cards_and_castles/screenshot_0_small.jpg.webp');
+}*/

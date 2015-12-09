@@ -91,7 +91,38 @@ module.exports = function(grunt) {
           '_site/css/critical.min.css': ['css/critical.css']
         }
       }
+    },
+
+    cwebp: {
+      images: {
+        options: {
+          arguments: [ '-q', 50 ],
+          concurrency: 20
+        },
+        files: [
+          { src: [ '_site/assets/images/**/*_small.png' ] }
+        ]
+      }
+    },
+
+    modernizr: {
+      build: {
+        "dest" : "_site/scripts/modernizr.js",
+        "parseFiles": false,
+        "customTests": [],
+        "devFile": "scripts/modernizr-custom.js",
+        "outputFile": "scripts/modernizr-custom.js",
+        "tests": [
+          "img/webp"
+        ],
+        "extensibility": [
+          "setClasses"
+        ],
+        "uglify": true
+      }
     }
+
+    
   });
 
   // Uglify plugin (to minify javascript)
@@ -107,11 +138,17 @@ module.exports = function(grunt) {
   // Minify css
   grunt.loadNpmTasks('grunt-contrib-cssmin');
 
+  grunt.loadNpmTasks('grunt-webp-compress');
+
+  grunt.loadNpmTasks('grunt-modernizr');
+
   grunt.registerTask('build', [
     'pages:build',
     'htmlmin',
     'cssmin',
-    'uglify'
+    'uglify',
+    'cwebp' ,
+    'modernizr'
   ]);
 
   grunt.registerTask('css', ['build', 'penthouse']);
