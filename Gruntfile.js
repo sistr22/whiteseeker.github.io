@@ -10,14 +10,14 @@ module.exports = function(grunt) {
       options: {
         banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n',
         screwIE8: true,
-        mangle: false
-
+        mangle: false,
+        preserveComments: false
       },
       build: {
       	files: {
         	'_site/css/photoswipe/photoswipe-ui-default.min.js': ['css/photoswipe/photoswipe-ui-default.js'],
         	'_site/css/photoswipe/photoswipe.min.js': ['css/photoswipe/photoswipe.js'],
-        	'_site/css/material.min.js': ['css/material.js']
+        	'_site/scripts/moderial.min.js': ['css/material.js', '_site/scripts/modernizr.js']
       	}
       }
     },
@@ -111,7 +111,7 @@ module.exports = function(grunt) {
         "parseFiles": false,
         "customTests": [],
         "devFile": "scripts/modernizr-custom.js",
-        "outputFile": "scripts/modernizr-custom.js",
+        "outputFile": "_site/scripts/modernizr-custom.js",
         "tests": [
           "img/webp"
         ],
@@ -147,8 +147,7 @@ module.exports = function(grunt) {
     'htmlmin',
     'cssmin',
     'uglify',
-    'cwebp' ,
-    'modernizr'
+    'cwebp'
   ]);
 
   grunt.registerTask('css', ['build', 'penthouse']);
