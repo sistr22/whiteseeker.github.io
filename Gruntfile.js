@@ -17,7 +17,7 @@ module.exports = function(grunt) {
       	files: {
         	'_site/css/photoswipe/photoswipe-ui-default.min.js': ['css/photoswipe/photoswipe-ui-default.js'],
         	'_site/css/photoswipe/photoswipe.min.js': ['css/photoswipe/photoswipe.js'],
-        	'_site/scripts/moderial.min.js': ['css/material.js', '_site/scripts/modernizr.js']
+        	'_site/scripts/material.min.js': ['css/material.js']
       	}
       }
     },
@@ -111,7 +111,7 @@ module.exports = function(grunt) {
         "parseFiles": false,
         "customTests": [],
         "devFile": "scripts/modernizr-custom.js",
-        "outputFile": "_site/scripts/modernizr-custom.js",
+        "outputFile": "scripts/modernizr-custom.js",
         "tests": [
           "img/webp"
         ],
@@ -147,7 +147,8 @@ module.exports = function(grunt) {
     'htmlmin',
     'cssmin',
     'uglify',
-    'cwebp'
+    'cwebp' ,
+    'modernizr'
   ]);
 
   grunt.registerTask('css', ['build', 'penthouse']);
