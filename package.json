@@ -39,6 +39,7 @@
     "grunt-modernizr": "^1.0.1",
     "grunt-penthouse": "^0.3.0",
     "grunt-responsive-images": "^0.1.7",
+    "grunt-uncss": "^0.4.4",
     "grunt-webp-compress": "0.0.4"
   },
   "dependencies": {

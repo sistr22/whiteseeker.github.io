@@ -1161,3 +1161,13 @@ html {
   flex-grow: 1;
   text-decoration: none;
 }
+
+.section__play-btn {
+  background-repeat: no-repeat;
+  background-position: center;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  background-color: #c6cceb;
+}

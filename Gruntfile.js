@@ -10,7 +10,6 @@ module.exports = function(grunt) {
       options: {
         banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n',
         screwIE8: true,
-        mangle: false,
         preserveComments: false
       },
       build: {
@@ -82,8 +81,9 @@ module.exports = function(grunt) {
 
     cssmin: {
       options: {
-        shorthandCompacting: false,
-        roundingPrecision: -1
+        shorthandCompacting: true,
+        roundingPrecision: -1,
+        keepSpecialComments: 0
       },
       target: {
         files: {
@@ -120,6 +120,21 @@ module.exports = function(grunt) {
         ],
         "uglify": true
       }
+    },
+
+    uncss: {
+
+      dist: {
+        options: {
+          report: 'min', // optional: include to report savings
+          media: [ '(min-width: 768px)', '(min-width: 992px)', '(min-width: 1200px)' ],
+          stylesheets : ['_site/css/merged.min.css', '_site/css/critical.min.css'],
+          ignoreSheets: [ '/fonts.googleapis/' ],
+        },
+        files: {
+          '_site/css/toto.css': ['_site/index.html', '_site/about/index.html']
+        }
+      }
     }
 
     
@@ -141,14 +156,15 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-webp-compress');
 
   grunt.loadNpmTasks('grunt-modernizr');
+  // Remove unused css
+  grunt.loadNpmTasks('grunt-uncss');
 
   grunt.registerTask('build', [
     'pages:build',
     'htmlmin',
     'cssmin',
     'uglify',
-    'cwebp' ,
-    'modernizr'
+    'cwebp'
   ]);
 
   grunt.registerTask('css', ['build', 'penthouse']);
