@@ -100,7 +100,7 @@ module.exports = function(grunt) {
           concurrency: 20
         },
         files: [
-          { src: [ '_site/assets/images/**/*_small.png' ] }
+          { src: [ '_site/assets/images/**/*_small.png'] }
         ]
       }
     },
