@@ -6,7 +6,7 @@ permalink: /about/
 
 *This is my personal blog. The views expressed on these pages are mine alone and not those of my employer.*
 
-I'm a developper advocate @ Google focusing on mobile gaming.
+I'm a developer advocate @ Google focusing on mobile gaming.
 On my free time I write about indie mobile games that are either forgotten or never discovered.
 
 I also love graphics programming. Years ago I co-founded [opengl-tutorial.org](http://www.opengl-tutorial.org){: target="_blank"} and now I can't wait for [Vulkan](https://www.khronos.org/vulkan){: target="_blank"} to be released !
