@@ -307,6 +307,11 @@ html, body {
   background-size: cover;
   background-color:#c6cceb
 }
+.post_date {
+  font-size: 13px;
+  margin-left: 10px;
+  color: gray;
+}
 /*
 .webp .section__play-btn {
   background-image: url('/assets/images/cards_and_castles/screenshot_0_small.jpg.webp');

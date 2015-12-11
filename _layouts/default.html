@@ -25,13 +25,6 @@
     element = document.createElement("script");
     element.src = "/css/photoswipe/photoswipe-ui-default.min.js";
     document.body.appendChild(element);
-    element = document.createElement("link");
-    element.href = "/css/merged.min.css";
-    element.rel = "stylesheet"
-    document.body.appendChild(element);
-    element = document.createElement("script");
-    element.src = "/scripts/material.min.js";
-    document.body.appendChild(element);
     }
     if (window.addEventListener)
     window.addEventListener("load", downloadJSAtOnload, false);
@@ -40,8 +33,8 @@
     else window.onload = downloadJSAtOnload;
     </script>
 
-    <!--script asynch src="/scripts/material.min.js"></script-->
-    <!--link rel="stylesheet" href="/css/merged.min.css"-->
+    <script asynch src="/scripts/material.min.js"></script>
+    <link rel="stylesheet" href="/css/merged.min.css">
   </body>
 
 </html>
