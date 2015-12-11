@@ -30,7 +30,10 @@
             <div class="mdl-grid">
               {% for scr in page.screenshots %}
                 <div class="mdl-cell mdl-cell--4-col">
-                  <a href="{{site.baseurl}}/assets/images/{{scr}}.png" onclick="screenshotOnClick({{forloop.index | plus: 1}});return false;" target="_blank"><img src="{{site.baseurl}}/assets/images/{{scr}}_small.png" alt="Screenshot" width="100%" class="gameScreenshotSmall"/></a>
+                  <a href="{{site.baseurl}}/assets/images/{{scr}}.png" onclick="screenshotOnClick({{forloop.index | plus: 1}});return false;" target="_blank"><picture>
+                    <source type="image/webp" srcset="{{site.baseurl}}/assets/images/{{scr}}_small.png.webp">
+                    <img src="{{site.baseurl}}/assets/images/{{scr}}_small.png" alt="Screenshot" width="100%" class="gameScreenshotSmall">
+                  </picture><!--img src="{{site.baseurl}}/assets/images/{{scr}}_small.png" alt="Screenshot" width="100%" class="gameScreenshotSmall"/--></a>
                 </div>
               {% endfor %}
               </div>
@@ -93,30 +96,42 @@
 
     {% if page.screenshots AND page.screenshots_size %}
     <script>
+      var items = [];
+
+      Modernizr.on('webp', function (result) {
+        // result == Modernizr.webp either is either `true` or `false`
+        var extension = ".png";
+        console.log("webp support: " + result);
+        if (result) {
+          // Has WebP support
+          extension = ".png.webp";
+        }
+
+        // build items array
+        items = [
+            {% if page.gif_size %}
+            {
+                src: '{{site.baseurl}}/assets/images/{{page.image}}',
+                {% assign widx = forloop.index0 | times: 2 %}
+                {% assign hidx = forloop.index0 | times: 2 | plus: 1 %}
+                w: {{page.gif_size[0]}},
+                h: {{page.gif_size[1]}},
+                msrc: '{{site.baseurl}}/assets/images/{{page.image}}'
+            },
+            {% endif %}
+            {% for scr in page.screenshots %}
+            {
+                src: '{{site.baseurl}}/assets/images/{{scr}}' + extension,
+                {% assign widx = forloop.index0 | times: 2 %}
+                {% assign hidx = forloop.index0 | times: 2 | plus: 1 %}
+                w: {{page.screenshots_size[widx]}},
+                h: {{page.screenshots_size[hidx]}},
+                msrc: '{{site.baseurl}}/assets/images/{{scr}}_small' + extension
+            },
+            {% endfor %}
+        ];
+      });
       
-      // build items array
-      var items = [
-          {% if page.gif_size %}
-          {
-              src: '{{site.baseurl}}/assets/images/{{page.image}}',
-              {% assign widx = forloop.index0 | times: 2 %}
-              {% assign hidx = forloop.index0 | times: 2 | plus: 1 %}
-              w: {{page.gif_size[0]}},
-              h: {{page.gif_size[1]}},
-              msrc: '{{site.baseurl}}/assets/images/{{page.image}}'
-          },
-          {% endif %}
-          {% for scr in page.screenshots %}
-          {
-              src: '{{site.baseurl}}/assets/images/{{scr}}.png',
-              {% assign widx = forloop.index0 | times: 2 %}
-              {% assign hidx = forloop.index0 | times: 2 | plus: 1 %}
-              w: {{page.screenshots_size[widx]}},
-              h: {{page.screenshots_size[hidx]}},
-              msrc: '{{site.baseurl}}/assets/images/{{scr}}_small.png'
-          },
-          {% endfor %}
-      ];
       
 
       var pswpElement = document.querySelectorAll('.pswp')[0];
@@ -152,8 +167,6 @@
         var gallery = new PhotoSwipe( pswpElement, PhotoSwipeUI_Default, items, options);
         gallery.init();
       }
-
-      !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');
 
     </script>
     {% endif %}
