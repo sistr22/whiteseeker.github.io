@@ -87,7 +87,7 @@ module.exports = function(grunt) {
       },
       target: {
         files: {
-          '_site/css/merged.min.css': ['css/material.css', 'css/fonts.css', 'css/icon.css', 'css/photoswipe.css', 'css/style.css', 'css/default-skin.css', 'css/syntax-hightlighting.css'],
+          '_site/css/merged.min.css': ['css/material.css', 'css/photoswipe.css', 'css/style.css', 'css/default-skin.css', 'css/syntax-hightlighting.css'],
           '_site/css/critical.min.css': ['css/critical.css']
         }
       }
