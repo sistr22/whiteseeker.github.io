@@ -102,10 +102,11 @@
         // result == Modernizr.webp either is either `true` or `false`
         var extension = ".png";
         console.log("webp support: " + result);
-        if (result) {
+        if (result == true) {
           // Has WebP support
           extension = ".png.webp";
         }
+        console.log("extension: " + extension);
 
         // build items array
         items = [
