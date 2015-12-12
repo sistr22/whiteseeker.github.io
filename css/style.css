@@ -312,6 +312,21 @@ html, body {
   margin-left: 10px;
   color: gray;
 }
+
+.blog-drawer > .mdl-card__title {
+  color: #fff;
+  height: 128px;
+  background: #c6cceb;
+}
+
+.blog-button-login {
+  position:absolute;
+  right:12px;
+  top:100px;
+}
+.blog-notif-switch {
+  margin-left:12px;
+}
 /*
 .webp .section__play-btn {
   background-image: url('/assets/images/cards_and_castles/screenshot_0_small.jpg.webp');

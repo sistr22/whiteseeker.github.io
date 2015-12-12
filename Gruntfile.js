@@ -16,7 +16,10 @@ module.exports = function(grunt) {
       	files: {
         	'_site/css/photoswipe/photoswipe-ui-default.min.js': ['css/photoswipe/photoswipe-ui-default.js'],
         	'_site/css/photoswipe/photoswipe.min.js': ['css/photoswipe/photoswipe.js'],
-        	'_site/scripts/material.min.js': ['css/material.js']
+        	'_site/scripts/material.min.js': ['css/material.js'],
+          '_site/scripts/modernizr-custom.min.js': ['scripts/modernizr-custom.js'],
+          '_site/scripts/rv-vanilla-modal.min.js': ['scripts/rv-vanilla-modal.js'],
+          '_site/service-worker.js': ['scripts/service-worker.js'],
       	}
       }
     },
@@ -33,7 +36,7 @@ module.exports = function(grunt) {
         options: {
           serve: true,
           drafts: true,
-          watch: true
+          watch: false
         }
       }
     },
@@ -70,8 +73,8 @@ module.exports = function(grunt) {
 
     penthouse: {
       extract : {
-        outfile : './css/critical.css',
-        css : './_site/css/merged.min.css',
+        outfile : '_site/css/critical.css',
+        css : '_site/css/merged.min.css',
         url : 'http://localhost:4000',
         width : 1200,
         height : 900,
@@ -85,10 +88,14 @@ module.exports = function(grunt) {
         roundingPrecision: -1,
         keepSpecialComments: 0
       },
-      target: {
+      main: {
         files: {
-          '_site/css/merged.min.css': ['css/material.css', 'css/photoswipe.css', 'css/style.css', 'css/default-skin.css', 'css/syntax-hightlighting.css'],
-          '_site/css/critical.min.css': ['css/critical.css']
+          '_site/css/merged.min.css': ['css/material.css', 'css/photoswipe.css', 'css/style.css', 'css/default-skin.css', 'css/syntax-hightlighting.css', 'css/modal_styles.css'],
+        }
+      },
+      critical: {
+        files: {
+          '_site/css/critical.min.css': ['_site/css/critical.css']
         }
       }
     },
@@ -162,12 +169,12 @@ module.exports = function(grunt) {
   grunt.registerTask('build', [
     'pages:build',
     'htmlmin',
-    'cssmin',
+    'cssmin:main',
+    'penthouse',
+    'cssmin:critical',
     'uglify',
     'cwebp'
   ]);
-
-  grunt.registerTask('css', ['build', 'penthouse']);
 
   // Default task(s).
   grunt.registerTask('default', ['build']);

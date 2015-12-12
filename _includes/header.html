@@ -11,10 +11,18 @@
       </nav>
     </div>
   </header>
-  <div class="mdl-layout__drawer mdl-layout--small-screen-only">
-    <span class="mdl-layout-title"><a href="{{ site.baseurl }}/" class="mdl-navigation__link">{{ site.title }}</a></span>
+  <div class="mdl-layout__drawer blog-drawer">
+    <div class="mdl-card__title"><h2 class="mdl-card__title-text">{{ site.title }}</h2></div>
+    <!--button data-rv-vanilla-modal="#target-modal" class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored blog-button-login">
+      <i class="material-icons">add</i>
+    </button-->
     <nav class="mdl-navigation">
+      <a class="mdl-navigation__link" href="{{ site.baseurl }}">Home</a>
       <a class="mdl-navigation__link" href="{{ site.baseurl }}/about/">About</a>
+      <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect blog-notif-switch" for="switch-notif">
+        <input type="checkbox" id="switch-notif" class="mdl-switch__input" disabled>
+        <span id="switch-notif-label" class="mdl-switch__label">Notifications</span>
+      </label>
     </nav>
   </div>
   

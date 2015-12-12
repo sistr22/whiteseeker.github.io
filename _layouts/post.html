@@ -192,6 +192,45 @@
     <link rel="stylesheet" href="/css/merged.min.css">
   </body>
 
+  <div id="target-modal" class="rv-vanilla-modal">
+    <div class="rv-vanilla-modal-header group">
+      <button class="rv-vanilla-modal-close"><span class="text">×</span></button>
+      <h2 class="rv-vanilla-modal-title">Modal Title</h2>
+    </div>
+    <div class="rv-vanilla-modal-body">
+      <p>Modal Content</p>
+    </div>
+  </div>
+  <!--script src="/scripts/rv-vanilla-modal.min.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    /* global RvVanillaModal */
+    'use strict';
+    var modal = new RvVanillaModal({
+        showOverlay: true
+    });
+
+    // each method
+    modal.each(function(element) {
+       var target = element.getAttribute('data-rv-vanilla-modal');
+       var targetElement = document.querySelector(target);
+       var closeBtn = targetElement.querySelector(modal.settings.closeSelector);
+
+       // close click listerner
+       closeBtn.addEventListener('click', function(event) {
+        event.preventDefault();
+        modal.close(targetElement);
+       });
+
+       // open click listerner
+       element.addEventListener('click', function(event) {
+        event.preventDefault();
+        modal.open(targetElement);
+       });
+    });
+  }, false);
+  </script-->
+
 </html>
 
 

@@ -10,7 +10,7 @@ url: "https://whiteseeker.github.io" # the base hostname & protocol for your sit
 twitter_username: yindie
 github_username:  jekyll
 excerpt_separator: <!--more-->
-exclude: ['node_modules', 'css']
+exclude: ['node_modules', 'css', 'scripts']
 
 # Build settings
 markdown: kramdown
