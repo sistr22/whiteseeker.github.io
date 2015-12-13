@@ -2,7 +2,7 @@
 console.log("navigator.language: " + navigator.language);
       var isPushEnabled = false;
       function initialiseState() {
-        console.log('initialiseState');  
+        console.log('initialiseState');
         // Are Notifications supported in the service worker?  
         if (!('showNotification' in ServiceWorkerRegistration.prototype)) {  
           console.warn('Notifications aren\'t supported.');  
