@@ -23,9 +23,7 @@
   <link rel="shortcut icon" href="/assets/images/favicon.png">
 
   <!-- SEO: If your mobile URL is different from the desktop URL, add a canonical link to the desktop page https://developers.google.com/webmasters/smartphone-sites/feature-phones -->
-  <!--
-  <link rel="canonical" href="http://www.example.com/">
-  -->
+  <link rel="canonical" href="{{ site.url }}{{ page.url }}">
 
   <link rel="stylesheet" href="/css/critical.min.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
@@ -38,6 +36,10 @@
 
   <!-- Google Analytics -->
   <script>
+  var host = "whiteseeker.github.io";
+  if ((host == window.location.host) && (window.location.protocol != "https:"))
+      window.location.protocol = "https";
+  
   window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
   ga('create', 'UA-70962121-1', {'siteSpeedSampleRate': 40});
   ga('send', 'pageview');
