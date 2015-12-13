@@ -7,7 +7,7 @@ layout: default
     {% if post.status == null or post.status == 'published' %}
       <section class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp home_sections">
         {% if post.screenshots %}
-        <style type = "text/css" scoped>
+        <style type = "text/css">
           .webp .scr{{forloop.index}} {
               background-image: url('/assets/images/{{ post.screenshots[0] }}_small.png.webp');
           }
