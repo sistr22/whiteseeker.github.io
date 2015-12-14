@@ -95,6 +95,28 @@ console.log("navigator.language: " + navigator.language);
               console.log('Pn toto added!');
             console.log('Toto\'s data: ', snapshot.val());
           });
+        } else if (subscription.endpoint.startsWith("https://updates.push.services.mozilla.com/push/")) {
+          var pntoken = subscription.endpoint.substring("https://updates.push.services.mozilla.com/push/".length);
+          console.log("push token: " + pntoken);
+          var wilmaRef = new Firebase('https://luminous-inferno-9971.firebaseio.com/pntokens/'+pntoken.hashCode());
+          wilmaRef.transaction(function(currentData) {
+            if (currentData === null) {
+              return {platform: "firefox", topic: "games", token: pntoken};
+            } else {
+              console.log('Pn toto already exists.');
+              return; // Abort the transaction.
+            }
+          }, function(error, committed, snapshot) {
+            if (error)
+              console.log('Transaction failed abnormally!', error);
+            else if (!committed)
+              console.log('We aborted the transaction (because wilma already exists).');
+            else
+              console.log('Pn toto added!');
+            console.log('Toto\'s data: ', snapshot.val());
+          });
+        } else {
+          console.log("Unknown pusk token type: " + subscription.endpoint);
         }
       }
 
@@ -151,9 +173,9 @@ console.log("navigator.language: " + navigator.language);
           // To unsubscribe from push messaging, you need get the
           // subscription object, which you can call unsubscribe() on.
           serviceWorkerRegistration.pushManager.getSubscription().then(
-            function(pushSubscription) {
+            function(subscription) {
               // Check we have a subscription to unsubscribe
-              if (!pushSubscription) {
+              if (!subscription) {
                 // No subscription object, so set the state
                 // to allow the user to subscribe to push
                 isPushEnabled = false;
@@ -164,40 +186,81 @@ console.log("navigator.language: " + navigator.language);
                 return;
               }
 
-              var endpoint = pushSubscription.endpoint;
-              // TODO: Make a request to your server to remove
-              // the subscriptionId from your data store so you
-              // don't attempt to send them push messages anymore
-              var pntoken = endpoint.substring("https://android.googleapis.com/gcm/send/".length);
-              console.log("push token: " + pntoken);
-              var onComplete = function(error) {
-                if (error) {
-                  console.log('Synchronization failed');
-                } else {
-                  console.log('Synchronization succeeded');
-                }
-              };
-              var dataRef = new Firebase('https://luminous-inferno-9971.firebaseio.com/pntokens/'+pntoken.hashCode());
-              dataRef.remove(onComplete);
+              if(subscription.endpoint.startsWith("https://android.googleapis.com/gcm/send/")) {
+                // This is a chrome push
+                var endpoint = subscription.endpoint;
+                // Make a request to your server to remove
+                // the subscriptionId from your data store so you
+                // don't attempt to send them push messages anymore
+                var pntoken = endpoint.substring("https://android.googleapis.com/gcm/send/".length);
+                console.log("push token: " + pntoken);
+                var onComplete = function(error) {
+                  if (error) {
+                    console.log('Synchronization failed');
+                  } else {
+                    console.log('Synchronization succeeded');
+                  }
+                };
+                var dataRef = new Firebase('https://luminous-inferno-9971.firebaseio.com/pntokens/'+pntoken.hashCode());
+                dataRef.remove(onComplete);
 
-              // We have a subscription, so call unsubscribe on it
-              pushSubscription.unsubscribe().then(function(successful) {
-                //pushButton.disabled = false;
-                pushButton.MaterialCheckbox.enable();
-                pushButton.MaterialCheckbox.uncheck();
-                //pushButton.textContent = 'Enable Push Messages';
-                isPushEnabled = false;
-              }).catch(function(e) {
-                // We failed to unsubscribe, this can lead to
-                // an unusual state, so may be best to remove
-                // the users data from your data store and
-                // inform the user that you have done so
+                // We have a subscription, so call unsubscribe on it
+                subscription.unsubscribe().then(function(successful) {
+                  //pushButton.disabled = false;
+                  pushButton.MaterialCheckbox.enable();
+                  pushButton.MaterialCheckbox.uncheck();
+                  //pushButton.textContent = 'Enable Push Messages';
+                  isPushEnabled = false;
+                }).catch(function(e) {
+                  // We failed to unsubscribe, this can lead to
+                  // an unusual state, so may be best to remove
+                  // the users data from your data store and
+                  // inform the user that you have done so
 
-                console.log('Unsubscription error: ', e);
-                //pushButton.disabled = false;
-                pushButton.MaterialCheckbox.enable();
-                //pushButton.textContent = 'Enable Push Messages';
-              });
+                  console.log('Unsubscription error: ', e);
+                  //pushButton.disabled = false;
+                  pushButton.MaterialCheckbox.enable();
+                  //pushButton.textContent = 'Enable Push Messages';
+                });
+              } else if (subscription.endpoint.startsWith("https://updates.push.services.mozilla.com/push/")) {
+                // This is a firefox push
+                var endpoint = subscription.endpoint;
+                // Make a request to your server to remove
+                // the subscriptionId from your data store so you
+                // don't attempt to send them push messages anymore
+                var pntoken = endpoint.substring("https://updates.push.services.mozilla.com/push/".length);
+                console.log("push token: " + pntoken);
+                var onComplete = function(error) {
+                  if (error) {
+                    console.log('Synchronization failed');
+                  } else {
+                    console.log('Synchronization succeeded');
+                  }
+                };
+                var dataRef = new Firebase('https://luminous-inferno-9971.firebaseio.com/pntokens/'+pntoken.hashCode());
+                dataRef.remove(onComplete);
+
+                // We have a subscription, so call unsubscribe on it
+                subscription.unsubscribe().then(function(successful) {
+                  //pushButton.disabled = false;
+                  pushButton.MaterialCheckbox.enable();
+                  pushButton.MaterialCheckbox.uncheck();
+                  //pushButton.textContent = 'Enable Push Messages';
+                  isPushEnabled = false;
+                }).catch(function(e) {
+                  // We failed to unsubscribe, this can lead to
+                  // an unusual state, so may be best to remove
+                  // the users data from your data store and
+                  // inform the user that you have done so
+
+                  console.log('Unsubscription error: ', e);
+                  //pushButton.disabled = false;
+                  pushButton.MaterialCheckbox.enable();
+                  //pushButton.textContent = 'Enable Push Messages';
+                });
+              } else {
+                console.log("Unknown pusk token type: " + subscription.endpoint);
+              }
             }).catch(function(e) {  
               console.error('Error thrown while unsubscribing from push messaging.', e);  
             });  
