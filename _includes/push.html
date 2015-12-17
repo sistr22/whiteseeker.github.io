@@ -1,3 +1,4 @@
+<script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
 <script>
 console.log("navigator.language: " + navigator.language);
       var isPushEnabled = false;
@@ -75,46 +76,18 @@ console.log("navigator.language: " + navigator.language);
       };
 
       function sendSubscriptionToServer(subscription) {
+        var timeOffset = new Date().getTimezoneOffset();
         if(subscription.endpoint.startsWith("https://android.googleapis.com/gcm/send/")) {
           var pntoken = subscription.endpoint.substring("https://android.googleapis.com/gcm/send/".length);
           console.log("push token: " + pntoken);
           var wilmaRef = new Firebase('https://luminous-inferno-9971.firebaseio.com/pntokens/'+pntoken.hashCode());
-          wilmaRef.transaction(function(currentData) {
-            if (currentData === null) {
-              return {platform: "chrome", topic: "games", token: pntoken};
-            } else {
-              console.log('Pn toto already exists.');
-              return; // Abort the transaction.
-            }
-          }, function(error, committed, snapshot) {
-            if (error)
-              console.log('Transaction failed abnormally!', error);
-            else if (!committed)
-              console.log('We aborted the transaction (because wilma already exists).');
-            else
-              console.log('Pn toto added!');
-            console.log('Toto\'s data: ', snapshot.val());
-          });
+          wilmaRef.set({platform: "chrome", topic: "games", token: pntoken, time_offset: timeOffset});
         } else if (subscription.endpoint.startsWith("https://updates.push.services.mozilla.com/push/")) {
           var pntoken = subscription.endpoint.substring("https://updates.push.services.mozilla.com/push/".length);
+          
           console.log("push token: " + pntoken);
           var wilmaRef = new Firebase('https://luminous-inferno-9971.firebaseio.com/pntokens/'+pntoken.hashCode());
-          wilmaRef.transaction(function(currentData) {
-            if (currentData === null) {
-              return {platform: "firefox", topic: "games", token: pntoken};
-            } else {
-              console.log('Pn toto already exists.');
-              return; // Abort the transaction.
-            }
-          }, function(error, committed, snapshot) {
-            if (error)
-              console.log('Transaction failed abnormally!', error);
-            else if (!committed)
-              console.log('We aborted the transaction (because wilma already exists).');
-            else
-              console.log('Pn toto added!');
-            console.log('Toto\'s data: ', snapshot.val());
-          });
+          wilmaRef.set({platform: "firefox", topic: "games", token: pntoken, time_offset: timeOffset});
         } else {
           console.log("Unknown pusk token type: " + subscription.endpoint);
         }
