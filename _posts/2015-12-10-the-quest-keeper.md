@@ -5,7 +5,7 @@ status: published
 date:   2015-12-10 20:37:34
 categories: mobile game
 image: "quest_keeper/tqk.gif"
-gif_size: [240, 176]
+gif_size: [264, 345]
 screenshots: ['quest_keeper/screenshot_0', 'quest_keeper/screenshot_1', 'quest_keeper/screenshot_2', 'quest_keeper/screenshot_3']
 screenshots_size: [1440, 2560, 1440, 2560, 1440, 2560, 1440, 2560]
 link_play: https://play.google.com/store/apps/details?id=com.tysonibele.questkeeper

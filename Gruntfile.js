@@ -27,14 +27,13 @@ module.exports = function(grunt) {
 	    options: {
 	      bundleExec: true,
 	      safe: true,
-	      draft: false
+	      draft: true
 	    },
       build: {
       },
       serve: {
         options: {
           serve: true,
-          drafts: true,
           watch: false
         }
       }
