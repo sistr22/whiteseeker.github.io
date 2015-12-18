@@ -18,7 +18,6 @@ module.exports = function(grunt) {
         	'_site/css/photoswipe/photoswipe.min.js': ['css/photoswipe/photoswipe.js'],
         	'_site/scripts/material.min.js': ['css/material.js'],
           '_site/scripts/modernizr-custom.min.js': ['scripts/modernizr-custom.js'],
-          '_site/scripts/rv-vanilla-modal.min.js': ['scripts/rv-vanilla-modal.js'],
           '_site/service-worker.js': ['scripts/service-worker.js'],
       	}
       }
@@ -90,7 +89,7 @@ module.exports = function(grunt) {
       },
       main: {
         files: {
-          '_site/css/merged.min.css': ['css/material.css', 'css/photoswipe.css', 'css/style.css', 'css/default-skin.css', 'css/syntax-hightlighting.css', 'css/modal_styles.css'],
+          '_site/css/merged.min.css': ['css/material.css', 'css/photoswipe.css', 'css/style.css', 'css/default-skin.css', 'css/syntax-hightlighting.css'],
         }
       },
       critical: {
