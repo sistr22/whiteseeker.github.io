@@ -11,7 +11,7 @@ screenshots_size: [1440, 2560, 1440, 2560, 1440, 2560, 1440, 2560]
 link_play: https://play.google.com/store/apps/details?id=com.mugshotgames.digfender
 link_apple: https://itunes.apple.com/app/digfender/id957253933
 ---
-*Digfender* is the best tower defense I played in 2015. It's not a creative game, it doesn't have any surprise, but it's well executed and perfectly balanced. All the towers are usefull, each specialisation has it's importance, and there isn't one better than the others. The gameplay is deep and has a lot of variety<!--more-->
+*Digfender* is the best tower defense I played in 2015. It's not a creative game, it doesn't have any surprises, but it's well executed and perfectly balanced. All the towers are usefull, each specialisation has it's importance, and there isn't one better than the others. The gameplay is deep and has a lot of variety.<!--more-->
 
 In this mobile game you try to defend your castle against waves of enemies that come from below your castle.
 In most TDs I played recently towers are completely unbalanced, or difficulty progression is unfair to make you pay, or game crash or ...
