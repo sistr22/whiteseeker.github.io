@@ -64,29 +64,18 @@ console.log("navigator.language: " + navigator.language);
         });  
       }
 
-      String.prototype.hashCode = function() {
-        var hash = 0, i, chr, len;
-        if (this.length === 0) return hash;
-        for (i = 0, len = this.length; i < len; i++) {
-          chr   = this.charCodeAt(i);
-          hash  = ((hash << 5) - hash) + chr;
-          hash |= 0; // Convert to 32bit integer
-        }
-        return hash;
-      };
-
       function sendSubscriptionToServer(subscription) {
         var timeOffset = new Date().getTimezoneOffset();
         if(subscription.endpoint.startsWith("https://android.googleapis.com/gcm/send/")) {
           var pntoken = subscription.endpoint.substring("https://android.googleapis.com/gcm/send/".length);
           console.log("push token: " + pntoken);
-          var wilmaRef = new Firebase('https://luminous-inferno-9971.firebaseio.com/pntokens/'+pntoken.hashCode());
+          var wilmaRef = new Firebase('https://luminous-inferno-9971.firebaseio.com/pntokens/'+pntoken);
           wilmaRef.set({platform: "chrome", topic: "games", token: pntoken, time_offset: timeOffset});
         } else if (subscription.endpoint.startsWith("https://updates.push.services.mozilla.com/push/")) {
           var pntoken = subscription.endpoint.substring("https://updates.push.services.mozilla.com/push/".length);
           
           console.log("push token: " + pntoken);
-          var wilmaRef = new Firebase('https://luminous-inferno-9971.firebaseio.com/pntokens/'+pntoken.hashCode());
+          var wilmaRef = new Firebase('https://luminous-inferno-9971.firebaseio.com/pntokens/'+pntoken);
           wilmaRef.set({platform: "firefox", topic: "games", token: pntoken, time_offset: timeOffset});
         } else {
           console.log("Unknown pusk token type: " + subscription.endpoint);
@@ -174,7 +163,7 @@ console.log("navigator.language: " + navigator.language);
                     console.log('Synchronization succeeded');
                   }
                 };
-                var dataRef = new Firebase('https://luminous-inferno-9971.firebaseio.com/pntokens/'+pntoken.hashCode());
+                var dataRef = new Firebase('https://luminous-inferno-9971.firebaseio.com/pntokens/'+pntoken);
                 dataRef.remove(onComplete);
 
                 // We have a subscription, so call unsubscribe on it
@@ -210,7 +199,7 @@ console.log("navigator.language: " + navigator.language);
                     console.log('Synchronization succeeded');
                   }
                 };
-                var dataRef = new Firebase('https://luminous-inferno-9971.firebaseio.com/pntokens/'+pntoken.hashCode());
+                var dataRef = new Firebase('https://luminous-inferno-9971.firebaseio.com/pntokens/'+pntoken);
                 dataRef.remove(onComplete);
 
                 // We have a subscription, so call unsubscribe on it
