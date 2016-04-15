@@ -1,5 +1,7 @@
 importScripts('https://cdn.firebase.com/js/client/2.3.2/firebase.js');
 
+var CACHE_NAME = 'my-site-cache-v1';
+
 var notifurl = "/"
 self.addEventListener('push', function(event) {  
   console.log('Received a push message', event);
@@ -31,6 +33,22 @@ self.addEventListener('push', function(event) {
  
     var tag = 'simple-push-demo-notification-tag';
 
+    event.waitUntil(
+      caches.open(CACHE_NAME).then(function(cache) {
+        return fetch(notifurl).then(function(response) {
+          cache.put(notifurl, response.clone());
+          return response.json();
+        });
+      }).then(function(emails) {
+        self.registration.showNotification(title, {  
+          body: body,  
+          icon: icon,  
+          tag: tag,
+          requireInteration: true
+        })
+      })
+    );
+/*
     event.waitUntil(  
       self.registration.showNotification(title, {  
         body: body,  
@@ -39,6 +57,7 @@ self.addEventListener('push', function(event) {
         requireInteration: true
       })  
     );  
+*/
   }, function (errorObject) {
     console.log("The read failed: " + errorObject.code);
   });
@@ -71,7 +90,6 @@ self.addEventListener('notificationclick', function(event) {
   );
 });
 
-var CACHE_NAME = 'my-site-cache-v1';
 var urlsToCache = [
   '/css/critical.min.css',
   '/css/merged.min.css',
@@ -88,7 +106,7 @@ self.addEventListener('install', function(event) {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(function(cache) {
-        console.log('Opened cache');
+        //console.log('Opened cache');
         return cache.addAll(urlsToCache);
       })
   );
@@ -100,7 +118,7 @@ self.addEventListener('fetch', function(event) {
       .then(function(response) {
         // Cache hit - return response
         if (response) {
-          console.log('return cached');
+          //console.log('return cached');
           return response;
         }
 
