@@ -9,10 +9,12 @@ module.exports = function(grunt) {
     uglify: {
       options: {
         banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n',
-        screwIE8: true,
-        preserveComments: false
+        screwIE8: true
       },
       build: {
+        options: {
+          preserveComments: false
+        },
       	files: {
         	'_site/css/photoswipe/photoswipe-ui-default.min.js': ['css/photoswipe/photoswipe-ui-default.js'],
         	'_site/css/photoswipe/photoswipe.min.js': ['css/photoswipe/photoswipe.js'],
@@ -140,6 +142,19 @@ module.exports = function(grunt) {
           '_site/css/toto.css': ['_site/index.html', '_site/about/index.html']
         }
       }
+    },
+
+    copy: {
+      main: {
+        nonull: true,
+        files: {
+          '_site/css/photoswipe/photoswipe-ui-default.min.js': ['css/photoswipe/photoswipe-ui-default.js'],
+          '_site/css/photoswipe/photoswipe.min.js': ['css/photoswipe/photoswipe.js'],
+          '_site/scripts/material.min.js': ['css/material.js'],
+          '_site/scripts/modernizr-custom.min.js': ['scripts/modernizr-custom.js'],
+          '_site/service-worker.js': ['scripts/service-worker.js'],
+        }
+      },
     }
 
     
@@ -164,6 +179,9 @@ module.exports = function(grunt) {
   // Remove unused css
   grunt.loadNpmTasks('grunt-uncss');
 
+  // Copy file (to copy css during development)
+  grunt.loadNpmTasks('grunt-contrib-copy');
+
   grunt.registerTask('build', [
     'pages:build',
     'htmlmin',
@@ -171,6 +189,16 @@ module.exports = function(grunt) {
     'penthouse',
     'cssmin:critical',
     'uglify',
+    'cwebp'
+  ]);
+
+   grunt.registerTask('buildev', [
+    'pages:build',
+    'htmlmin',
+    'cssmin:main',
+    'penthouse',
+    'cssmin:critical',
+    'copy',
     'cwebp'
   ]);
 

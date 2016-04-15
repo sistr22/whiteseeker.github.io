@@ -70,3 +70,42 @@ self.addEventListener('notificationclick', function(event) {
     })
   );
 });
+
+var CACHE_NAME = 'my-site-cache-v1';
+var urlsToCache = [
+  '/css/critical.min.css',
+  '/css/merged.min.css',
+  '/css/photoswipe/photoswipe-ui-default.min.js',
+  '/css/photoswipe/photoswipe.min.js',
+  '/scripts/material.min.js',
+  '/scripts/modernizr-custom.min.js',
+  '/assets/images/favicon.png',
+  '/assets/images/icon_192_192.png'
+];
+
+self.addEventListener('install', function(event) {
+  // Perform install steps
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(function(cache) {
+        console.log('Opened cache');
+        return cache.addAll(urlsToCache);
+      })
+  );
+});
+
+self.addEventListener('fetch', function(event) {
+  event.respondWith(
+    caches.match(event.request)
+      .then(function(response) {
+        // Cache hit - return response
+        if (response) {
+          console.log('return cached');
+          return response;
+        }
+
+        return fetch(event.request);
+      }
+    )
+  );
+});
