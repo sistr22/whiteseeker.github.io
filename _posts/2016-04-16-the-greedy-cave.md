@@ -5,7 +5,7 @@ status: published
 date:   2016-04-16 21:03:07
 categories: mobile game
 image: "greedy_cave/tgc.gif"
-gif_size: [412, 417]
+gif_size: [371, 376]
 screenshots: ['greedy_cave/screenshot_0', 'greedy_cave/screenshot_1', 'greedy_cave/screenshot_2', 'greedy_cave/screenshot_3']
 screenshots_size: [1440, 2560, 1440, 2560, 1440, 2560, 1440, 2560]
 link_play: https://play.google.com/store/apps/details?id=com.avalon.cave
