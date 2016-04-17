@@ -16,11 +16,11 @@ module.exports = function(grunt) {
           preserveComments: false
         },
       	files: {
-        	'_site/css/photoswipe/photoswipe-ui-default.min.js': ['css/photoswipe/photoswipe-ui-default.js'],
-        	'_site/css/photoswipe/photoswipe.min.js': ['css/photoswipe/photoswipe.js'],
-        	'_site/scripts/material.min.js': ['css/material.js'],
-          '_site/scripts/modernizr-custom.min.js': ['scripts/modernizr-custom.js'],
-          '_site/service-worker.js': ['scripts/service-worker.js'],
+        	'_site/css/photoswipe/photoswipe-ui-default.min.js': ['src/css/photoswipe/photoswipe-ui-default.js'],
+        	'_site/css/photoswipe/photoswipe.min.js': ['src/css/photoswipe/photoswipe.js'],
+        	'_site/scripts/material.min.js': ['src/css/material.js'],
+          '_site/scripts/modernizr-custom.min.js': ['src/scripts/modernizr-custom.js'],
+          '_site/service-worker.js': ['src/scripts/service-worker.js'],
       	}
       }
     },
@@ -29,7 +29,9 @@ module.exports = function(grunt) {
 	    options: {
 	      bundleExec: true,
 	      safe: true,
-	      draft: true
+	      draft: true,
+        src: 'src/',
+        layouts: 'src/_layouts'
 	    },
       build: {
       },
@@ -65,7 +67,7 @@ module.exports = function(grunt) {
         files: [{
           expand: true, 
           cwd: '_site/',
-          src: '**/*.html',
+          src: 'src/**/*.html',
           dest: '_site/'
         }]
       }
@@ -90,7 +92,7 @@ module.exports = function(grunt) {
       },
       main: {
         files: {
-          '_site/css/merged.min.css': ['css/material.css', 'css/photoswipe.css', 'css/style.css', 'css/default-skin.css', 'css/syntax-hightlighting.css'],
+          '_site/css/merged.min.css': ['src/css/material.css', 'src/css/photoswipe.css', 'src/css/style.css', 'src/css/default-skin.css', 'src/css/syntax-hightlighting.css'],
         }
       },
       critical: {
@@ -117,8 +119,8 @@ module.exports = function(grunt) {
         "dest" : "_site/scripts/modernizr.js",
         "parseFiles": false,
         "customTests": [],
-        "devFile": "scripts/modernizr-custom.js",
-        "outputFile": "scripts/modernizr-custom.js",
+        "devFile": "src/scripts/modernizr-custom.js",
+        "outputFile": "src/scripts/modernizr-custom.js",
         "tests": [
           "img/webp"
         ],
@@ -148,11 +150,11 @@ module.exports = function(grunt) {
       main: {
         nonull: true,
         files: {
-          '_site/css/photoswipe/photoswipe-ui-default.min.js': ['css/photoswipe/photoswipe-ui-default.js'],
-          '_site/css/photoswipe/photoswipe.min.js': ['css/photoswipe/photoswipe.js'],
-          '_site/scripts/material.min.js': ['css/material.js'],
-          '_site/scripts/modernizr-custom.min.js': ['scripts/modernizr-custom.js'],
-          '_site/service-worker.js': ['scripts/service-worker.js'],
+          '_site/css/photoswipe/photoswipe-ui-default.min.js': ['src/css/photoswipe/photoswipe-ui-default.js'],
+          '_site/css/photoswipe/photoswipe.min.js': ['src/css/photoswipe/photoswipe.js'],
+          '_site/scripts/material.min.js': ['src/css/material.js'],
+          '_site/scripts/modernizr-custom.min.js': ['src/scripts/modernizr-custom.js'],
+          '_site/service-worker.js': ['src/scripts/service-worker.js'],
         }
       },
     }
