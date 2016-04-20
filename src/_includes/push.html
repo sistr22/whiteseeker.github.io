@@ -1,254 +1,265 @@
 <script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
 <script>
-console.log("navigator.language: " + navigator.language);
-      var isPushEnabled = false;
-      function initialiseState() {
-        console.log('initialiseState');
-        // Are Notifications supported in the service worker?  
-        if (!('showNotification' in ServiceWorkerRegistration.prototype)) {  
-          console.warn('Notifications aren\'t supported.');  
-          return;  
-        }
+  console.log("navigator.language: " + navigator.language);
+  var isPushEnabled = false;
+  var pushNotifToken;
+  var pushNotifEndPoint;
+  function initialiseState() {
+    console.log('initialiseState');
+    // Are Notifications supported in the service worker?  
+    if (!('showNotification' in ServiceWorkerRegistration.prototype)) {  
+      console.warn('Notifications aren\'t supported.');  
+      return;  
+    }
 
-        // Check the current Notification permission.  
-        // If its denied, it's a permanent block until the  
-        // user changes the permission  
-        if (Notification.permission === 'denied') {
-          console.warn('The user has blocked notifications.');
-          return;
-        }
+    // Check the current Notification permission.  
+    // If its denied, it's a permanent block until the  
+    // user changes the permission  
+    if (Notification.permission === 'denied') {
+      console.warn('The user has blocked notifications.');
+      return;
+    }
 
-        // Check if push messaging is supported  
-        if (!('PushManager' in window)) {
-          console.warn('Push messaging isn\'t supported.');
-          return;
-        }
+    // Check if push messaging is supported  
+    if (!('PushManager' in window)) {
+      console.warn('Push messaging isn\'t supported.');
+      return;
+    }
 
-        console.log("check for a subscription ");
-        // We need the service worker registration to check for a subscription  
-        navigator.serviceWorker.ready.then(function(serviceWorkerRegistration) {
-          console.log("service worker is ready");
-          // Do we already have a push message subscription?
-          serviceWorkerRegistration.pushManager.getSubscription()
-            .then(function(subscription) {
-              console.log("enable ui");
-              // Enable any UI which subscribes / unsubscribes from
-              // push messages.
-              var pushButton = document.querySelector('#switch-notif');
-              //pushButton.disabled = false;
-              pushButton.MaterialCheckbox.enable();
+    console.log("check for a subscription ");
+    // We need the service worker registration to check for a subscription  
+    navigator.serviceWorker.ready.then(function(serviceWorkerRegistration) {
+      console.log("service worker is ready");
+      // Do we already have a push message subscription?
+      serviceWorkerRegistration.pushManager.getSubscription()
+        .then(function(subscription) {
+          console.log("enable ui");
+          // Enable any UI which subscribes / unsubscribes from
+          // push messages.
+          var pushButton = document.querySelector('#switch-notif');
+          //pushButton.disabled = false;
+          pushButton.MaterialCheckbox.enable();
 
-              if (!subscription) {
-                // We aren't subscribed to push, so set UI  
-                // to allow the user to enable push
-                console.log("enable ui");
-                //pushButton.checked = false;
-                pushButton.MaterialCheckbox.uncheck();
-                return;  
-              }
-
-              pushButton.MaterialCheckbox.check();
-              //pushButton.checked = true;
-
-              // Keep your server in sync with the latest subscriptionId
-              sendSubscriptionToServer(subscription);
-
-              // Set your UI to show they have subscribed for
-              // push messages
-              //pushButton.textContent = 'Disable Push Messages';
-              isPushEnabled = true;
-            })  
-            .catch(function(err) {
-              console.warn('Error during getSubscription()', err);
-            });
-        });  
-      }
-
-      function sendSubscriptionToServer(subscription) {
-        var timeOffset = new Date().getTimezoneOffset();
-        if(subscription.endpoint.startsWith("https://android.googleapis.com/gcm/send/")) {
-          var pntoken = subscription.endpoint.substring("https://android.googleapis.com/gcm/send/".length);
-          console.log("push token: " + pntoken);
-          var wilmaRef = new Firebase('https://luminous-inferno-9971.firebaseio.com/pntokens/'+pntoken);
-          wilmaRef.set({platform: "chrome", topic: "games", token: pntoken, time_offset: timeOffset});
-        } else if (subscription.endpoint.startsWith("https://updates.push.services.mozilla.com/push/")) {
-          var pntoken = subscription.endpoint.substring("https://updates.push.services.mozilla.com/push/".length);
-          
-          console.log("push token: " + pntoken);
-          var wilmaRef = new Firebase('https://luminous-inferno-9971.firebaseio.com/pntokens/'+pntoken);
-          wilmaRef.set({platform: "firefox", topic: "games", token: pntoken, time_offset: timeOffset});
-        } else {
-          console.log("Unknown pusk token type: " + subscription.endpoint);
-        }
-      }
-
-      function subscribe() {  
-        // Disable the button so it can't be changed while  
-        // we process the permission request  
-        var pushButton = document.querySelector('#switch-notif');  
-        //pushButton.disabled = true;
-        pushButton.MaterialCheckbox.disable();
-
-        navigator.serviceWorker.ready.then(function(serviceWorkerRegistration) {  
-          serviceWorkerRegistration.pushManager.subscribe({userVisibleOnly: true})  
-            .then(function(subscription) {  
-              // The subscription was successful  
-              isPushEnabled = true;  
-              //pushButton.textContent = 'Disable Push Messages';  
-              //pushButton.disabled = false;
-              pushButton.MaterialCheckbox.enable();
-              pushButton.MaterialCheckbox.check();
-
-              // TODO: Send the subscription.endpoint to your server  
-              // and save it to send a push message at a later date
-              return sendSubscriptionToServer(subscription);  
-            })  
-            .catch(function(e) {  
-              if (Notification.permission === 'denied') {  
-                // The user denied the notification permission which  
-                // means we failed to subscribe and the user will need  
-                // to manually change the notification permission to  
-                // subscribe to push messages  
-                console.warn('Permission for Notifications was denied');  
-                //pushButton.disabled = true;
-                pushButton.MaterialCheckbox.disable();
-              } else {  
-                // A problem occurred with the subscription; common reasons  
-                // include network errors, and lacking gcm_sender_id and/or  
-                // gcm_user_visible_only in the manifest.  
-                console.error('Unable to subscribe to push.', e);  
-                //pushButton.disabled = false;
-                pushButton.MaterialCheckbox.enable();
-              pushButton.MaterialCheckbox.uncheck();
-                //pushButton.textContent = 'Enable Push Messages';  
-              }  
-            });  
-        });  
-      }
-
-      function unsubscribe() {  
-        var pushButton = document.querySelector('#switch-notif');
-        //pushButton.disabled = true;
-        pushButton.MaterialCheckbox.disable();
-
-        navigator.serviceWorker.ready.then(function(serviceWorkerRegistration) {
-          // To unsubscribe from push messaging, you need get the
-          // subscription object, which you can call unsubscribe() on.
-          serviceWorkerRegistration.pushManager.getSubscription().then(
-            function(subscription) {
-              // Check we have a subscription to unsubscribe
-              if (!subscription) {
-                // No subscription object, so set the state
-                // to allow the user to subscribe to push
-                isPushEnabled = false;
-                //pushButton.disabled = false;
-                pushButton.MaterialCheckbox.enable();
-                pushButton.MaterialCheckbox.uncheck();
-                //pushButton.textContent = 'Enable Push Messages';
-                return;
-              }
-
-              if(subscription.endpoint.startsWith("https://android.googleapis.com/gcm/send/")) {
-                // This is a chrome push
-                var endpoint = subscription.endpoint;
-                // Make a request to your server to remove
-                // the subscriptionId from your data store so you
-                // don't attempt to send them push messages anymore
-                var pntoken = endpoint.substring("https://android.googleapis.com/gcm/send/".length);
-                console.log("push token: " + pntoken);
-                var onComplete = function(error) {
-                  if (error) {
-                    console.log('Synchronization failed');
-                  } else {
-                    console.log('Synchronization succeeded');
-                  }
-                };
-                var dataRef = new Firebase('https://luminous-inferno-9971.firebaseio.com/pntokens/'+pntoken);
-                dataRef.remove(onComplete);
-
-                // We have a subscription, so call unsubscribe on it
-                subscription.unsubscribe().then(function(successful) {
-                  //pushButton.disabled = false;
-                  pushButton.MaterialCheckbox.enable();
-                  pushButton.MaterialCheckbox.uncheck();
-                  //pushButton.textContent = 'Enable Push Messages';
-                  isPushEnabled = false;
-                }).catch(function(e) {
-                  // We failed to unsubscribe, this can lead to
-                  // an unusual state, so may be best to remove
-                  // the users data from your data store and
-                  // inform the user that you have done so
-
-                  console.log('Unsubscription error: ', e);
-                  //pushButton.disabled = false;
-                  pushButton.MaterialCheckbox.enable();
-                  //pushButton.textContent = 'Enable Push Messages';
-                });
-              } else if (subscription.endpoint.startsWith("https://updates.push.services.mozilla.com/push/")) {
-                // This is a firefox push
-                var endpoint = subscription.endpoint;
-                // Make a request to your server to remove
-                // the subscriptionId from your data store so you
-                // don't attempt to send them push messages anymore
-                var pntoken = endpoint.substring("https://updates.push.services.mozilla.com/push/".length);
-                console.log("push token: " + pntoken);
-                var onComplete = function(error) {
-                  if (error) {
-                    console.log('Synchronization failed');
-                  } else {
-                    console.log('Synchronization succeeded');
-                  }
-                };
-                var dataRef = new Firebase('https://luminous-inferno-9971.firebaseio.com/pntokens/'+pntoken);
-                dataRef.remove(onComplete);
-
-                // We have a subscription, so call unsubscribe on it
-                subscription.unsubscribe().then(function(successful) {
-                  //pushButton.disabled = false;
-                  pushButton.MaterialCheckbox.enable();
-                  pushButton.MaterialCheckbox.uncheck();
-                  //pushButton.textContent = 'Enable Push Messages';
-                  isPushEnabled = false;
-                }).catch(function(e) {
-                  // We failed to unsubscribe, this can lead to
-                  // an unusual state, so may be best to remove
-                  // the users data from your data store and
-                  // inform the user that you have done so
-
-                  console.log('Unsubscription error: ', e);
-                  //pushButton.disabled = false;
-                  pushButton.MaterialCheckbox.enable();
-                  //pushButton.textContent = 'Enable Push Messages';
-                });
-              } else {
-                console.log("Unknown pusk token type: " + subscription.endpoint);
-              }
-            }).catch(function(e) {  
-              console.error('Error thrown while unsubscribing from push messaging.', e);  
-            });  
-        });  
-      }
-
-      window.addEventListener('load', function() {
-        var pushButton = document.getElementById('switch-notif');
-        pushButton.addEventListener('click', function() {
-          if (isPushEnabled) {
-            console.log("unsubscribe()");
-            unsubscribe();
-          } else {
-            console.log("subscribe()");
-            subscribe();
+          if (!subscription) {
+            // We aren't subscribed to push, so set UI  
+            // to allow the user to enable push
+            console.log("enable ui");
+            //pushButton.checked = false;
+            pushButton.MaterialCheckbox.uncheck();
+            return;  
           }
-        });
 
-        // Check that service workers are supported, if so, progressively  
-        // enhance and add push messaging support, otherwise continue without it.  
-        if ('serviceWorker' in navigator) {
-          console.log("serviceWorker in navigator");
-          navigator.serviceWorker.register('/service-worker.js')
-          .then(initialiseState);
-        } else {
-          console.warn('Service workers aren\'t supported in this browser.');
-        }
-      });
-    </script>
+          pushButton.MaterialCheckbox.check();
+          //pushButton.checked = true;
+
+          // Keep your server in sync with the latest subscriptionId
+          sendSubscriptionToServer(subscription);
+
+          // Set your UI to show they have subscribed for
+          // push messages
+          //pushButton.textContent = 'Disable Push Messages';
+          isPushEnabled = true;
+        })  
+        .catch(function(err) {
+          console.warn('Error during getSubscription()', err);
+        });
+    });  
+  }
+
+  function sendSubscriptionToServer(subscription) {
+    var timeOffset = new Date().getTimezoneOffset();
+    pushNotifEndPoint = subscription.endpoint;
+    if(subscription.endpoint.startsWith("https://android.googleapis.com/gcm/send/")) {
+      pushNotifToken = subscription.endpoint.substring("https://android.googleapis.com/gcm/send/".length);
+      console.log("push token: " + pushNotifToken);
+      var wilmaRef = new Firebase('https://luminous-inferno-9971.firebaseio.com/pntokens/'+pushNotifToken);
+      wilmaRef.set({platform: "chrome", topic: "games", token: pushNotifToken, time_offset: timeOffset, endpoint: pushNotifEndPoint});
+    } else if (subscription.endpoint.startsWith("https://updates.push.services.mozilla.com/push/")) {
+      pushNotifToken = subscription.endpoint.substring("https://updates.push.services.mozilla.com/push/".length);
+      console.log("push token: " + pushNotifToken);
+      var wilmaRef = new Firebase('https://luminous-inferno-9971.firebaseio.com/pntokens/'+pushNotifToken);
+      wilmaRef.set({platform: "firefox", topic: "games", token: pushNotifToken, time_offset: timeOffset, endpoint: pushNotifEndPoint});
+    } else {
+      console.log("Unknown pusk token type: " + subscription.endpoint);
+    }
+    var pnTokenElt = document.getElementById('div_pn_token');
+    if(pnTokenElt) {
+      pnTokenElt.innerHTML = pushNotifToken;
+    }
+
+    var pnEndpointElt = document.getElementById('div_pn_endpoint');
+    if(pnEndpointElt) {
+      pnEndpointElt.innerHTML = pushNotifEndPoint;
+    }
+  }
+
+  function subscribe() {  
+    // Disable the button so it can't be changed while  
+    // we process the permission request  
+    var pushButton = document.querySelector('#switch-notif');  
+    //pushButton.disabled = true;
+    pushButton.MaterialCheckbox.disable();
+
+    navigator.serviceWorker.ready.then(function(serviceWorkerRegistration) {  
+      serviceWorkerRegistration.pushManager.subscribe({userVisibleOnly: true})  
+        .then(function(subscription) {  
+          // The subscription was successful  
+          isPushEnabled = true;  
+          //pushButton.textContent = 'Disable Push Messages';  
+          //pushButton.disabled = false;
+          pushButton.MaterialCheckbox.enable();
+          pushButton.MaterialCheckbox.check();
+
+          // TODO: Send the subscription.endpoint to your server  
+          // and save it to send a push message at a later date
+          return sendSubscriptionToServer(subscription);  
+        })  
+        .catch(function(e) {  
+          if (Notification.permission === 'denied') {  
+            // The user denied the notification permission which  
+            // means we failed to subscribe and the user will need  
+            // to manually change the notification permission to  
+            // subscribe to push messages  
+            console.warn('Permission for Notifications was denied');  
+            //pushButton.disabled = true;
+            pushButton.MaterialCheckbox.disable();
+          } else {  
+            // A problem occurred with the subscription; common reasons  
+            // include network errors, and lacking gcm_sender_id and/or  
+            // gcm_user_visible_only in the manifest.  
+            console.error('Unable to subscribe to push.', e);  
+            //pushButton.disabled = false;
+            pushButton.MaterialCheckbox.enable();
+          pushButton.MaterialCheckbox.uncheck();
+            //pushButton.textContent = 'Enable Push Messages';  
+          }  
+        });  
+    });  
+  }
+
+  function unsubscribe() {  
+    var pushButton = document.querySelector('#switch-notif');
+    //pushButton.disabled = true;
+    pushButton.MaterialCheckbox.disable();
+
+    navigator.serviceWorker.ready.then(function(serviceWorkerRegistration) {
+      // To unsubscribe from push messaging, you need get the
+      // subscription object, which you can call unsubscribe() on.
+      serviceWorkerRegistration.pushManager.getSubscription().then(
+        function(subscription) {
+          // Check we have a subscription to unsubscribe
+          if (!subscription) {
+            // No subscription object, so set the state
+            // to allow the user to subscribe to push
+            isPushEnabled = false;
+            //pushButton.disabled = false;
+            pushButton.MaterialCheckbox.enable();
+            pushButton.MaterialCheckbox.uncheck();
+            //pushButton.textContent = 'Enable Push Messages';
+            return;
+          }
+
+          if(subscription.endpoint.startsWith("https://android.googleapis.com/gcm/send/")) {
+            // This is a chrome push
+            var endpoint = subscription.endpoint;
+            // Make a request to your server to remove
+            // the subscriptionId from your data store so you
+            // don't attempt to send them push messages anymore
+            var pntoken = endpoint.substring("https://android.googleapis.com/gcm/send/".length);
+            console.log("push token: " + pntoken);
+            var onComplete = function(error) {
+              if (error) {
+                console.log('Synchronization failed');
+              } else {
+                console.log('Synchronization succeeded');
+              }
+            };
+            var dataRef = new Firebase('https://luminous-inferno-9971.firebaseio.com/pntokens/'+pntoken);
+            dataRef.remove(onComplete);
+
+            // We have a subscription, so call unsubscribe on it
+            subscription.unsubscribe().then(function(successful) {
+              //pushButton.disabled = false;
+              pushButton.MaterialCheckbox.enable();
+              pushButton.MaterialCheckbox.uncheck();
+              //pushButton.textContent = 'Enable Push Messages';
+              isPushEnabled = false;
+            }).catch(function(e) {
+              // We failed to unsubscribe, this can lead to
+              // an unusual state, so may be best to remove
+              // the users data from your data store and
+              // inform the user that you have done so
+
+              console.log('Unsubscription error: ', e);
+              //pushButton.disabled = false;
+              pushButton.MaterialCheckbox.enable();
+              //pushButton.textContent = 'Enable Push Messages';
+            });
+          } else if (subscription.endpoint.startsWith("https://updates.push.services.mozilla.com/push/")) {
+            // This is a firefox push
+            var endpoint = subscription.endpoint;
+            // Make a request to your server to remove
+            // the subscriptionId from your data store so you
+            // don't attempt to send them push messages anymore
+            var pntoken = endpoint.substring("https://updates.push.services.mozilla.com/push/".length);
+            console.log("push token: " + pntoken);
+            var onComplete = function(error) {
+              if (error) {
+                console.log('Synchronization failed');
+              } else {
+                console.log('Synchronization succeeded');
+              }
+            };
+            var dataRef = new Firebase('https://luminous-inferno-9971.firebaseio.com/pntokens/'+pntoken);
+            dataRef.remove(onComplete);
+
+            // We have a subscription, so call unsubscribe on it
+            subscription.unsubscribe().then(function(successful) {
+              //pushButton.disabled = false;
+              pushButton.MaterialCheckbox.enable();
+              pushButton.MaterialCheckbox.uncheck();
+              //pushButton.textContent = 'Enable Push Messages';
+              isPushEnabled = false;
+            }).catch(function(e) {
+              // We failed to unsubscribe, this can lead to
+              // an unusual state, so may be best to remove
+              // the users data from your data store and
+              // inform the user that you have done so
+
+              console.log('Unsubscription error: ', e);
+              //pushButton.disabled = false;
+              pushButton.MaterialCheckbox.enable();
+              //pushButton.textContent = 'Enable Push Messages';
+            });
+          } else {
+            console.log("Unknown pusk token type: " + subscription.endpoint);
+          }
+        }).catch(function(e) {  
+          console.error('Error thrown while unsubscribing from push messaging.', e);  
+        });  
+    });  
+  }
+
+  window.addEventListener('load', function() {
+    var pushButton = document.getElementById('switch-notif');
+    pushButton.addEventListener('click', function() {
+      if (isPushEnabled) {
+        console.log("unsubscribe()");
+        unsubscribe();
+      } else {
+        console.log("subscribe()");
+        subscribe();
+      }
+    });
+
+    // Check that service workers are supported, if so, progressively  
+    // enhance and add push messaging support, otherwise continue without it.  
+    if ('serviceWorker' in navigator) {
+      console.log("serviceWorker in navigator");
+      navigator.serviceWorker.register('/service-worker.js')
+      .then(initialiseState);
+    } else {
+      console.warn('Service workers aren\'t supported in this browser.');
+    }
+  });
+</script>
