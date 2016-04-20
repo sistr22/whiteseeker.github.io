@@ -33,7 +33,7 @@ self.addEventListener('push', function(event) {
  
     var tag = 'simple-push-demo-notification-tag';
 
-    event.waitUntil(
+    /*event.waitUntil(
       caches.open(CACHE_NAME).then(function(cache) {
         return fetch(notifurl).then(function(response) {
           cache.put(notifurl, response.clone());
@@ -44,20 +44,20 @@ self.addEventListener('push', function(event) {
           body: body,  
           icon: icon,  
           tag: tag,
-          requireInteration: true
+          requireInteraction: true
         })
       })
-    );
-/*
+    );*/
+
     event.waitUntil(  
       self.registration.showNotification(title, {  
         body: body,  
         icon: icon,  
         tag: tag,
-        requireInteration: true
+        requireInteraction: true
       })  
     );  
-*/
+
   }, function (errorObject) {
     console.log("The read failed: " + errorObject.code);
   });
