@@ -29,13 +29,20 @@ public class PushServlet extends HttpServlet {
       else
         isTest = "0";
 
+      String pushToken = null;
+      if(req.getParameter("pn_token") != null)
+        pushToken = req.getParameter("pn_token");
+
       // Add the task to the default queue.
       Queue queue = QueueFactory.getDefaultQueue();
-      queue.add(TaskOptions.Builder.withUrl("/push_worker")
+      TaskOptions taskOpt = TaskOptions.Builder.withUrl("/pushworker")
         .param("pn_title", newPnInfos.getTitle())
         .param("pn_body", newPnInfos.getBody())
         .param("pn_url", newPnInfos.getUrl())
-        .param("is_test", isTest));
+        .param("is_test", isTest);
+      if(req.getParameter("pn_token") != null)
+        taskOpt.param("pn_token", req.getParameter("pn_token"));
+      queue.add(taskOpt);
 
       req.setAttribute("pn_title", newPnInfos.getTitle());
       req.setAttribute("pn_body", newPnInfos.getBody());

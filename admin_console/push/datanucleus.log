@@ -1,0 +1,45 @@
+10:49:28,551 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer (version 3.2.15) for API "JDO" using JRE "1.7"
+10:49:28,606 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed with success for 0 classes. Timings : input=51 ms, enhance=0 ms, total=51 ms. Consult the log for full details
+10:49:28,606 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed and no classes were enhanced. Consult the log for full details
+13:43:09,461 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer (version 3.2.15) for API "JDO" using JRE "1.7"
+13:43:09,531 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed with success for 0 classes. Timings : input=66 ms, enhance=0 ms, total=66 ms. Consult the log for full details
+13:43:09,531 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed and no classes were enhanced. Consult the log for full details
+13:47:48,346 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer (version 3.2.15) for API "JDO" using JRE "1.7"
+13:47:48,395 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed with success for 0 classes. Timings : input=46 ms, enhance=0 ms, total=46 ms. Consult the log for full details
+13:47:48,395 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed and no classes were enhanced. Consult the log for full details
+13:54:04,587 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer (version 3.2.15) for API "JDO" using JRE "1.7"
+13:54:04,635 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed with success for 0 classes. Timings : input=45 ms, enhance=0 ms, total=45 ms. Consult the log for full details
+13:54:04,635 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed and no classes were enhanced. Consult the log for full details
+13:55:52,646 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer (version 3.2.15) for API "JDO" using JRE "1.7"
+13:55:52,699 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed with success for 0 classes. Timings : input=50 ms, enhance=0 ms, total=50 ms. Consult the log for full details
+13:55:52,699 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed and no classes were enhanced. Consult the log for full details
+08:34:28,272 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer (version 3.2.15) for API "JDO" using JRE "1.7"
+08:34:28,338 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed with success for 0 classes. Timings : input=63 ms, enhance=0 ms, total=63 ms. Consult the log for full details
+08:34:28,339 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed and no classes were enhanced. Consult the log for full details
+10:10:48,209 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer (version 3.2.15) for API "JDO" using JRE "1.7"
+10:10:48,265 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed with success for 0 classes. Timings : input=53 ms, enhance=0 ms, total=53 ms. Consult the log for full details
+10:10:48,265 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed and no classes were enhanced. Consult the log for full details
+09:17:04,270 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer (version 3.2.15) for API "JDO" using JRE "1.7"
+09:17:04,324 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed with success for 0 classes. Timings : input=50 ms, enhance=0 ms, total=50 ms. Consult the log for full details
+09:17:04,324 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed and no classes were enhanced. Consult the log for full details
+09:20:15,348 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer (version 3.2.15) for API "JDO" using JRE "1.7"
+09:20:15,403 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed with success for 0 classes. Timings : input=52 ms, enhance=0 ms, total=52 ms. Consult the log for full details
+09:20:15,404 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed and no classes were enhanced. Consult the log for full details
+11:01:44,055 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer (version 3.2.15) for API "JDO" using JRE "1.7"
+11:01:44,113 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed with success for 0 classes. Timings : input=55 ms, enhance=0 ms, total=55 ms. Consult the log for full details
+11:01:44,113 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed and no classes were enhanced. Consult the log for full details
+11:02:38,944 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer (version 3.2.15) for API "JDO" using JRE "1.7"
+11:02:39,002 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed with success for 0 classes. Timings : input=54 ms, enhance=0 ms, total=54 ms. Consult the log for full details
+11:02:39,002 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed and no classes were enhanced. Consult the log for full details
+11:07:57,731 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer (version 3.2.15) for API "JDO" using JRE "1.7"
+11:07:57,790 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed with success for 0 classes. Timings : input=56 ms, enhance=0 ms, total=56 ms. Consult the log for full details
+11:07:57,791 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed and no classes were enhanced. Consult the log for full details
+11:17:57,187 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer (version 3.2.15) for API "JDO" using JRE "1.7"
+11:17:57,241 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed with success for 0 classes. Timings : input=51 ms, enhance=0 ms, total=51 ms. Consult the log for full details
+11:17:57,241 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed and no classes were enhanced. Consult the log for full details
+11:18:52,437 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer (version 3.2.15) for API "JDO" using JRE "1.7"
+11:18:52,494 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed with success for 0 classes. Timings : input=53 ms, enhance=0 ms, total=53 ms. Consult the log for full details
+11:18:52,494 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed and no classes were enhanced. Consult the log for full details
+11:20:40,301 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer (version 3.2.15) for API "JDO" using JRE "1.7"
+11:20:40,356 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed with success for 0 classes. Timings : input=52 ms, enhance=0 ms, total=52 ms. Consult the log for full details
+11:20:40,357 (main) INFO  [DataNucleus.Enhancer] - DataNucleus Enhancer completed and no classes were enhanced. Consult the log for full details

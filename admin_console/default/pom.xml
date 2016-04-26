@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>io.github.whiteseeker</groupId>
+    <artifactId>Blog</artifactId>
+    <version>1.0-SNAPSHOT</version>
+  </parent>
+
+  <groupId>io.github.whiteseeker</groupId>
+  <artifactId>Blog-default</artifactId>
+  <name>Blog-default</name>
+  <packaging>war</packaging>
+  <version>1.0-SNAPSHOT</version>
+ 
+    <dependencies>
+        <dependency>
+          <groupId>com.google.http-client</groupId>
+          <artifactId>google-http-client-jackson2</artifactId>
+          <version>1.20.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.appengine</groupId>
+            <artifactId>appengine-api-1.0-sdk</artifactId>
+            <version>${appengine.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <version>2.5</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>jstl</groupId>
+            <artifactId>jstl</artifactId>
+            <version>1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.firebase</groupId>
+            <artifactId>firebase-client-jvm</artifactId>
+            <version>[2.5.2,)</version>
+        </dependency>
+
+        <!-- Test dependency -->
+        <dependency>
+            <groupId>com.google.appengine</groupId>
+            <artifactId>appengine-testing</artifactId>
+            <version>${appengine.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.appengine</groupId>
+            <artifactId>appengine-api-stubs</artifactId>
+            <version>${appengine.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+      <outputDirectory>target/${project.artifactId}-${project.version}/WEB-INF/classes</outputDirectory> 
+      <!-- All details/versions/configurations are setup at the parent pom -->                           
+      <plugins>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-compiler-plugin</artifactId>
+          </plugin>
+          <plugin>
+              <groupId>com.google.appengine</groupId>
+              <artifactId>appengine-maven-plugin</artifactId>
+              <configuration>
+                  <enableJarClasses>false</enableJarClasses>
+              </configuration>
+              <!--  automatically call endpoints_get_discovery_doc goal as part of a Maven build by configuring the App Engine Maven plugin -->
+              <executions>
+                  <execution>
+                      <goals>
+                          <goal>endpoints_get_discovery_doc</goal>
+                      </goals>
+                  </execution>
+              </executions>
+          </plugin>
+          <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-war-plugin</artifactId>
+              <configuration>
+                  <archiveClasses>true</archiveClasses>
+                  <version>${app.version}</version>
+                  <!-- This is required for the cloud endpoints -->
+                  <webXml>${project.build.directory}/generated-sources/appengine-endpoints/WEB-INF/web.xml</webXml>
+                  <webResources>
+                      <!-- in order to interpolate version from pom into appengine-web.xml -->
+                      <resource>
+                          <directory>${basedir}/src/main/webapp/WEB-INF</directory>
+                          <filtering>true</filtering>
+                          <targetPath>WEB-INF</targetPath>
+                      </resource>
+                      <!-- This is required for the cloud endpoints -->
+                      <resource>
+                          <!-- this is relative to the pom.xml directory -->
+                          <directory>${project.build.directory}/generated-sources/appengine-endpoints</directory>
+                          <!-- filtering is needed to interpolate app name from pom into the discovery files -->
+                          <filtering>true</filtering>
+                          <includes>
+                              <include>WEB-INF/*.discovery</include>
+                              <include>WEB-INF/*.api</include>
+                          </includes>
+                      </resource>
+                  </webResources>
+              </configuration>
+          </plugin>
+      </plugins>
+    </build>
+ 
+    
+</project>

@@ -10,6 +10,7 @@ public class FirebaseUtils {
     private String token;
     private String topic;
     private int time_offset;
+    private String endpoint;
 
     public PnToken() {
       // empty ctor for firebase to deserialise
@@ -36,6 +37,10 @@ public class FirebaseUtils {
 
     public int getTime_offset() {
       return time_offset;
+    }
+
+    public String getEndpoint() {
+      return endpoint;
     }
 
     public String toString() { 

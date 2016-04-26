@@ -4,7 +4,9 @@
 
 <html>
 <head>
-    <link type="text/css" rel="stylesheet" href="/stylesheets/main.css"/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://code.getmdl.io/1.1.3/material.indigo-pink.min.css">
+  <script defer src="https://code.getmdl.io/1.1.3/material.min.js"></script>
 </head>
 
 <body>
@@ -19,6 +21,7 @@
               <div class="formField">Body <input type="text" name="pn_body" value="Check out that new game !" required/></div>
               <div class="formField">Url <input type="text" name="pn_url" value="https://whiteseeker.github.io/" required/></div>
               <div class="formField"><input type="checkbox" name="is_test" value="1" checked="checked"> Test</div>
+              <div class="formField">Pn token <input type="text" name="pn_token" value="..." /></div>
               <div class="formField"><input type="submit" value="Send push" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect"/></div>
             </form>
           </div>

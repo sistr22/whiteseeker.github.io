@@ -42,6 +42,7 @@ public class PushWorker extends HttpServlet {
       else
         log.info("It's NOT a test");
 
+      final String opt_pn_token = req.getParameter("pn_token");
 
       final Firebase firebase = new Firebase("https://"+ Constants.FIREBASE_ID +".firebaseio.com");
       firebase.authWithCustomToken(Constants.FIREBASE_SECRET, new Firebase.AuthResultHandler() {
@@ -66,23 +67,28 @@ public class PushWorker extends HttpServlet {
                   //SendPush();
                   final ArrayList<FirebaseUtils.PnToken> tokens = new ArrayList<>();
                   if(isTest) {
-                    tokens.add(new FirebaseUtils.PnToken("e5KO-q0KADE:APA91bEotSOTc1lLDfzAUI-2qSF-HVxRqNAwMrc-bpyhX7rF0UGjjW9HjC0X0YDdzx2qMWpteWHHgQ7xA0czCgsOffD7Bfy2r5wHuwdRexOrxpSVsk178c6WZ8lnNigTVs7PVrsxWYWd", "chrome"));
-                    // Get firebase push tokens to test but ignore the result
-                    getFirebasePushTokens(new FirebaseTokenListener() {
-                      public void onComplete(List<FirebaseUtils.PnToken> fbTokens) {
-                        log.info("Push token received from firebase, but we ignore them (test push)");
-                        sendPush(tokens);
-                      }
-                      public void onFail() {
-                        log.warning("Fail to get the push tokens from Firebase");
-                      }
-                    });
+                    if(opt_pn_token != null) {
+                      tokens.add(new FirebaseUtils.PnToken(opt_pn_token, "chrome"));
+                      // Get firebase push tokens to test but ignore the result
+                      getFirebasePushTokens(new FirebaseTokenListener() {
+                        public void onComplete(List<FirebaseUtils.PnToken> fbTokens) {
+                          log.info("Push token received from firebase, but we ignore them (test push)");
+                          sendPush(tokens);
+                        }
+                        public void onFail() {
+                          log.warning("Fail to get the push tokens from Firebase");
+                        }
+                      });
+                    } else {
+                      log.warning("Test push and no token specified -_-, nothing to do !");
+                    }
                   } else {
                     // Get the token from the firebase DB
                     getFirebasePushTokens(new FirebaseTokenListener() {
                       public void onComplete(List<FirebaseUtils.PnToken> fbTokens) {
                         log.info("Push token received from firebase");
                         tokens.addAll(fbTokens);
+                        sendPush(tokens);
                       }
                       public void onFail() {
                         log.warning("Fail to get the push tokens from Firebase");
