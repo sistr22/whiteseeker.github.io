@@ -37,7 +37,6 @@
           // Enable any UI which subscribes / unsubscribes from
           // push messages.
           var pushButton = document.querySelector('#switch-notif');
-          //pushButton.disabled = false;
           pushButton.MaterialCheckbox.enable();
 
           if (!subscription) {
@@ -46,6 +45,9 @@
             console.log("enable ui");
             //pushButton.checked = false;
             pushButton.MaterialCheckbox.uncheck();
+
+            setTimeout(displaySnackBar,3000);
+
             return;  
           }
 
@@ -64,6 +66,26 @@
           console.warn('Error during getSubscription()', err);
         });
     });  
+  }
+
+  function snackbarHandler() {
+    var snck = document.getElementById("demo-snackbar-example");
+    //snck.style.display = "none";
+    snck.classList.remove('mdl-snackbar--active');
+    subscribe();
+  }
+
+  function displaySnackBar() {
+    var snackbarContainer = document.querySelector('#demo-snackbar-example');
+    if(snackbarContainer) {
+      var data = {
+        message: 'Stay in touch ! Subscribe to notification (^_^)',
+        timeout: 8000,
+        actionHandler: snackbarHandler,
+        actionText: 'Subscribe'
+      };
+      snackbarContainer.MaterialSnackbar.showSnackbar(data);
+    }
   }
 
   function sendSubscriptionToServer(subscription) {
@@ -251,6 +273,14 @@
         subscribe();
       }
     });
+
+    var pushSectionButton = document.getElementById('button-notif-subscribe');
+    if (pushSectionButton) {
+      pushSectionButton.addEventListener('click', function() {
+        console.log("subscribe()");
+        subscribe();
+    });
+    }
 
     // Check that service workers are supported, if so, progressively  
     // enhance and add push messaging support, otherwise continue without it.  
