@@ -1,6 +1,7 @@
 importScripts('https://cdn.firebase.com/js/client/2.3.2/firebase.js');
 
 var CACHE_NAME = 'my-site-cache-v1';
+var CACHE_DYN = 'blog-dynamique-cache-v1';
 
 var notifurl = "/"
 self.addEventListener('push', function(event) {  
@@ -113,7 +114,39 @@ self.addEventListener('install', function(event) {
 });
 
 self.addEventListener('fetch', function(event) {
+  // Parse the URL:
+  var requestURL = new URL(event.request.url);
+
+  // Routing for local URLs
+  if (requestURL.origin == location.origin) {
+    // Handle article URLs
+    if (/\.gif$\//.test(requestURL.pathname)) {
+      event.respondWith(
+        caches.match(event.request).then(function(response) {
+          return response || fetch(event.request);
+        })
+      );
+    }
+  }
+
+  // Default pattern
   event.respondWith(
+    caches.open(CACHE_DYN).then(function(cache) {
+      return cache.match(event.request).then(function (response) {
+        return response || fetch(event.request).then(function(response) {
+          cache.put(event.request, response.clone());
+          return response;
+        });
+      });
+    })
+  );
+
+  /*event.respondWith(
+    caches.match(event.request).then(function(response) {
+      return response || fetch(event.request);
+    })
+  );*/
+  /*event.respondWith(
     caches.match(event.request)
       .then(function(response) {
         // Cache hit - return response
@@ -122,8 +155,11 @@ self.addEventListener('fetch', function(event) {
           return response;
         }
 
-        return fetch(event.request);
+        return response || fetch(event.request).then(function(response) {
+          cache.put(event.request, response.clone());
+          return response;
+        });
       }
     )
-  );
+  );*/
 });
