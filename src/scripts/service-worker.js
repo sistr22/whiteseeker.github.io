@@ -3,6 +3,18 @@ importScripts('https://cdn.firebase.com/js/client/2.3.2/firebase.js');
 var CACHE_NAME = 'my-site-cache-v1';
 var CACHE_DYN = 'blog-dynamique-cache-v1';
 
+if (!String.prototype.endsWith) {
+  String.prototype.endsWith = function(searchString, position) {
+      var subjectString = this.toString();
+      if (typeof position !== 'number' || !isFinite(position) || Math.floor(position) !== position || position > subjectString.length) {
+        position = subjectString.length;
+      }
+      position -= searchString.length;
+      var lastIndex = subjectString.indexOf(searchString, position);
+      return lastIndex !== -1 && lastIndex === position;
+  };
+}
+
 var notifurl = "/"
 self.addEventListener('push', function(event) {  
   console.log('Received a push message', event);
@@ -126,40 +138,41 @@ self.addEventListener('fetch', function(event) {
           return response || fetch(event.request);
         })
       );
+      return;
     }
+
+    if(requestURL.pathname.endsWith(".png.webp") && !requestURL.pathname.endsWith("_small.png.webp")) {
+      event.respondWith(
+        fetch(event.request).then(function(response) {
+          if (!response.ok) {
+            console.log('FAIL fetching .png.webp, throwing error');
+            // An HTTP error response code (40x, 50x) won't cause the fetch() promise to reject.
+            // We need to explicitly throw an exception to trigger the catch() clause.
+            throw Error('response status ' + response.status);
+          }
+          console.log('Success fetching .png.webp');
+          // If we got back a non-error HTTP response, return it to the page.
+          return response;
+        }).catch(function(err) {
+          console.log('Fail fetching .png.webp, try using _small.png.web: ' + err);
+          // In case of error, return cache
+          var myRequest = new Request(event.request.url.replace(".png.webp", "_small.png.webp"));
+          return caches.match(myRequest);
+        })
+      );
+      return;
+    }
+
+    // Default pattern
+    event.respondWith(
+      caches.open(CACHE_DYN).then(function(cache) {
+        return cache.match(event.request).then(function (response) {
+          return response || fetch(event.request).then(function(response) {
+            cache.put(event.request, response.clone());
+            return response;
+          });
+        });
+      })
+    );
   }
-
-  // Default pattern
-  event.respondWith(
-    caches.open(CACHE_DYN).then(function(cache) {
-      return cache.match(event.request).then(function (response) {
-        return response || fetch(event.request).then(function(response) {
-          cache.put(event.request, response.clone());
-          return response;
-        });
-      });
-    })
-  );
-
-  /*event.respondWith(
-    caches.match(event.request).then(function(response) {
-      return response || fetch(event.request);
-    })
-  );*/
-  /*event.respondWith(
-    caches.match(event.request)
-      .then(function(response) {
-        // Cache hit - return response
-        if (response) {
-          //console.log('return cached');
-          return response;
-        }
-
-        return response || fetch(event.request).then(function(response) {
-          cache.put(event.request, response.clone());
-          return response;
-        });
-      }
-    )
-  );*/
 });
