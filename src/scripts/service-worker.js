@@ -1,4 +1,4 @@
-importScripts('https://cdn.firebase.com/js/client/2.3.2/firebase.js');
+importScripts('https://cdn.firebase.com/js/client/2.4.2/firebase.js');
 
 var CACHE_NAME = 'my-site-cache-v1';
 var CACHE_DYN = 'blog-dynamique-cache-v1';
@@ -131,36 +131,82 @@ self.addEventListener('fetch', function(event) {
 
   // Routing for local URLs
   if (requestURL.origin == location.origin) {
-    // Handle article URLs
-    if (/\.gif$\//.test(requestURL.pathname)) {
+
+    if (/^\/$/.test(requestURL.pathname)) {
       event.respondWith(
-        caches.match(event.request).then(function(response) {
-          return response || fetch(event.request);
+        caches.open(CACHE_DYN).then(function(cache) {
+          return fetch(event.request).then(function(response) {
+            cache.put(event.request, response.clone());
+            return response;
+          }).catch(function() {
+            return cache.match(event.request);
+          });
         })
       );
       return;
     }
 
-    if(requestURL.pathname.endsWith(".png.webp") && !requestURL.pathname.endsWith("_small.png.webp")) {
-      event.respondWith(
-        fetch(event.request).then(function(response) {
-          if (!response.ok) {
-            console.log('FAIL fetching .png.webp, throwing error');
-            // An HTTP error response code (40x, 50x) won't cause the fetch() promise to reject.
-            // We need to explicitly throw an exception to trigger the catch() clause.
-            throw Error('response status ' + response.status);
-          }
-          console.log('Success fetching .png.webp');
-          // If we got back a non-error HTTP response, return it to the page.
-          return response;
-        }).catch(function(err) {
-          console.log('Fail fetching .png.webp, try using _small.png.web: ' + err);
-          // In case of error, return cache
-          var myRequest = new Request(event.request.url.replace(".png.webp", "_small.png.webp"));
-          return caches.match(myRequest);
-        })
-      );
-      return;
+    // For all the assets request inside /assets/images/*/*.extension
+    // with at least one folder after the 'images' folder
+    if(/^\/assets\/images\/[^\/]+\/.+\.\w+$/.test(requestURL.pathname)) {
+
+      // Don't cache gif (too big)
+      if (/\.gif$\//.test(requestURL.pathname)) {
+        event.respondWith(
+          caches.match(event.request).then(function(response) {
+            return response || fetch(event.request);
+          })
+        );
+        return;
+      }
+
+      // Don't cache high res webp, but cache low res ones
+      // + serve the low res version instead of the high res if the high res can't be fetched
+      if(requestURL.pathname.endsWith(".png.webp") && !requestURL.pathname.endsWith("_small.png.webp")) {
+        event.respondWith(
+          fetch(event.request).then(function(response) {
+            if (!response.ok) {
+              console.log('FAIL fetching .png.webp [' + requestURL + '], throwing error');
+              // An HTTP error response code (40x, 50x) won't cause the fetch() promise to reject.
+              // We need to explicitly throw an exception to trigger the catch() clause.
+              throw Error('response status ' + response.status);
+            }
+            console.log('Success fetching .png.webp : ' + requestURL);
+            // If we got back a non-error HTTP response, return it to the page.
+            return response;
+          }).catch(function(err) {
+            console.log('Fail fetching .png.webp, try using _small.png.web: ' + err);
+            // In case of error, return cache
+            var myRequest = new Request(event.request.url.replace(".png.webp", "_small.png.webp"));
+            return caches.match(myRequest);
+          })
+        );
+        return;
+      }
+
+      // Don't cache high res png, but cache low res ones
+      // + serve the low res version instead of the high res if the high res can't be fetched
+      if(requestURL.pathname.endsWith(".png") && !requestURL.pathname.endsWith("_small.png")) {
+        event.respondWith(
+          fetch(event.request).then(function(response) {
+            if (!response.ok) {
+              console.log('FAIL fetching .png [' + requestURL + '], throwing error');
+              // An HTTP error response code (40x, 50x) won't cause the fetch() promise to reject.
+              // We need to explicitly throw an exception to trigger the catch() clause.
+              throw Error('response status ' + response.status);
+            }
+            console.log('Success fetching .png : ' + requestURL);
+            // If we got back a non-error HTTP response, return it to the page.
+            return response;
+          }).catch(function(err) {
+            console.log('Fail fetching .png, try using _small.png.web: ' + err);
+            // In case of error, return cache
+            var myRequest = new Request(event.request.url.replace(".png", "_small.png"));
+            return caches.match(myRequest);
+          })
+        );
+        return;
+      }
     }
 
     // Default pattern
@@ -175,4 +221,20 @@ self.addEventListener('fetch', function(event) {
       })
     );
   }
+
+  if(requestURL.origin == "https://fonts.googleapis.com") {
+    console.log("Loading google font");
+    event.respondWith(
+      caches.open(CACHE_DYN).then(function(cache) {
+        return fetch(event.request).then(function(response) {
+          cache.put(event.request, response.clone());
+          return response;
+        }).catch(function() {
+          return cache.match(event.request);
+        });
+      })
+    );
+    return;
+  }
+
 });
