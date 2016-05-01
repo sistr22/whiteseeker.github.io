@@ -21,59 +21,58 @@ self.addEventListener('push', function(event) {
 
   // Get a database reference to our notification
   var ref = new Firebase("https://luminous-inferno-9971.firebaseio.com/pninfos");
-  // Attach an asynchronous callback to read the data at our posts reference
-  ref.on("value", function(snapshot) {
-    console.log(snapshot.val());
-    var notif = snapshot.val();
+  event.waitUntil(
+    
+    
+    // Attach an asynchronous callback to read the data at our posts reference
+    ref.once("value").then(function(snapshot) {
+      console.log(snapshot.val());
+      var notif = snapshot.val();
 
-    var title = "New post!";
-    if(notif.title)
-      title = notif.title;
+      var title = "New post!";
+      if(notif.title)
+        title = notif.title;
 
-    var body = "Curious ? Check that out (^_^)";
-    if(notif.body)
-      body = notif.body;
+      var body = "Curious ? Check that out (^_^)";
+      if(notif.body)
+        body = notif.body;
 
-    var icon = '/assets/images/icon_192_192.png';
-    if(notif.iconurl)
-      icon = notif.iconurl;
+      var icon = '/assets/images/icon_192_192.png';
+      if(notif.iconurl)
+        icon = notif.iconurl;
 
-    if(notif.url) {
-      console.log("notif.url=" + notif.url);
-      notifurl = notif.url;
-    } else
-      notifurl = "/";
- 
-    var tag = 'simple-push-demo-notification-tag';
+      if(notif.url) {
+        console.log("notif.url=" + notif.url);
+        notifurl = notif.url;
+      } else
+        notifurl = "/";
+   
+      var tag = 'simple-push-demo-notification-tag';
 
-    /*event.waitUntil(
-      caches.open(CACHE_NAME).then(function(cache) {
+      caches.open(CACHE_DYN).then(function(cache) {
         return fetch(notifurl).then(function(response) {
           cache.put(notifurl, response.clone());
           return response.json();
         });
-      }).then(function(emails) {
-        self.registration.showNotification(title, {  
-          body: body,  
-          icon: icon,  
-          tag: tag,
-          requireInteraction: true
-        })
-      })
-    );*/
-
-    event.waitUntil(  
-      self.registration.showNotification(title, {  
+      });
+      
+      return self.registration.showNotification(title, {  
         body: body,  
         icon: icon,  
         tag: tag,
         requireInteraction: true
-      })  
-    );  
+      });
 
-  }, function (errorObject) {
-    console.log("The read failed: " + errorObject.code);
-  });
+    }, function (errorObject) {
+      console.log("The read failed: " + errorObject.code);
+      return self.registration.showNotification("New post!", {  
+        body: "Curious ? Check that out (^_^)",  
+        icon: '/assets/images/icon_192_192.png',  
+        tag: 'simple-push-demo-notification-tag',
+        requireInteraction: true
+      });
+    })
+  );  
 });
 
 self.addEventListener('notificationclick', function(event) {
