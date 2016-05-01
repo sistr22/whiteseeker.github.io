@@ -1,7 +1,7 @@
 importScripts('https://cdn.firebase.com/js/client/2.4.2/firebase.js');
 
 var CACHE_NAME = 'my-site-cache-v1';
-var CACHE_DYN = 'blog-dynamique-cache-v1';
+//var OLD_CACHE = 'blog-dynamique-cache-v1';
 
 if (!String.prototype.endsWith) {
   String.prototype.endsWith = function(searchString, position) {
@@ -22,7 +22,6 @@ self.addEventListener('push', function(event) {
   // Get a database reference to our notification
   var ref = new Firebase("https://luminous-inferno-9971.firebaseio.com/pninfos");
   event.waitUntil(
-    
     
     // Attach an asynchronous callback to read the data at our posts reference
     ref.once("value").then(function(snapshot) {
@@ -49,7 +48,7 @@ self.addEventListener('push', function(event) {
    
       var tag = 'simple-push-demo-notification-tag';
 
-      caches.open(CACHE_DYN).then(function(cache) {
+      caches.open(CACHE_NAME).then(function(cache) {
         return fetch(notifurl).then(function(response) {
           cache.put(notifurl, response.clone());
           return response.json();
@@ -102,6 +101,22 @@ self.addEventListener('notificationclick', function(event) {
   );
 });
 
+this.addEventListener('activate', function(event) {
+  var cacheWhitelist = [CACHE_NAME];
+
+  event.waitUntil(
+    caches.keys().then(function(keyList) {
+      return Promise.all(keyList.map(function(key) {
+        console.log('Cache: ' + key);
+        if (cacheWhitelist.indexOf(key) === -1) {
+          console.log('Deleting cache: ' + key);
+          return caches.delete(key);
+        }
+      }));
+    })
+  );
+});
+
 var urlsToCache = [
   '/css/critical.min.css',
   '/css/merged.min.css',
@@ -113,11 +128,17 @@ var urlsToCache = [
   '/assets/images/icon_192_192.png'
 ];
 
+var optionalUrlsToCache = [
+  '/assets/images/play_badge.png',
+  '/assets/images/apple_badge.svg'
+];
+
 self.addEventListener('install', function(event) {
   // Perform install steps
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(function(cache) {
+        cache.addAll(optionalUrlsToCache);
         //console.log('Opened cache');
         return cache.addAll(urlsToCache);
       })
@@ -133,7 +154,7 @@ self.addEventListener('fetch', function(event) {
 
     if (/^\/$/.test(requestURL.pathname)) {
       event.respondWith(
-        caches.open(CACHE_DYN).then(function(cache) {
+        caches.open(CACHE_NAME).then(function(cache) {
           return fetch(event.request).then(function(response) {
             cache.put(event.request, response.clone());
             return response;
@@ -210,7 +231,7 @@ self.addEventListener('fetch', function(event) {
 
     // Default pattern
     event.respondWith(
-      caches.open(CACHE_DYN).then(function(cache) {
+      caches.open(CACHE_NAME).then(function(cache) {
         return cache.match(event.request).then(function (response) {
           return response || fetch(event.request).then(function(response) {
             cache.put(event.request, response.clone());
@@ -224,7 +245,7 @@ self.addEventListener('fetch', function(event) {
   if(requestURL.origin == "https://fonts.googleapis.com") {
     console.log("Loading google font");
     event.respondWith(
-      caches.open(CACHE_DYN).then(function(cache) {
+      caches.open(CACHE_NAME).then(function(cache) {
         return fetch(event.request).then(function(response) {
           cache.put(event.request, response.clone());
           return response;
