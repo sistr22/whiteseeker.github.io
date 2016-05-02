@@ -15,6 +15,13 @@ if (!String.prototype.endsWith) {
   };
 }
 
+function handleErrors(response) {
+    if (!response.ok) {
+        throw Error(response.statusText);
+    }
+    return response;
+}
+
 var notifurl = "/"
 self.addEventListener('push', function(event) {  
   console.log('Received a push message', event);
@@ -130,7 +137,8 @@ var urlsToCache = [
 
 var optionalUrlsToCache = [
   '/assets/images/play_badge.png',
-  '/assets/images/apple_badge.svg'
+  '/assets/images/apple_badge.svg',
+  '/assets/images/no_wifi.svg'
 ];
 
 self.addEventListener('install', function(event) {
@@ -171,58 +179,59 @@ self.addEventListener('fetch', function(event) {
     if(/^\/assets\/images\/[^\/]+\/.+\.\w+$/.test(requestURL.pathname)) {
 
       // Don't cache gif (too big)
-      if (/\.gif$\//.test(requestURL.pathname)) {
+      if (/\.gif$/.test(requestURL.pathname)) {
         event.respondWith(
-          caches.match(event.request).then(function(response) {
-            return response || fetch(event.request);
-          })
+          fetch(event.request)
+            .then(handleErrors)
+            .then(function(response) {
+              console.log('Success fetching .gif : ' + requestURL);
+              return response;
+            }).catch(function(err) {
+              console.log('Fail fetching .gif, try using default svg: ' + err);
+              return caches.match(new Request("/assets/images/no_wifi.svg"));
+            })
         );
         return;
       }
 
       // Don't cache high res webp, but cache low res ones
       // + serve the low res version instead of the high res if the high res can't be fetched
-      if(requestURL.pathname.endsWith(".png.webp") && !requestURL.pathname.endsWith("_small.png.webp")) {
+      if( (requestURL.pathname.endsWith(".png.webp") && !requestURL.pathname.endsWith("_small.png.webp") )
+          || (requestURL.pathname.endsWith(".png") && !requestURL.pathname.endsWith("_small.png")) ) {
         event.respondWith(
-          fetch(event.request).then(function(response) {
-            if (!response.ok) {
-              console.log('FAIL fetching .png.webp [' + requestURL + '], throwing error');
-              // An HTTP error response code (40x, 50x) won't cause the fetch() promise to reject.
-              // We need to explicitly throw an exception to trigger the catch() clause.
-              throw Error('response status ' + response.status);
-            }
-            console.log('Success fetching .png.webp : ' + requestURL);
-            // If we got back a non-error HTTP response, return it to the page.
-            return response;
-          }).catch(function(err) {
-            console.log('Fail fetching .png.webp, try using _small.png.web: ' + err);
-            // In case of error, return cache
-            var myRequest = new Request(event.request.url.replace(".png.webp", "_small.png.webp"));
-            return caches.match(myRequest);
-          })
+          fetch(event.request)
+            .then(handleErrors)
+            .then(function(response) {
+              console.log('Success fetching : ' + requestURL);
+              return response;
+            }).catch(function(err) {
+              console.log('Fail fetching .png(.webp), try using _small.png(.webp): ' + err);
+              // In case of error, return cache
+              var myRequest = new Request(event.request.url.replace(".png", "_small.png"));
+              return caches.match(myRequest).then(function(response) {
+                return response || caches.match(new Request("/assets/images/no_wifi.svg"));
+              })
+            })
         );
         return;
       }
 
-      // Don't cache high res png, but cache low res ones
-      // + serve the low res version instead of the high res if the high res can't be fetched
-      if(requestURL.pathname.endsWith(".png") && !requestURL.pathname.endsWith("_small.png")) {
+      if(requestURL.pathname.endsWith("_small.png.webp") || requestURL.pathname.endsWith("_small.png.webp")) {
         event.respondWith(
-          fetch(event.request).then(function(response) {
-            if (!response.ok) {
-              console.log('FAIL fetching .png [' + requestURL + '], throwing error');
-              // An HTTP error response code (40x, 50x) won't cause the fetch() promise to reject.
-              // We need to explicitly throw an exception to trigger the catch() clause.
-              throw Error('response status ' + response.status);
-            }
-            console.log('Success fetching .png : ' + requestURL);
-            // If we got back a non-error HTTP response, return it to the page.
-            return response;
-          }).catch(function(err) {
-            console.log('Fail fetching .png, try using _small.png.web: ' + err);
-            // In case of error, return cache
-            var myRequest = new Request(event.request.url.replace(".png", "_small.png"));
-            return caches.match(myRequest);
+          caches.open(CACHE_NAME).then(function(cache) {
+            return cache.match(event.request).then(function (response) {
+              return response || fetch(event.request)
+                .then(handleErrors)
+                .then(function(response) {
+                  console.log('Success fetching : ' + requestURL);
+                  cache.put(event.request, response.clone());
+                  return response;
+                }).catch(function(err) {
+                  console.log('Fail fetching [' + requestURL + '], try using default svg: ' + err);
+                  // In case of error, return cache
+                  return caches.match(new Request("/assets/images/no_wifi.svg"));
+                });
+            });
           })
         );
         return;
