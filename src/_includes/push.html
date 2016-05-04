@@ -1,9 +1,10 @@
-<script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
+<script src="https://cdn.firebase.com/js/client/2.4.2/firebase.js"></script>
 <script>
   console.log("navigator.language: " + navigator.language);
   var isPushEnabled = false;
   var pushNotifToken;
   var pushNotifEndPoint;
+
   function initialiseState() {
     console.log('initialiseState');
     // Are Notifications supported in the service worker?  
@@ -279,7 +280,7 @@
       pushSectionButton.addEventListener('click', function() {
         console.log("subscribe()");
         subscribe();
-    });
+      });
     }
 
     // Check that service workers are supported, if so, progressively  

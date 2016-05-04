@@ -24,8 +24,6 @@ function handleErrors(response) {
 
 var notifurl = "/"
 self.addEventListener('push', function(event) {  
-  console.log('Received a push message', event);
-
   // Get a database reference to our notification
   var ref = new Firebase("https://luminous-inferno-9971.firebaseio.com/pninfos");
   event.waitUntil(
