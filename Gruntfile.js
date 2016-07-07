@@ -29,7 +29,7 @@ module.exports = function(grunt) {
 	    options: {
 	      bundleExec: true,
 	      safe: true,
-	      draft: true,
+	      draft: false,
         src: 'src/',
         layouts: 'src/_layouts'
 	    },
