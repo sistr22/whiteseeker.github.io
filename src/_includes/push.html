@@ -1,5 +1,14 @@
-<script src="https://cdn.firebase.com/js/client/2.4.2/firebase.js"></script>
+<script src="https://www.gstatic.com/firebasejs/3.1.0/firebase.js"></script>
 <script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyBaKSt8JOUUokXd4vzVwg7covsTpzNM5jo",
+    authDomain: "luminous-inferno-9971.firebaseapp.com",
+    databaseURL: "https://luminous-inferno-9971.firebaseio.com",
+    storageBucket: "luminous-inferno-9971.appspot.com",
+  };
+  firebase.initializeApp(config);
+
   console.log("navigator.language: " + navigator.language);
   var isPushEnabled = false;
   var pushNotifToken;
@@ -95,12 +104,12 @@
     if(subscription.endpoint.startsWith("https://android.googleapis.com/gcm/send/")) {
       pushNotifToken = subscription.endpoint.substring("https://android.googleapis.com/gcm/send/".length);
       console.log("push token: " + pushNotifToken);
-      var wilmaRef = new Firebase('https://luminous-inferno-9971.firebaseio.com/pntokens/'+pushNotifToken);
+      var wilmaRef = firebase.database().ref('pntokens/'+pushNotifToken);
       wilmaRef.set({platform: "chrome", topic: "games", token: pushNotifToken, time_offset: timeOffset, endpoint: pushNotifEndPoint});
     } else if (subscription.endpoint.startsWith("https://updates.push.services.mozilla.com/push/")) {
       pushNotifToken = subscription.endpoint.substring("https://updates.push.services.mozilla.com/push/".length);
       console.log("push token: " + pushNotifToken);
-      var wilmaRef = new Firebase('https://luminous-inferno-9971.firebaseio.com/pntokens/'+pushNotifToken);
+      var wilmaRef = firebase.database().ref('pntokens/'+pushNotifToken);
       wilmaRef.set({platform: "firefox", topic: "games", token: pushNotifToken, time_offset: timeOffset, endpoint: pushNotifEndPoint});
     } else {
       console.log("Unknown pusk token type: " + subscription.endpoint);
@@ -197,7 +206,7 @@
                 console.log('Synchronization succeeded');
               }
             };
-            var dataRef = new Firebase('https://luminous-inferno-9971.firebaseio.com/pntokens/'+pntoken);
+            var dataRef = firebase.database().ref('pntokens/'+pntoken);
             dataRef.remove(onComplete);
 
             // We have a subscription, so call unsubscribe on it
@@ -233,7 +242,7 @@
                 console.log('Synchronization succeeded');
               }
             };
-            var dataRef = new Firebase('https://luminous-inferno-9971.firebaseio.com/pntokens/'+pntoken);
+            var dataRef = firebase.database().ref('pntokens/'+pntoken);
             dataRef.remove(onComplete);
 
             // We have a subscription, so call unsubscribe on it
