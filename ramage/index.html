@@ -1,2 +1,1355 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="description" content="A front-end template that helps you build fast, modern mobile web apps."><meta name="viewport" content="width=device-width, initial-scale=1"><title>Blog</title><meta name="mobile-web-app-capable" content="yes"><link rel="icon" sizes="192x192" href="images/android-desktop.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="apple-mobile-web-app-title" content="Material Design Lite"><link rel="apple-touch-icon-precomposed" href="images/ios-desktop.png"><meta name="msapplication-TileImage" content="images/touch/ms-touch-icon-144x144-precomposed.png"><meta name="msapplication-TileColor" content="#3372DF"><link rel="shortcut icon" href="/assets/images/favicon.png"><link rel="stylesheet" href="/css/critical.min.css"><link rel="stylesheet" href="/ramage/map.css"> <style>#view-source{position:fixed;display:block;right:0;bottom:0;margin-right:40px;margin-bottom:40px;z-index:900}</style><script>!function(e,a,t,n,c,s,o){e.GoogleAnalyticsObject=c,e[c]=e[c]||function(){(e[c].q=e[c].q||[]).push(arguments)},e[c].l=1*new Date,s=a.createElement(t),o=a.getElementsByTagName(t)[0],s.async=1,s.src=n,o.parentNode.insertBefore(s,o)}(window,document,"script","//www.google-analytics.com/analytics.js","ga"),ga("create","UA-70962121-1",{siteSpeedSampleRate:40}),ga("send","pageview")</script></head><body class="mdl-demo mdl-color--grey-100 mdl-color-text--grey-700 mdl-base"><div class="mdl-layout mdl-js-layout mdl-layout--fixed-header"><header class="mdl-layout__header"><div class="mdl-layout__header-row"> <a href="/" class="mdl-navigation__link site_title"><span class="mdl-layout-title">Blog</span></a><div class="mdl-layout-spacer"></div> <nav class="mdl-navigation mdl-layout--large-screen-only"> <a class="mdl-navigation__link" href="/about/">About</a> </nav></div> </header><div class="mdl-layout__drawer mdl-layout--small-screen-only"> <span class="mdl-layout-title"><a href="/" class="mdl-navigation__link">Blog</a></span> <nav class="mdl-navigation"> <a class="mdl-navigation__link" href="/about/">About</a> </nav></div><main class="mdl-layout__content"> <section class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp" style="margin-top:18px;margin-bottom:18px"><div class="mdl-card mdl-cell mdl-cell--12-col"><div class="mdl-card__supporting-text"><h4>RaMaGe</h4> <!DOCTYPE html><html><body><div> <canvas id="mapCanvas" width="300" height="300" style="margin:auto;display:block;padding:0 0 5px 0">Your browser does not support the HTML5 canvas tag.</canvas></div><div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect"><div class="mdl-tabs__tab-bar"> <a href="#fractal_3d" class="mdl-tabs__tab is-active">Fractal 3D</a> <a href="#simple_algo" class="mdl-tabs__tab">Simple algo</a> <a href="#fractal_2d" class="mdl-tabs__tab">Fractal 2D</a></div><div class="mdl-tabs__panel is-active" id="fractal_3d"><div style="float:left;margin-top:10px"><form id="wmm_parameters" style="float:left;margin:0 auto" onsubmit="wmm_startGenerateMap(); return false"><div class="formField">Width <input id="wmm_width" type="number" name="drop" value="257" placeholder="(power of 2) + 1" required><span id= " error_wmm_width"  class="mdl-badge" data-badge="x" style="display:none"/></div><div class="mdl-tooltip" for="error_wmm_width"> Must be a power of 2 + 1</div><div class="formField">Height <input id="wmm_height" type="number" name="drop" value="257" placeholder="(power of 2) + 1" required><span id= " error_wmm_height" class="mdl-badge" data-badge="x" style="display:none"/></div><div class="mdl-tooltip" for="error_wmm_height"> Must be a power of 2 + 1</div><div class="formField">Seed <input id="wmm_seed"  name="drop" value="Bretagne" required></div><div class="formField">Roughness <input id="wmm_roughness" type="number" step="0.05" min="0" max="1" name="drop" value="0.55" required></div><div class="formField">Initial altitude <input id="wmm_initalt" type="number" step="0.05" min="0" max="1" name="drop" value="0.2" required></div><div class="formField"><button id="wmm_generateMap" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">Generate map</button></div></form></div><script>function IsPowerOfTwo(e){return 0!=e&&0==(e&e-1)}function validateForm(){var e=parseInt(document.getElementById("wmm_width").value);console.log("width = "+e),res=!0;var t=document.getElementById("error_wmm_width");IsPowerOfTwo(e-1)?t.style.display="none":(res=!1,t.style.display=null);var o=parseInt(document.getElementById("wmm_height").value);console.log("height = "+o),t=document.getElementById("error_wmm_height"),IsPowerOfTwo(o-1)?t.style.display="none":(t.style.display=null,res=!1);var a=document.getElementById("wmm_seed").value;console.log("seed = "+a);var n=document.getElementById("wmm_roughness").value;console.log("roughness = "+n);var l=document.getElementById("wmm_initalt").value;return console.log("initalt = "+l),res}function wmm_startGenerateMap(){if(console.log("->wmm_startGenerateMap()"),validateForm()){var e=parseInt(document.getElementById("wmm_width").value);console.log("width = "+e);var t=parseInt(document.getElementById("wmm_height").value);console.log("height = "+t);var o=document.getElementById("wmm_seed").value;console.log("seed = "+o);var a=document.getElementById("wmm_roughness").value;console.log("roughness = "+a);var n=document.getElementById("wmm_initalt").value;console.log("initalt = "+n),"undefined"!=typeof Worker?("undefined"==typeof wm&&(wm=new Worker("map_fractal_3d/wormsThreeDMapGenerator.js"),wm.postMessage({width:e,height:t,seed:o,roughness:a,initalt:n})),wm.onmessage=function(o){"Result"==o.data.type?(lastWidth=e,lastHeight=t,wmm_displayMap(o.data.data,e,t),wm.terminate(),wm=void 0):"Update"==o.data.type?console.log("update : "+o.data.val):console.log("event type: "+o.type)}):console.log("Sorry, your browser does not support Web Workers..."),console.log("<-wmm_startGenerateMap")}}function wmm_displayMap(e,t,o){console.log("wmm_displayMap");var a=document.getElementById("mapCanvas");a.width=t,a.height=o;for(var n=a.getContext("2d"),l=n.createImageData(t,o),m=0;m<e.length;m++)l.data[4*m+0]=e[e.length-m],l.data[4*m+1]=e[e.length-m],l.data[4*m+2]=e[e.length-m],l.data[4*m+3]=255;n.putImageData(l,0,0)}</script></div><div class="mdl-tabs__panel" id="simple_algo"><div style="float:left;margin-top:10px"><div id="terrains" style="float:left;margin:0 auto"><div class="terrain"><div class="terrainLabel" draggable="true">Deep water</div> <input class="deleteButton" type="button" value="X"/> <input class="terrainSlider" type="range" min="0" max="1" step="0.01" value="0.00"/> <input class="terrainColor" type="color" value="#0000C6"/></div><div class="terrain"><div class="terrainLabel" draggable="true">Water</div> <input class="deleteButton" type="button" value="X"/> <input class="terrainSlider" type="range" min="0" max="1" step="0.01" value="0.23"/> <input class="terrainColor" type="color" value="#3766FF"/></div><div class="terrain"><div class="terrainLabel" draggable="true">Sand</div> <input class="deleteButton" type="button" value="X"/> <input class="terrainSlider" type="range" min="0" max="1" step="0.01" value="0.31"/> <input class="terrainColor" type="color" value="#D8EE61"/></div><div class="terrain"><div class="terrainLabel" draggable="true">Grass</div> <input class="deleteButton" type="button" value="X"/> <input class="terrainSlider" type="range" min="0" max="1" step="0.01" value="0.35"/> <input class="terrainColor" type="color" value="#009B00"/></div><div class="terrain"><div class="terrainLabel" draggable="true">Forest</div> <input class="deleteButton" type="button" value="X"/> <input class="terrainSlider" type="range" min="0" max="1" step="0.01" value="0.55"/> <input class="terrainColor" type="color" value="#008400"/></div><div class="terrain"><div class="terrainLabel" draggable="true">Mountain</div> <input class="deleteButton" type="button" value="X"/> <input class="terrainSlider" type="range" min="0" max="1" step="0.01" value="0.76"/> <input class="terrainColor" type="color" value="#9B9B9B"/></div></div> <br><div style="float:left"> <input id="addTerrain" type="button" value="Add terrain" style="margin:3px"/></div></div><div style="clear:left"><form name="algo_custom_val"> Width <input id="width" type="number" name="drop" value="300"> Height <input id="height" type="number" name="drop" value="300"><br> <input id="rawDisplay" type="checkbox" name="vehicle">display raw heightmap<br> Seed <input id="seed"  name="drop" value="random_seed"><br> Number of drop: <input id="nbDrop" type="number" name="drop" value="55"><br> min particules: <input id="minPart" type="number" name="minPart" value="10000"><br> max particules: <input id="maxPart" type="number" name="maxPart" value="20000"><br> max retry: <input id="maxRetry" type="number" name="maxRetry" value="75"><br> agitate range: <input id="agitate" type="number" name="agitate" value="2"><br> Gaussian blur radius: <input id="gaussian" type="number" name="gaussian" value="7"> <input id="blur" type="button" value="Re-apply blur"/><br> <input id="generateMap" type="button" value="Generate map"/> <br></form><progress id='progress' max='100' style="display:none"><span>0</span>%</progress></div> <script>function handleDragStart(e){e.target.parentNode.style.opacity="0.4",dragSrcEl=this,e.dataTransfer.effectAllowed="move",e.dataTransfer.setData("text/html",this.innerHTML)}function handleDragEnter(e){this.parentNode.classList.add("over")}function handleDragOver(e){return e.preventDefault&&e.preventDefault(),e.dataTransfer.dropEffect="move",!1}function handleDragLeave(e){this.parentNode.classList.remove("over")}function handleDrop(e){if(e.stopPropagation&&e.stopPropagation(),dragSrcEl!=this){var a=document.getElementById("terrains");console.log("nbChild: "+a.children.length);for(var t=-1,n=-1,r=[],l=0;l<a.children.length;l++)r[l]=a.children[l],a.children[l]==dragSrcEl.parentNode&&(t=l),a.children[l]==e.target.parentNode&&(n=l);if(-1!=t&&-1!=n){r[t]=this.parentNode,r[n]=dragSrcEl.parentNode;for(var l=0;l<r.length;l++)a.appendChild(r[l]);updateVisualisation()}else console.log("bug")}return!1}function handleDragEnd(e){e.target.parentNode.style.opacity="1.0";var a=document.querySelectorAll("#terrains .terrain .terrainLabel");[].forEach.call(a,function(e){e.parentNode.classList.remove("over")})}function onblurLabel(){var e=event.target.value;console.log("onblurLabel: "+e);var a=event.target.parentNode;a.removeChild(event.target);var t=a.getElementsByClassName("terrainLabel")[0];t.innerHTML=e,t.style.display="block"}function onclickLabel(){console.log("Label clicked !");var e=document.createElement("input");e.type="text",e.value=event.target.innerHTML,e.className="terrainEditLabel",e.onblur=onblurLabel,event.target.parentNode.insertBefore(e,event.target),event.target.style.display="none"}function addTerrain(){var e=document.getElementById("terrains");if(e.children.length>0){console.log("Adding terrains ...");var a=e.children[0].cloneNode(!0),t=a.getElementsByClassName("terrainLabel")[0];t.addEventListener("dragstart",handleDragStart,!1),t.addEventListener("dragenter",handleDragEnter,!1),t.addEventListener("dragover",handleDragOver,!1),t.addEventListener("dragleave",handleDragLeave,!1),t.addEventListener("drop",handleDrop,!1),t.addEventListener("dragend",handleDragEnd,!1),t.onclick=onclickLabel;var n=a.getElementsByClassName("terrainSlider")[0];n.oninput=updateVisualisation;var r=a.getElementsByClassName("deleteButton")[0];r.onclick=deleteTerrain,e.appendChild(a)}}function deleteTerrain(){console.log("Delete terrain");var e=document.getElementById("terrains");if(e.children.length>1){var a=this.parentNode;a.parentNode.removeChild(a),updateVisualisation()}}function toggleDisplayRaw(){var e=document.getElementById("rawDisplay").checked;e?displayHeightMap(lastData,lastMin,lastMax,lastWidth,lastHeight):updateVisualisation()}function cancelMapGeneration(){console.log("cancelMapGeneration"),w&&(console.log("terminate worker"),w.terminate(),w=void 0);var e=document.getElementById("generateMap");e.value="Generate map",e.onclick=startGenerateMap;var a=document.getElementById("progress");a.value=0,a.getElementsByTagName("span")[0].innerHTML=0,a.style.display="none"}function displayHeightMap(e,a,t,n,r){var l=document.getElementById("mapCanvas"),o=l.getContext("2d");l.width=n,l.height=r;for(var d=o.createImageData(n,r),i=0;i<d.data.length;i+=4){var s=Math.floor((e[i/4]-a)/(t-a)*255);d.data[i+0]=s,d.data[i+1]=s,d.data[i+2]=s,d.data[i+3]=255}o.putImageData(d,0,0)}function updateVisualisation(){console.log("updateVisualisation");var e=document.getElementById("rawDisplay").checked;lastData&&!e&&displaySampleVisualisation(lastData,lastMin,lastMax,lastWidth,lastHeight)}function hexToRgb(e){var a=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(e);return a?{r:parseInt(a[1],16),g:parseInt(a[2],16),b:parseInt(a[3],16)}:null}function displaySampleVisualisation(e,a,t,n,r){console.log("displaySampleVisualisation");for(var l=document.getElementById("mapCanvas"),o=l.getContext("2d"),d=document.querySelectorAll("#terrains .terrain"),i=[],s=[],c=0;c<d.length;c++){var g=d[c].getElementsByClassName("terrainSlider")[0],u=d[c].getElementsByClassName("terrainColor")[0];i[c]=g.value,s[c]=u.value}l.width=n,l.height=r;var p=o.createImageData(n,r);if(3>t-a)for(var c=0;c<p.data.length;c+=4){var m=Math.floor((e[c/4]-a)/(t-a)*255);p.data[c+0]=m,p.data[c+1]=m,p.data[c+2]=m,p.data[c+3]=255}else for(var v=t-a,c=0;c<p.data.length;c+=4){for(var m=e[c/4],l="#000000",h=i.length-1;h>=0;h--)if(m>=a+v*i[h]){l=s[h];break}var y=hexToRgb(l);p.data[c+0]=y.r,p.data[c+1]=y.g,p.data[c+2]=y.b,p.data[c+3]=255}o.putImageData(p,0,0)}function startBlur(){console.log("start blur");var e=parseInt(document.getElementById("gaussian").value);console.log("gaussian = "+e);var a=parseInt(document.getElementById("width").value);console.log("width = "+a);var t=parseInt(document.getElementById("height").value);console.log("height = "+t),lastData&&e>0&&"undefined"!=typeof Worker&&("undefined"==typeof w&&(w=new Worker("map2d_simple/WorkerMapGenerator.js"),w.postMessage({width:a,height:t,gaussian:e,img:lastData})),w.onmessage=function(e){"Result"==e.data.type?(lastData=e.data.data,lastMin=e.data.minVal,lastMax=e.data.maxVal,lastWidth=a,lastHeight=t,displayHeightMap(e.data.data,e.data.minVal,e.data.maxVal,a,t),updateVisualisation(),w.terminate(),w=void 0):console.log("event type: "+e.type)})}function startGenerateMap(){var e=parseInt(document.getElementById("nbDrop").value);console.log("nbDrop = "+e);var a=parseInt(document.getElementById("minPart").value);console.log("minPart = "+a);var t=parseInt(document.getElementById("maxPart").value);console.log("maxPart = "+t);var n=parseInt(document.getElementById("maxRetry").value);console.log("maxRetry = "+n);var r=parseInt(document.getElementById("agitate").value);console.log("agitate = "+r);var l=parseInt(document.getElementById("gaussian").value);console.log("gaussian = "+l);var o=parseInt(document.getElementById("width").value);console.log("width = "+o);var d=parseInt(document.getElementById("height").value);console.log("height = "+d);var i=document.getElementById("seed").value;console.log("seed = "+i);var s=document.getElementById("progress");s.value=0,s.getElementsByTagName("span")[0].innerHTML=0,s.style.display="block";var c=document.getElementById("generateMap");c.value="Cancel",c.onclick=cancelMapGeneration,"undefined"!=typeof Worker&&("undefined"==typeof w&&(w=new Worker("map2d_simple/WorkerMapGenerator.js"),w.postMessage({nbDrop:e,minPart:a,maxPart:t,maxRetry:n,agitateRange:r,width:o,height:d,gaussian:l,seed:i})),w.onmessage=function(e){if("Result"==e.data.type){lastData=e.data.data,lastMin=e.data.minVal,lastMax=e.data.maxVal,lastWidth=o,lastHeight=d,displayHeightMap(e.data.data,e.data.minVal,e.data.maxVal,o,d),updateVisualisation(),w.terminate(),s.style.display="none",w=void 0;var a=document.getElementById("generateMap");a.value="Generate map",a.onclick=startGenerateMap}else"Update"==e.data.type?(s.value=e.data.val,s.getElementsByTagName("span")[0].innerHTML=Math.floor(e.data.val)):console.log("event type: "+e.type)})}var dragSrcEl=null,cols=document.querySelectorAll("#terrains .terrain .terrainLabel");[].forEach.call(cols,function(e){e.addEventListener("dragstart",handleDragStart,!1),e.addEventListener("dragenter",handleDragEnter,!1),e.addEventListener("dragover",handleDragOver,!1),e.addEventListener("dragleave",handleDragLeave,!1),e.addEventListener("drop",handleDrop,!1),e.addEventListener("dragend",handleDragEnd,!1),e.onclick=onclickLabel});var lastData=void 0,lastMin=void 0,lastMax=void 0,lastWidth=void 0,lastHeight=void 0,displayRawCheckbox=document.getElementById("rawDisplay");displayRawCheckbox.onclick=toggleDisplayRaw;var generateButton=document.getElementById("generateMap");generateButton.onclick=startGenerateMap;var blurButton=document.getElementById("blur");blurButton.onclick=startBlur;var addTerrainButton=document.getElementById("addTerrain");addTerrainButton.onclick=addTerrain;var sliders=document.querySelectorAll("#terrains .terrain .terrainSlider");[].forEach.call(sliders,function(e){e.oninput=updateVisualisation});var pickers=document.querySelectorAll("#terrains .terrain .terrainColor");[].forEach.call(pickers,function(e){e.onblur=updateVisualisation});var deletes=document.querySelectorAll("#terrains .terrain .deleteButton");[].forEach.call(deletes,function(e){e.onclick=deleteTerrain})</script></div><div class="mdl-tabs__panel" id="fractal_2d"><div style="float:left;margin-top:10px"><div id="wm_parameters" style="float:left;margin:0 auto"><div>Width <input id="wm_width" type="number" name="drop" value="300"></div><div>Height <input id="wm_height" type="number" name="drop" value="300"></div><div>Seed <input id="wm_seed"  name="drop" value="Lambic"></div><div>Roughness <input id="wm_roughness" type="number" step="0.05" min="0" max="1" name="drop" value="0.4"></div><div>Initial altitude <input id="wm_initalt" type="number" step="0.05" min="0" max="1" name="drop" value="0.2"></div><div><input id="wm_generateMap" type="button" value="Generate map"/></div></div></div><script>function wm_startGenerateMap(){console.log("->wm_startGenerateMap()");var e=parseInt(document.getElementById("wm_width").value);console.log("width = "+e);var t=parseInt(document.getElementById("wm_height").value);console.log("height = "+t);var a=document.getElementById("wm_seed").value;console.log("seed = "+a);var o=document.getElementById("wm_roughness").value;console.log("roughness = "+o);var n=document.getElementById("wm_initalt").value;console.log("initalt = "+n),"undefined"!=typeof Worker?("undefined"==typeof w&&(w=new Worker("map_fractal_2d/workerMapGenerator.js"),w.postMessage({width:e,height:t,seed:a,roughness:o,initalt:n})),w.onmessage=function(a){"Result"==a.data.type?(lastWidth=e,lastHeight=t,wm_displayMap(a.data.data,e,t),w.terminate(),w=void 0):"Update"==a.data.type?console.log("update : "+a.data.val):console.log("event type: "+a.type)}):console.log("Sorry, your browser does not support Web Workers..."),console.log("<-startGenerateMap")}function wm_displayMap(e,t,a){console.log("wm_displayMap");var o=document.getElementById("mapCanvas");o.width=t,o.height=a;for(var n=o.getContext("2d"),l=n.createImageData(t,a),d=0;d<e.length;d++)l.data[4*d+0]=e[e.length-d],l.data[4*d+1]=e[e.length-d],l.data[4*d+2]=e[e.length-d],l.data[4*d+3]=255;n.putImageData(l,0,0)}var generateMapButton=document.getElementById("wm_generateMap");generateMapButton.onclick=wm_startGenerateMap</script></div></div></body></html></div></div> </section><footer class="mdl-mega-footer"><div class="mdl-mega-footer__middle-section"><div class="mdl-mega-footer__drop-down-section"> <input class="mdl-mega-footer__heading-checkbox" type="checkbox" checked><h1 class="mdl-mega-footer__heading">Informations</h1><ul class="mdl-mega-footer__link-list"><li><a class="footer_link" href="#">License</a></li><li><a class="footer_link" href="mailto:your-email@domain.com">Send an email</a></li></ul></div><div class="mdl-mega-footer__drop-down-section"> <input class="mdl-mega-footer__heading-checkbox" type="checkbox" checked><h1 class="mdl-mega-footer__heading">Social</h1><ul class="mdl-mega-footer__link-list"><li> <a class="footer_link" href="https://plus.google.com/+DamienMABIN" target="_blank"> <span> <svg style="fill:red" height="16px" id="Layer_1" version="1.1" viewBox="0 0 128 128" width="16px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g><circle cx="64" cy="64" fill="#9e9e9e" r="64"/><g><path fill="#424242" d="M49.424,97.875c-19.018,0-34.491-15.193-34.491-33.874c0-18.68,15.473-33.875,34.491-33.875     c8.318,0,16.354,2.952,22.624,8.309l-8.771,9.899c-3.838-3.279-8.758-5.086-13.853-5.086c-11.652,0-21.13,9.31-21.13,20.752     c0,11.441,9.479,20.75,21.13,20.75c9.858,0,16.311-4.723,18.407-13.197H49.587V58.432h32.347v6.562     C81.934,84.659,68.869,97.875,49.424,97.875z"/></g><polygon fill="#424242" points="117.934,58.438 107.934,58.438 107.934,48.438 99.934,48.438 99.934,58.438 89.934,58.438     89.934,66.438 99.934,66.438 99.934,76.438 107.934,76.438 107.934,66.438 117.934,66.438   "/></g> </svg> </span> <span>+DamienMabin</span> </a></li><li> <a class="footer_link" href="https://twitter.com/yindie" target="_blank"> <svg viewBox="0 0 16 16" height="16px" width="16px"> <path fill="#9e9e9e" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809
-c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"/> </svg> <span class="username">yindie</span> </a></li></ul></div></div></footer></main></div> <script src="/css/photoswipe/photoswipe.min.js" defer></script> <script src="/css/photoswipe/photoswipe-ui-default.min.js" defer></script><script src="/css/material.min.js" defer></script><link rel="stylesheet" href="/css/merged.min.css"></body></html>
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="description" content="A front-end template that helps you build fast, modern mobile web apps.">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Blog</title>
+
+  <!-- Add to homescreen for Chrome on Android -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="icon" sizes="192x192" href="/assets/images/icon_192_192.png">
+  <link rel="manifest" href="/manifest.json">
+
+  <!-- Add to homescreen for Safari on iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Material Design Lite">
+  <link rel="apple-touch-icon-precomposed" href="/assets/images/icon_192_192.png">
+
+  <!-- Tile icon for Win8 (144x144 + tile color) -->
+  <meta name="msapplication-TileImage" content="images/touch/ms-touch-icon-144x144-precomposed.png">
+  <meta name="msapplication-TileColor" content="#3372DF">
+
+  <meta name="theme-color" content="#3F51B5">
+  <link rel="shortcut icon" href="/assets/images/favicon.png">
+
+  <meta name="google-site-verification" content="G5DNU81K0TiZ4pd6NaBXaUwv0XgI_bI7NHlaMymkrN8" />
+  <!-- SEO: If your mobile URL is different from the desktop URL, add a canonical link to the desktop page https://developers.google.com/webmasters/smartphone-sites/feature-phones -->
+  <link rel="canonical" href="https://whiteseeker.github.io/ramage/index.html">
+
+  <link rel="stylesheet" href="/css/critical.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  
+  
+      
+       <link rel="stylesheet" href="/ramage/map.css">
+         
+  
+
+  <!-- Google Analytics -->
+  <script>
+  var host = "whiteseeker.github.io";
+  if ((host == window.location.host) && (window.location.protocol != "https:"))
+      window.location.protocol = "https";
+  
+  window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+  ga('create', 'UA-70962121-1', {'siteSpeedSampleRate': 40});
+  ga('send', 'pageview');
+  </script>
+  <script async src='//www.google-analytics.com/analytics.js'></script>
+  <script src="/scripts/modernizr-custom.min.js"></script>
+  <!-- End Google Analytics -->
+
+</head>
+
+
+  <body class="mdl-demo mdl-color--grey-100 mdl-color-text--grey-700 mdl-base">
+
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+      <!-- Always shows a header, even in smaller screens. -->
+
+  <header class="mdl-layout__header">
+    <div class="mdl-layout__header-row">
+      
+      <a href="/" class="mdl-navigation__link site_title"><span class="mdl-layout-title" >Blog</span></a>
+      
+      <div class="mdl-layout-spacer"></div>
+      <nav class="mdl-navigation mdl-layout--large-screen-only">
+        <a class="mdl-navigation__link" href="/about/">About</a>
+      </nav>
+    </div>
+  </header>
+  <div class="mdl-layout__drawer blog-drawer">
+    <div class="mdl-card__title"><h2 class="mdl-card__title-text">Blog</h2></div>
+    <!--button data-rv-vanilla-modal="#target-modal" class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored blog-button-login">
+      <i class="material-icons">add</i>
+    </button-->
+    <nav class="mdl-navigation">
+      <a class="mdl-navigation__link" href="/">Home</a>
+      <a class="mdl-navigation__link" href="/about/">About</a>
+      <label id="switch-notif" class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect blog-notif-switch" for="switch-notif-input">
+        <input type="checkbox" id="switch-notif-input" class="mdl-checkbox__input" disabled>
+        <span class="mdl-checkbox__label">Notifications</span>
+      </label>
+      <!--label id="switch-notif" class="mdl-switch mdl-js-switch mdl-js-ripple-effect blog-notif-switch" for="switch-notif-input">
+        <input id="switch-notif-input" type="checkbox"  class="mdl-switch__input">
+        <span id="switch-notif-label" class="mdl-switch__label">Notifications</span>
+      </label-->
+    </nav>
+  </div>
+  
+
+      <main class="mdl-layout__content">
+        
+        <section class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp" style="margin-top: 18px; margin-bottom: 18px">
+	      <div class="mdl-card mdl-cell mdl-cell--12-col">
+	        <div class="mdl-card__supporting-text">
+	          <h4>RaMaGe</h4>
+            
+	          <!DOCTYPE html>
+<html>
+<body>
+  <div>
+    <canvas id="mapCanvas" width="300" height="300" style="margin: auto; display: block; padding: 0px 0px 5px 0px;">Your browser does not support the HTML5 canvas tag.</canvas>
+  </div>
+	<div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
+		<div class="mdl-tabs__tab-bar">
+      <a href="#fractal_3d" class="mdl-tabs__tab is-active">Fractal 3D</a>
+  		<a href="#simple_algo" class="mdl-tabs__tab">Simple algo</a>
+  		<a href="#fractal_2d" class="mdl-tabs__tab">Fractal 2D</a>
+		</div>
+    <div class="mdl-tabs__panel is-active" id="fractal_3d">
+      <div style="float: left;margin-top: 10px;">
+    <form id="wmm_parameters" style="float: left;margin: 0 auto;" onsubmit="wmm_startGenerateMap(); return false">
+        <div class="formField">Width <input id="wmm_width" type="number" name="drop" value="257" placeholder="(power of 2) + 1" required><span id= "error_wmm_width" class="mdl-badge" data-badge="x" style="display: none;"/></div>
+        <div class="mdl-tooltip" for="error_wmm_width">
+            Must be a power of 2 + 1
+        </div>
+        <div class="formField">Height <input id="wmm_height" type="number" name="drop" value="257" placeholder="(power of 2) + 1" required><span id= "error_wmm_height"class="mdl-badge" data-badge="x" style="display: none;"/></div>
+        <div class="mdl-tooltip" for="error_wmm_height">
+            Must be a power of 2 + 1
+        </div>
+        <div class="formField">Seed <input id="wmm_seed" type="text" name="drop" value="Bretagne" required></div>
+        <div class="formField">Roughness <input id="wmm_roughness" type="number" step="0.05" min="0" max="1" name="drop" value="0.55" required></div>
+        <div class="formField">Initial altitude <input id="wmm_initalt" type="number" step="0.05" min="0" max="1" name="drop" value="0.2" required></div>
+        <div class="formField"><button id="wmm_generateMap" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">Generate map</button></div>
+    </form>
+</div>
+
+<script type="text/javascript">
+
+function IsPowerOfTwo(x)
+{
+    return (x != 0) && ((x & (x - 1)) == 0);
+}
+
+function validateForm() {
+    var width = parseInt(document.getElementById("wmm_width").value);
+    console.log("width = " + width);
+
+    res = true;
+
+    var elt = document.getElementById("error_wmm_width");
+    if(!IsPowerOfTwo(width-1)){
+        res = false;
+        elt.style.display=null;
+    } else {
+        elt.style.display="none";
+    }
+
+    var height = parseInt(document.getElementById("wmm_height").value);
+    console.log("height = " + height);
+    
+    elt = document.getElementById("error_wmm_height");
+    if(!IsPowerOfTwo(height-1)){
+        elt.style.display=null;
+        res = false;
+    } else {
+        elt.style.display="none";
+    }
+        
+
+    var seed = document.getElementById('wmm_seed').value;
+    console.log("seed = " + seed);
+
+    var roughness = document.getElementById("wmm_roughness").value;
+    console.log("roughness = " + roughness);
+
+    var initalt = document.getElementById("wmm_initalt").value;
+    console.log("initalt = " + initalt);
+
+    return res;
+}
+
+function wmm_startGenerateMap() {
+    console.log("->wmm_startGenerateMap()");
+
+    if(!validateForm())
+        return;
+
+    var width = parseInt(document.getElementById("wmm_width").value);
+    console.log("width = " + width);
+
+    var height = parseInt(document.getElementById("wmm_height").value);
+    console.log("height = " + height);
+
+    var seed = document.getElementById('wmm_seed').value;
+    console.log("seed = " + seed);
+
+    var roughness = document.getElementById("wmm_roughness").value;
+    console.log("roughness = " + roughness);
+
+    var initalt = document.getElementById("wmm_initalt").value;
+    console.log("initalt = " + initalt);
+
+    if(typeof(Worker) !== "undefined") {
+        if(typeof(wm) == "undefined") {
+            wm = new Worker("map_fractal_3d/wormsThreeDMapGenerator.js");
+            wm.postMessage({width:width, height:height, seed: seed, roughness: roughness, initalt: initalt});
+        }
+        wm.onmessage = function(event) {
+            if(event.data.type == "Result") {
+                lastWidth = width;
+                lastHeight = height;
+
+                wmm_displayMap(event.data.data, width, height);
+
+                wm.terminate();
+                wm = undefined;
+
+            } else if(event.data.type == "Update") {
+                console.log("update : " + event.data.val);
+            } else {
+                console.log("event type: " + event.type);
+            }
+        };
+    } else {
+        console.log("Sorry, your browser does not support Web Workers...");
+    }
+
+    console.log("<-wmm_startGenerateMap");
+}
+
+function wmm_displayMap(map, w, h) {
+    console.log("wmm_displayMap");
+    var c = document.getElementById("mapCanvas");
+    c.width = w;
+    c.height = h;
+    var ctx = c.getContext("2d");
+
+    var imgData = ctx.createImageData(w, h);
+
+    for (var i = 0; i < map.length; i++) {
+        imgData.data[4*i+0] = map[map.length - i];
+        imgData.data[4*i+1] = map[map.length - i];
+        imgData.data[4*i+2] = map[map.length - i];
+        imgData.data[4*i+3] = 255;
+    }
+
+    ctx.putImageData(imgData, 0, 0);
+}
+
+</script>
+    </div>
+  	<div class="mdl-tabs__panel" id="simple_algo">
+    	<div style="float: left;margin-top: 10px;">
+    <div id="terrains" style="float: left;margin: 0 auto;">
+        <div class="terrain">
+            <div class="terrainLabel" draggable="true">Deep water</div>
+            <input class="deleteButton" type="button" value="X"/>
+            <input class="terrainSlider" type="range" min="0" max="1" step="0.01" value="0.00" />
+            <input class="terrainColor" type="color" value="#0000C6"/>
+        </div>
+        <div class="terrain">
+            <div class="terrainLabel" draggable="true">Water</div>
+            <input class="deleteButton" type="button" value="X"/>
+            <input class="terrainSlider" type="range" min="0" max="1" step="0.01" value="0.23" />
+            <input class="terrainColor" type="color" value="#3766FF"/>
+        </div>
+        <div class="terrain">
+            <div class="terrainLabel" draggable="true">Sand</div>
+            <input class="deleteButton" type="button" value="X"/>
+            <input class="terrainSlider" type="range" min="0" max="1" step="0.01" value="0.31" />
+            <input class="terrainColor" type="color" value="#D8EE61"/>
+        </div>
+        <div class="terrain">
+            <div class="terrainLabel" draggable="true">Grass</div>
+            <input class="deleteButton" type="button" value="X"/>
+            <input class="terrainSlider" type="range" min="0" max="1" step="0.01" value="0.35" />
+            <input class="terrainColor" type="color" value="#009B00"/>
+        </div>
+        <div class="terrain">
+            <div class="terrainLabel" draggable="true">Forest</div>
+            <input class="deleteButton" type="button" value="X"/>
+            <input class="terrainSlider" type="range" min="0" max="1" step="0.01" value="0.55" />
+            <input class="terrainColor" type="color" value="#008400"/>
+        </div>
+        <div class="terrain">
+            <div class="terrainLabel" draggable="true">Mountain</div>
+            <input class="deleteButton" type="button" value="X"/>
+            <input class="terrainSlider" type="range" min="0" max="1" step="0.01" value="0.76" />
+            <input class="terrainColor" type="color" value="#9B9B9B"/>
+        </div>
+    </div>
+    <br>
+    <div style="float: left;">
+        <input id="addTerrain" type="button" value="Add terrain" style="margin: 3px;"/>
+    </div>
+</div>
+
+
+<div style="clear: left;">
+    <form name="algo_custom_val">
+      Width <input id="width" type="number" name="drop" value="300">
+      Height <input id="height" type="number" name="drop" value="300"><br>
+      <input id="rawDisplay" type="checkbox" name="vehicle">display raw heightmap<br>
+      Seed <input id="seed" type="text" name="drop" value="random_seed"><br>
+      Number of drop: <input id="nbDrop" type="number" name="drop" value="55"><br>
+      min particules: <input id="minPart" type="number" name="minPart" value="10000"><br>
+      max particules: <input id="maxPart" type="number" name="maxPart" value="20000"><br>
+      max retry: <input id="maxRetry" type="number" name="maxRetry" value="75"><br>
+      agitate range: <input id="agitate" type="number" name="agitate" value="2"><br>
+      Gaussian blur radius: <input id="gaussian" type="number" name="gaussian" value="7">
+      <input id="blur" type="button" value="Re-apply blur"/><br>
+      <input id="generateMap" type="button" value="Generate map"/> <br>
+    </form>
+
+    <progress id='progress' max='100' style="display: none;"><span>0</span>%</progress>
+<!--
+    <div>
+        <div style="float: left;">
+            <canvas id="canvasVis" width="300" height="300" style="border:1px solid #d3d3d3; display: block;">
+                Your browser does not support the HTML5 canvas tag.</canvas>    
+        </div>
+        
+    </div>
+-->
+</div>
+<script type="text/javascript">
+
+var dragSrcEl = null;
+
+function handleDragStart(e) {
+  // Target (this) element is the source node.
+  e.target.parentNode.style.opacity = '0.4';
+
+  dragSrcEl = this;
+
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/html', this.innerHTML);
+}
+
+function handleDragEnter(e) {
+  // this / e.target is the current hover target.
+  this.parentNode.classList.add('over');
+}
+
+function handleDragOver(e) {
+  if (e.preventDefault) {
+    e.preventDefault(); // Necessary. Allows us to drop.
+  }
+
+  e.dataTransfer.dropEffect = 'move';  // See the section on the DataTransfer object.
+
+  return false;
+}
+
+function handleDragLeave(e) {
+  this.parentNode.classList.remove('over');  // this / e.target is previous target element.
+}
+
+function handleDrop(e) {
+  // this/e.target is current target element.
+
+  if (e.stopPropagation) {
+    e.stopPropagation(); // Stops some browsers from redirecting.
+  }
+
+  // Don't do anything if dropping the same column we're dragging.
+  if (dragSrcEl != this) {
+
+    var parent = document.getElementById('terrains');
+    console.log("nbChild: " + parent.children.length);
+
+    var idxInit = -1; // Position of the element dragged
+    var idxDropped = -1; // Position of the element where it has been dropped
+    var div_array = [];
+
+    for (var i = 0 ; i < parent.children.length ; i++) {
+        div_array[i] = parent.children[i];
+        if(parent.children[i] == dragSrcEl.parentNode){
+            idxInit = i;
+        }
+        if(parent.children[i] == e.target.parentNode){
+            idxDropped = i;
+        }
+    }
+
+    if(idxInit != -1 && idxDropped != -1) {
+        div_array[idxInit] = this.parentNode;
+        div_array[idxDropped] = dragSrcEl.parentNode;
+
+        for (var i=0; i<div_array.length; i++) {
+            parent.appendChild(div_array[i]);
+        }
+        updateVisualisation();
+        
+    } else {
+        console.log('bug');
+    }
+  }
+
+  return false;
+}
+
+function handleDragEnd(e) {
+  // this/e.target is the source node.
+  e.target.parentNode.style.opacity = '1.0';
+
+  var cols = document.querySelectorAll('#terrains .terrain .terrainLabel');
+  [].forEach.call(cols, function (col) {
+    col.parentNode.classList.remove('over');
+  });
+}
+
+function onblurLabel() {
+    var txt = event.target.value;
+    console.log("onblurLabel: " + txt);
+
+    var parent = event.target.parentNode;
+    parent.removeChild(event.target);
+
+    var lbl = parent.getElementsByClassName('terrainLabel')[0];
+    lbl.innerHTML = txt;
+    lbl.style.display = 'block';
+
+}
+
+function onclickLabel() {
+    console.log("Label clicked !");
+
+    var input = document.createElement("input");
+    input.type = "text";
+    input.value=event.target.innerHTML;
+    input.className = "terrainEditLabel"; // set the CSS class
+    //input.onchange = onblurLabel;
+    input.onblur = onblurLabel;
+    event.target.parentNode.insertBefore(input, event.target);
+    event.target.style.display='none';
+}
+
+var cols = document.querySelectorAll('#terrains .terrain .terrainLabel');
+[].forEach.call(cols, function(col) {
+  col.addEventListener('dragstart', handleDragStart, false);
+  col.addEventListener('dragenter', handleDragEnter, false);
+  col.addEventListener('dragover', handleDragOver, false);
+  col.addEventListener('dragleave', handleDragLeave, false);
+  col.addEventListener('drop', handleDrop, false);
+  col.addEventListener('dragend', handleDragEnd, false);
+  col.onclick = onclickLabel;
+});
+
+function addTerrain() {
+    var terrains = document.getElementById('terrains');
+
+    if(terrains.children.length > 0) {
+        console.log("Adding terrains ...");
+        var cloned = terrains.children[0].cloneNode(true);
+        // Add drag and drop to the text label:
+        var label = cloned.getElementsByClassName('terrainLabel')[0];
+        label.addEventListener('dragstart', handleDragStart, false);
+        label.addEventListener('dragenter', handleDragEnter, false);
+        label.addEventListener('dragover', handleDragOver, false);
+        label.addEventListener('dragleave', handleDragLeave, false);
+        label.addEventListener('drop', handleDrop, false);
+        label.addEventListener('dragend', handleDragEnd, false);
+        label.onclick = onclickLabel;
+        // Add slider listener
+        var slider = cloned.getElementsByClassName('terrainSlider')[0];
+        slider.oninput = updateVisualisation;
+        // Delete button onclick listener
+        var delBut = cloned.getElementsByClassName('deleteButton')[0];
+        delBut.onclick = deleteTerrain;
+        
+        terrains.appendChild(cloned);
+    }
+}
+
+function deleteTerrain() {
+    console.log("Delete terrain");
+    var terrains = document.getElementById('terrains');
+
+    if(terrains.children.length > 1) {
+        var terrainNode = this.parentNode;
+        terrainNode.parentNode.removeChild(terrainNode);
+        updateVisualisation();
+    }
+
+}
+
+function toggleDisplayRaw() {
+    var rawDisplay = document.getElementById("rawDisplay").checked;
+    if(rawDisplay) {
+        /*var width = parseInt(document.getElementById("width").value);
+
+        var height = parseInt(document.getElementById("height").value);*/
+        displayHeightMap(lastData, lastMin, lastMax, lastWidth, lastHeight);
+    } else {
+        updateVisualisation();
+    }
+}
+
+function cancelMapGeneration() {
+    console.log("cancelMapGeneration");
+    if(w) {
+        console.log("terminate worker");
+        w.terminate();
+        w = undefined;
+    }
+
+    var generateButton = document.getElementById("generateMap");
+    generateButton.value = 'Generate map';
+    generateButton.onclick = startGenerateMap;
+
+    var pBar = document.getElementById('progress');
+    pBar.value = 0;
+    pBar.getElementsByTagName('span')[0].innerHTML = 0;
+    pBar.style.display = 'none';
+}
+
+var lastData = undefined;
+var lastMin = undefined;
+var lastMax = undefined;
+var lastWidth = undefined;
+var lastHeight = undefined;
+
+function displayHeightMap(heightmap, min, max, w, h) {
+    var c = document.getElementById("mapCanvas");
+    var ctx = c.getContext("2d");
+
+    c.width = w;
+    c.height = h;
+    var imgData = ctx.createImageData(w, h);
+
+    for (var i = 0; i < imgData.data.length; i += 4) {
+        var v = Math.floor((heightmap[i/4]-min)/(max-min)*255);
+        imgData.data[i+0] = v;
+        imgData.data[i+1] = v;
+        imgData.data[i+2] = v;
+        imgData.data[i+3] = 255;
+    }
+
+    ctx.putImageData(imgData, 0, 0);
+}
+
+function updateVisualisation() {
+    console.log("updateVisualisation");
+    var rawDisplay = document.getElementById("rawDisplay").checked;
+    //console.log("rawDisplay = " + rawDisplay);
+    if(lastData && !rawDisplay) {
+        /*var width = parseInt(document.getElementById("width").value);
+        console.log("width = " + width);
+
+        var height = parseInt(document.getElementById("height").value);
+        console.log("height = " + height);*/
+
+        displaySampleVisualisation(lastData, lastMin, lastMax, lastWidth, lastHeight);
+    }
+}
+
+function hexToRgb(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
+}
+
+function displaySampleVisualisation(heightmap, min, max, w, h) {
+    console.log("displaySampleVisualisation");
+    var c = document.getElementById("mapCanvas");
+    var ctx = c.getContext("2d");
+
+    var terrains = document.querySelectorAll('#terrains .terrain');
+    var levels = [];
+    var colors = [];
+    for(var i = 0 ; i < terrains.length ; i++) {
+        var slid = terrains[i].getElementsByClassName("terrainSlider")[0];
+        var cpick = terrains[i].getElementsByClassName("terrainColor")[0];
+        levels[i] = slid.value;
+        colors[i] = cpick.value;
+    }
+
+    c.width = w;
+    c.height = h;
+    var imgData = ctx.createImageData(w, h);
+
+    if(max-min < 3) {
+
+        for (var i = 0; i < imgData.data.length; i += 4) {
+            var v = Math.floor((heightmap[i/4]-min)/(max-min)*255);
+            imgData.data[i+0] = v;
+            imgData.data[i+1] = v;
+            imgData.data[i+2] = v;
+            imgData.data[i+3] = 255;
+        }
+    } else {
+        var range = max-min;
+
+        for (var i = 0; i < imgData.data.length; i += 4) {
+            var v = heightmap[i/4];
+
+            var c = "#000000";
+            for(var j = levels.length-1 ; j >= 0 ; j--) {
+                if(v >= min + range*levels[j]) {
+                    c = colors[j];
+                    break;
+                }
+            }
+            var co = hexToRgb(c);
+            imgData.data[i+0] = co.r;
+            imgData.data[i+1] = co.g;
+            imgData.data[i+2] = co.b;
+            imgData.data[i+3] = 255;
+        }
+    }
+
+    ctx.putImageData(imgData, 0, 0);
+}
+
+function startBlur() {
+    console.log("start blur");
+
+    var gaussian = parseInt(document.getElementById("gaussian").value);
+    console.log("gaussian = " + gaussian);
+
+    var width = parseInt(document.getElementById("width").value);
+    console.log("width = " + width);
+
+    var height = parseInt(document.getElementById("height").value);
+    console.log("height = " + height);
+
+    if(lastData && gaussian > 0) {
+        if(typeof(Worker) !== "undefined") {
+            if(typeof(w) == "undefined") {
+                w = new Worker("map2d_simple/WorkerMapGenerator.js");
+                w.postMessage({width:width, height:height, gaussian:gaussian, img:lastData});
+            }
+            w.onmessage = function(event) {
+                if(event.data.type == "Result") {
+
+                    lastData = event.data.data;
+                    lastMin = event.data.minVal;
+                    lastMax = event.data.maxVal;
+                    lastWidth = width;
+                    lastHeight = height;
+
+                    displayHeightMap(event.data.data, event.data.minVal, event.data.maxVal, width, height);
+                    updateVisualisation();
+                    //displaySampleVisualisation(event.data.data, event.data.minVal, event.data.maxVal, width, height);
+
+                    w.terminate();
+                    w = undefined;
+
+                } else {
+                    console.log("event type: " + event.type);
+                }
+            };
+        }
+    }
+}
+
+function startGenerateMap() {
+    //ath.seedrandom("kiki");
+    // ----------------------------------------------------
+    // Get parameter from HTML
+    var nbDrop = parseInt(document.getElementById("nbDrop").value);
+    console.log("nbDrop = " + nbDrop);
+    
+    var minPart = parseInt(document.getElementById("minPart").value);
+    console.log("minPart = " + minPart);
+    
+    var maxPart = parseInt(document.getElementById("maxPart").value);
+    console.log("maxPart = " + maxPart);
+
+    var maxRetry = parseInt(document.getElementById("maxRetry").value);
+    console.log("maxRetry = " + maxRetry);
+
+    var agitateRange = parseInt(document.getElementById("agitate").value);
+    console.log("agitate = " + agitateRange);
+
+    var gaussian = parseInt(document.getElementById("gaussian").value);
+    console.log("gaussian = " + gaussian);
+
+    var width = parseInt(document.getElementById("width").value);
+    console.log("width = " + width);
+
+    var height = parseInt(document.getElementById("height").value);
+    console.log("height = " + height);
+
+    var seed = document.getElementById('seed').value;
+    console.log("seed = " + seed);
+
+    var pBar = document.getElementById('progress');
+    pBar.value = 0;
+    pBar.getElementsByTagName('span')[0].innerHTML = 0;
+    pBar.style.display = 'block';
+
+    var generateButton = document.getElementById("generateMap");
+    generateButton.value = 'Cancel';
+    generateButton.onclick = cancelMapGeneration;
+    // ----------------------------------------------------
+
+    if(typeof(Worker) !== "undefined") {
+        if(typeof(w) == "undefined") {
+            w = new Worker("map2d_simple/WorkerMapGenerator.js");
+            w.postMessage({nbDrop: nbDrop, minPart:minPart, maxPart:maxPart, maxRetry:maxRetry, agitateRange:agitateRange, width:width, height:height, gaussian:gaussian, seed: seed});
+        }
+        w.onmessage = function(event) {
+            if(event.data.type == "Result") {
+                lastData = event.data.data;
+                lastMin = event.data.minVal;
+                lastMax = event.data.maxVal;
+                lastWidth = width;
+                lastHeight = height;
+
+                displayHeightMap(event.data.data, event.data.minVal, event.data.maxVal, width, height);
+                //displaySampleVisualisation(event.data.data, event.data.minVal, event.data.maxVal, width, height);
+                updateVisualisation();
+                w.terminate();
+                pBar.style.display = 'none';
+                w = undefined;
+
+                var generateButton = document.getElementById("generateMap");
+                generateButton.value = 'Generate map';
+                generateButton.onclick = startGenerateMap;
+
+            } else if(event.data.type == "Update") {
+                pBar.value = event.data.val;
+                pBar.getElementsByTagName('span')[0].innerHTML = Math.floor(event.data.val);
+            } else {
+                console.log("event type: " + event.type);
+            }
+        };
+    } else {
+        //document.getElementById("result").innerHTML = "Sorry, your browser does not support Web Workers...";
+    }
+}
+
+var displayRawCheckbox = document.getElementById("rawDisplay");
+displayRawCheckbox.onclick = toggleDisplayRaw;
+
+var generateButton = document.getElementById("generateMap");
+generateButton.onclick = startGenerateMap;
+
+var blurButton = document.getElementById("blur");
+blurButton.onclick = startBlur;
+
+var addTerrainButton = document.getElementById("addTerrain");
+addTerrainButton.onclick = addTerrain;
+
+var sliders = document.querySelectorAll('#terrains .terrain .terrainSlider');
+[].forEach.call(sliders, function(slider) {
+  slider.oninput = updateVisualisation;
+});
+
+var pickers = document.querySelectorAll('#terrains .terrain .terrainColor');
+[].forEach.call(pickers, function(picker) {
+  picker.onblur = updateVisualisation;
+});
+
+var deletes = document.querySelectorAll('#terrains .terrain .deleteButton');
+[].forEach.call(deletes, function(db) {
+  db.onclick = deleteTerrain;
+});
+
+//startGenerateMap();
+
+</script>
+
+  	</div>
+  	<div class="mdl-tabs__panel" id="fractal_2d">
+  		<div style="float: left;margin-top: 10px;">
+    <div id="wm_parameters" style="float: left;margin: 0 auto;">
+        <div>Width <input id="wm_width" type="number" name="drop" value="300"></div>
+        <div>Height <input id="wm_height" type="number" name="drop" value="300"></div>
+        <div>Seed <input id="wm_seed" type="text" name="drop" value="Lambic"></div>
+        <div>Roughness <input id="wm_roughness" type="number" step="0.05" min="0" max="1" name="drop" value="0.4"></div>
+        <div>Initial altitude <input id="wm_initalt" type="number" step="0.05" min="0" max="1" name="drop" value="0.2"></div>
+        <div><input id="wm_generateMap" type="button" value="Generate map"/></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+var generateMapButton = document.getElementById("wm_generateMap");
+generateMapButton.onclick = wm_startGenerateMap;
+
+function wm_startGenerateMap() {
+    console.log("->wm_startGenerateMap()");
+
+    var width = parseInt(document.getElementById("wm_width").value);
+    console.log("width = " + width);
+
+    var height = parseInt(document.getElementById("wm_height").value);
+    console.log("height = " + height);
+
+    var seed = document.getElementById('wm_seed').value;
+    console.log("seed = " + seed);
+
+    var roughness = document.getElementById("wm_roughness").value;
+    console.log("roughness = " + roughness);
+
+    var initalt = document.getElementById("wm_initalt").value;
+    console.log("initalt = " + initalt);
+
+    if(typeof(Worker) !== "undefined") {
+        if(typeof(w) == "undefined") {
+            w = new Worker("map_fractal_2d/workerMapGenerator.js");
+            w.postMessage({width:width, height:height, seed: seed, roughness: roughness, initalt: initalt});
+        }
+        w.onmessage = function(event) {
+            if(event.data.type == "Result") {
+                lastWidth = width;
+                lastHeight = height;
+
+                wm_displayMap(event.data.data, width, height);
+
+                w.terminate();
+                w = undefined;
+
+            } else if(event.data.type == "Update") {
+                console.log("update : " + event.data.val);
+            } else {
+                console.log("event type: " + event.type);
+            }
+        };
+    } else {
+        console.log("Sorry, your browser does not support Web Workers...");
+    }
+
+    console.log("<-startGenerateMap");
+}
+
+function wm_displayMap(map, w, h) {
+    console.log("wm_displayMap");
+    var c = document.getElementById("mapCanvas");
+    c.width = w;
+    c.height = h;
+    var ctx = c.getContext("2d");
+
+
+    var imgData = ctx.createImageData(w, h);
+
+    for (var i = 0; i < map.length; i++) {
+        imgData.data[4*i+0] = map[map.length - i];
+        imgData.data[4*i+1] = map[map.length - i];
+        imgData.data[4*i+2] = map[map.length - i];
+        imgData.data[4*i+3] = 255;
+    }
+
+
+    ctx.putImageData(imgData, 0, 0);
+}
+
+</script>
+    </div>
+</div>
+</body>
+</html>
+            
+            
+	        </div>
+	      </div>
+	    </section> 
+        
+
+        
+<footer class="mdl-mega-footer">
+  <div class="mdl-mega-footer__middle-section">
+
+    <div class="mdl-mega-footer__drop-down-section">
+      <input class="mdl-mega-footer__heading-checkbox" type="checkbox" checked>
+      <h1 class="mdl-mega-footer__heading">Informations</h1>
+      <ul class="mdl-mega-footer__link-list">
+        <li><a class="footer_link" href="#">License</a></li>
+        <li><a class="footer_link" href="mailto:your-email@domain.com">Send an email</a></li>
+      </ul>
+    </div>
+
+    <!--div class="mdl-mega-footer__drop-down-section">
+      <input class="mdl-mega-footer__heading-checkbox" type="checkbox" checked>
+      <h1 class="mdl-mega-footer__heading">Details</h1>
+      <ul class="mdl-mega-footer__link-list">
+        <li><a href="#">Specs</a></li>
+        <li><a href="#">Tools</a></li>
+        <li><a href="#">Resources</a></li>
+      </ul>
+    </div-->
+
+    <div class="mdl-mega-footer__drop-down-section">
+      <input class="mdl-mega-footer__heading-checkbox" type="checkbox" checked>
+      <h1 class="mdl-mega-footer__heading">Social</h1>
+      <ul class="mdl-mega-footer__link-list">
+        
+          <li>
+            <a class="footer_link" href="https://plus.google.com/+DamienMABIN" target="_blank">
+              <span>
+                <svg style="fill: #ff0000;" height="16px" id="Layer_1" version="1.1" viewBox="0 0 128 128" width="16px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g><circle cx="64" cy="64" fill="#9e9e9e" r="64"/><g><path fill="#424242" d="M49.424,97.875c-19.018,0-34.491-15.193-34.491-33.874c0-18.68,15.473-33.875,34.491-33.875     c8.318,0,16.354,2.952,22.624,8.309l-8.771,9.899c-3.838-3.279-8.758-5.086-13.853-5.086c-11.652,0-21.13,9.31-21.13,20.752     c0,11.441,9.479,20.75,21.13,20.75c9.858,0,16.311-4.723,18.407-13.197H49.587V58.432h32.347v6.562     C81.934,84.659,68.869,97.875,49.424,97.875z"/></g><polygon fill="#424242" points="117.934,58.438 107.934,58.438 107.934,48.438 99.934,48.438 99.934,58.438 89.934,58.438     89.934,66.438 99.934,66.438 99.934,76.438 107.934,76.438 107.934,66.438 117.934,66.438   "/></g>
+                </svg>
+              </span>
+              <span>+DamienMabin</span>
+            </a>
+          </li>
+          
+
+          
+          <li>
+            <a class="footer_link" href="https://twitter.com/yindie" target="_blank">
+                <svg viewBox="0 0 16 16" height="16px" width="16px">
+                  <path fill="#9e9e9e" d="M15.969,3.058c-0.586,0.26-1.217,0.436-1.878,0.515c0.675-0.405,1.194-1.045,1.438-1.809
+                  c-0.632,0.375-1.332,0.647-2.076,0.793c-0.596-0.636-1.446-1.033-2.387-1.033c-1.806,0-3.27,1.464-3.27,3.27 c0,0.256,0.029,0.506,0.085,0.745C5.163,5.404,2.753,4.102,1.14,2.124C0.859,2.607,0.698,3.168,0.698,3.767 c0,1.134,0.577,2.135,1.455,2.722C1.616,6.472,1.112,6.325,0.671,6.08c0,0.014,0,0.027,0,0.041c0,1.584,1.127,2.906,2.623,3.206 C3.02,9.402,2.731,9.442,2.433,9.442c-0.211,0-0.416-0.021-0.615-0.059c0.416,1.299,1.624,2.245,3.055,2.271 c-1.119,0.877-2.529,1.4-4.061,1.4c-0.264,0-0.524-0.015-0.78-0.046c1.447,0.928,3.166,1.469,5.013,1.469 c6.015,0,9.304-4.983,9.304-9.304c0-0.142-0.003-0.283-0.009-0.423C14.976,4.29,15.531,3.714,15.969,3.058z"/>
+                </svg>
+              <span class="username">yindie</span>
+            </a>
+          </li>
+          
+      </ul>
+    </div>
+
+    <!-- div class="mdl-mega-footer__drop-down-section">
+      <input class="mdl-mega-footer__heading-checkbox" type="checkbox" checked>
+      <h1 class="mdl-mega-footer__heading">FAQ</h1>
+      <ul class="mdl-mega-footer__link-list">
+        <li><a href="#">Questions</a></li>
+        <li><a href="#">Answers</a></li>
+        <li><a href="#">Contact us</a></li>
+      </ul>
+    </div -->
+
+  </div>
+
+  <!-- div class="mdl-mega-footer__bottom-section">
+    <div class="mdl-logo">Title</div>
+    <ul class="mdl-mega-footer__link-list">
+      <li><a href="#">Help</a></li>
+      <li><a href="#">Privacy & Terms</a></li>
+    </ul>
+  </div -->
+
+</footer>
+
+      </main>
+      </div>
+
+      <!-- Root element of PhotoSwipe. Must have class pswp. -->
+    <div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+      <!-- Background of PhotoSwipe. 
+           It's a separate element as animating opacity is faster than rgba(). -->
+      <div class="pswp__bg"></div>
+      <!-- Slides wrapper with overflow:hidden. -->
+      <div class="pswp__scroll-wrap">
+        <!-- Container that holds slides. 
+        PhotoSwipe keeps only 3 of them in the DOM to save memory.
+        Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+          <div class="pswp__item"></div>
+          <div class="pswp__item"></div>
+          <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+          <div class="pswp__top-bar">
+            <!--  Controls are self-explanatory. Order can be changed. -->
+            <div class="pswp__counter"></div>
+            <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+            <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+            <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+            <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+            <!-- element will get class pswp__preloader--active when preloader is running -->
+            <div class="pswp__preloader">
+              <div class="pswp__preloader__icn">
+                <div class="pswp__preloader__cut">
+                  <div class="pswp__preloader__donut"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+            <div class="pswp__share-tooltip"></div> 
+          </div>
+          <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)"></button>
+          <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"> </button>
+          <div class="pswp__caption">
+            <div class="pswp__caption__center"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    
+
+    <script type="text/javascript">
+      function downloadJSAtOnload() {
+        var element = document.createElement("script");
+        element.src = "/css/photoswipe/photoswipe.min.js";
+        document.body.appendChild(element);
+        element = document.createElement("script");
+        element.src = "/css/photoswipe/photoswipe-ui-default.min.js";
+        document.body.appendChild(element);
+      }
+      if (window.addEventListener)
+        window.addEventListener("load", downloadJSAtOnload, false);
+      else if (window.attachEvent)
+        window.attachEvent("onload", downloadJSAtOnload);
+      else
+        window.onload = downloadJSAtOnload;
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/3.1.0/firebase.js"></script>
+<script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyBaKSt8JOUUokXd4vzVwg7covsTpzNM5jo",
+    authDomain: "luminous-inferno-9971.firebaseapp.com",
+    databaseURL: "https://luminous-inferno-9971.firebaseio.com",
+    storageBucket: "luminous-inferno-9971.appspot.com",
+  };
+  firebase.initializeApp(config);
+
+  console.log("navigator.language: " + navigator.language);
+  var isPushEnabled = false;
+  var pushNotifToken;
+  var pushNotifEndPoint;
+
+  function initialiseState() {
+    console.log('initialiseState');
+    // Are Notifications supported in the service worker?  
+    if (!('showNotification' in ServiceWorkerRegistration.prototype)) {  
+      console.warn('Notifications aren\'t supported.');  
+      return;  
+    }
+
+    // Check the current Notification permission.  
+    // If its denied, it's a permanent block until the  
+    // user changes the permission  
+    if (Notification.permission === 'denied') {
+      console.warn('The user has blocked notifications.');
+      return;
+    }
+
+    // Check if push messaging is supported  
+    if (!('PushManager' in window)) {
+      console.warn('Push messaging isn\'t supported.');
+      return;
+    }
+
+    console.log("check for a subscription ");
+    // We need the service worker registration to check for a subscription  
+    navigator.serviceWorker.ready.then(function(serviceWorkerRegistration) {
+      console.log("service worker is ready");
+      // Do we already have a push message subscription?
+      serviceWorkerRegistration.pushManager.getSubscription()
+        .then(function(subscription) {
+          console.log("enable ui");
+          // Enable any UI which subscribes / unsubscribes from
+          // push messages.
+          var pushButton = document.querySelector('#switch-notif');
+          pushButton.MaterialCheckbox.enable();
+
+          if (!subscription) {
+            // We aren't subscribed to push, so set UI  
+            // to allow the user to enable push
+            console.log("enable ui");
+            //pushButton.checked = false;
+            pushButton.MaterialCheckbox.uncheck();
+
+            setTimeout(displaySnackBar,3000);
+
+            return;  
+          }
+
+          pushButton.MaterialCheckbox.check();
+          //pushButton.checked = true;
+
+          // Keep your server in sync with the latest subscriptionId
+          sendSubscriptionToServer(subscription);
+
+          // Set your UI to show they have subscribed for
+          // push messages
+          //pushButton.textContent = 'Disable Push Messages';
+          isPushEnabled = true;
+        })  
+        .catch(function(err) {
+          console.warn('Error during getSubscription()', err);
+        });
+    });  
+  }
+
+  function snackbarHandler() {
+    var snck = document.getElementById("demo-snackbar-example");
+    //snck.style.display = "none";
+    snck.classList.remove('mdl-snackbar--active');
+    subscribe();
+  }
+
+  function displaySnackBar() {
+    var snackbarContainer = document.querySelector('#demo-snackbar-example');
+    if(snackbarContainer) {
+      var data = {
+        message: 'Stay in touch ! Subscribe to notification (^_^)',
+        timeout: 8000,
+        actionHandler: snackbarHandler,
+        actionText: 'Subscribe'
+      };
+      snackbarContainer.MaterialSnackbar.showSnackbar(data);
+    }
+  }
+
+  function sendSubscriptionToServer(subscription) {
+    var timeOffset = new Date().getTimezoneOffset();
+    pushNotifEndPoint = subscription.endpoint;
+    if(subscription.endpoint.startsWith("https://android.googleapis.com/gcm/send/")) {
+      pushNotifToken = subscription.endpoint.substring("https://android.googleapis.com/gcm/send/".length);
+      console.log("push token: " + pushNotifToken);
+      var wilmaRef = firebase.database().ref('pntokens/'+pushNotifToken);
+      wilmaRef.set({platform: "chrome", topic: "games", token: pushNotifToken, time_offset: timeOffset, endpoint: pushNotifEndPoint});
+    } else if (subscription.endpoint.startsWith("https://updates.push.services.mozilla.com/push/")) {
+      pushNotifToken = subscription.endpoint.substring("https://updates.push.services.mozilla.com/push/".length);
+      console.log("push token: " + pushNotifToken);
+      var wilmaRef = firebase.database().ref('pntokens/'+pushNotifToken);
+      wilmaRef.set({platform: "firefox", topic: "games", token: pushNotifToken, time_offset: timeOffset, endpoint: pushNotifEndPoint});
+    } else {
+      console.log("Unknown pusk token type: " + subscription.endpoint);
+    }
+    var pnTokenElt = document.getElementById('div_pn_token');
+    if(pnTokenElt) {
+      pnTokenElt.innerHTML = pushNotifToken;
+    }
+
+    var pnEndpointElt = document.getElementById('div_pn_endpoint');
+    if(pnEndpointElt) {
+      pnEndpointElt.innerHTML = pushNotifEndPoint;
+    }
+  }
+
+  function subscribe() {  
+    // Disable the button so it can't be changed while  
+    // we process the permission request  
+    var pushButton = document.querySelector('#switch-notif');  
+    //pushButton.disabled = true;
+    pushButton.MaterialCheckbox.disable();
+
+    navigator.serviceWorker.ready.then(function(serviceWorkerRegistration) {  
+      serviceWorkerRegistration.pushManager.subscribe({userVisibleOnly: true})  
+        .then(function(subscription) {  
+          // The subscription was successful  
+          isPushEnabled = true;  
+          //pushButton.textContent = 'Disable Push Messages';  
+          //pushButton.disabled = false;
+          pushButton.MaterialCheckbox.enable();
+          pushButton.MaterialCheckbox.check();
+
+          // TODO: Send the subscription.endpoint to your server  
+          // and save it to send a push message at a later date
+          return sendSubscriptionToServer(subscription);  
+        })  
+        .catch(function(e) {  
+          if (Notification.permission === 'denied') {  
+            // The user denied the notification permission which  
+            // means we failed to subscribe and the user will need  
+            // to manually change the notification permission to  
+            // subscribe to push messages  
+            console.warn('Permission for Notifications was denied');  
+            //pushButton.disabled = true;
+            pushButton.MaterialCheckbox.disable();
+          } else {  
+            // A problem occurred with the subscription; common reasons  
+            // include network errors, and lacking gcm_sender_id and/or  
+            // gcm_user_visible_only in the manifest.  
+            console.error('Unable to subscribe to push.', e);  
+            //pushButton.disabled = false;
+            pushButton.MaterialCheckbox.enable();
+          pushButton.MaterialCheckbox.uncheck();
+            //pushButton.textContent = 'Enable Push Messages';  
+          }  
+        });  
+    });  
+  }
+
+  function unsubscribe() {  
+    var pushButton = document.querySelector('#switch-notif');
+    //pushButton.disabled = true;
+    pushButton.MaterialCheckbox.disable();
+
+    navigator.serviceWorker.ready.then(function(serviceWorkerRegistration) {
+      // To unsubscribe from push messaging, you need get the
+      // subscription object, which you can call unsubscribe() on.
+      serviceWorkerRegistration.pushManager.getSubscription().then(
+        function(subscription) {
+          // Check we have a subscription to unsubscribe
+          if (!subscription) {
+            // No subscription object, so set the state
+            // to allow the user to subscribe to push
+            isPushEnabled = false;
+            //pushButton.disabled = false;
+            pushButton.MaterialCheckbox.enable();
+            pushButton.MaterialCheckbox.uncheck();
+            //pushButton.textContent = 'Enable Push Messages';
+            return;
+          }
+
+          if(subscription.endpoint.startsWith("https://android.googleapis.com/gcm/send/")) {
+            // This is a chrome push
+            var endpoint = subscription.endpoint;
+            // Make a request to your server to remove
+            // the subscriptionId from your data store so you
+            // don't attempt to send them push messages anymore
+            var pntoken = endpoint.substring("https://android.googleapis.com/gcm/send/".length);
+            console.log("push token: " + pntoken);
+            var onComplete = function(error) {
+              if (error) {
+                console.log('Synchronization failed');
+              } else {
+                console.log('Synchronization succeeded');
+              }
+            };
+            var dataRef = firebase.database().ref('pntokens/'+pntoken);
+            dataRef.remove(onComplete);
+
+            // We have a subscription, so call unsubscribe on it
+            subscription.unsubscribe().then(function(successful) {
+              //pushButton.disabled = false;
+              pushButton.MaterialCheckbox.enable();
+              pushButton.MaterialCheckbox.uncheck();
+              //pushButton.textContent = 'Enable Push Messages';
+              isPushEnabled = false;
+            }).catch(function(e) {
+              // We failed to unsubscribe, this can lead to
+              // an unusual state, so may be best to remove
+              // the users data from your data store and
+              // inform the user that you have done so
+
+              console.log('Unsubscription error: ', e);
+              //pushButton.disabled = false;
+              pushButton.MaterialCheckbox.enable();
+              //pushButton.textContent = 'Enable Push Messages';
+            });
+          } else if (subscription.endpoint.startsWith("https://updates.push.services.mozilla.com/push/")) {
+            // This is a firefox push
+            var endpoint = subscription.endpoint;
+            // Make a request to your server to remove
+            // the subscriptionId from your data store so you
+            // don't attempt to send them push messages anymore
+            var pntoken = endpoint.substring("https://updates.push.services.mozilla.com/push/".length);
+            console.log("push token: " + pntoken);
+            var onComplete = function(error) {
+              if (error) {
+                console.log('Synchronization failed');
+              } else {
+                console.log('Synchronization succeeded');
+              }
+            };
+            var dataRef = firebase.database().ref('pntokens/'+pntoken);
+            dataRef.remove(onComplete);
+
+            // We have a subscription, so call unsubscribe on it
+            subscription.unsubscribe().then(function(successful) {
+              //pushButton.disabled = false;
+              pushButton.MaterialCheckbox.enable();
+              pushButton.MaterialCheckbox.uncheck();
+              //pushButton.textContent = 'Enable Push Messages';
+              isPushEnabled = false;
+            }).catch(function(e) {
+              // We failed to unsubscribe, this can lead to
+              // an unusual state, so may be best to remove
+              // the users data from your data store and
+              // inform the user that you have done so
+
+              console.log('Unsubscription error: ', e);
+              //pushButton.disabled = false;
+              pushButton.MaterialCheckbox.enable();
+              //pushButton.textContent = 'Enable Push Messages';
+            });
+          } else {
+            console.log("Unknown pusk token type: " + subscription.endpoint);
+          }
+        }).catch(function(e) {  
+          console.error('Error thrown while unsubscribing from push messaging.', e);  
+        });  
+    });  
+  }
+
+  window.addEventListener('load', function() {
+    var pushButton = document.getElementById('switch-notif');
+    pushButton.addEventListener('click', function() {
+      if (isPushEnabled) {
+        console.log("unsubscribe()");
+        unsubscribe();
+      } else {
+        console.log("subscribe()");
+        subscribe();
+      }
+    });
+
+    var pushSectionButton = document.getElementById('button-notif-subscribe');
+    if (pushSectionButton) {
+      pushSectionButton.addEventListener('click', function() {
+        console.log("subscribe()");
+        subscribe();
+      });
+    }
+
+    // Check that service workers are supported, if so, progressively  
+    // enhance and add push messaging support, otherwise continue without it.  
+    if ('serviceWorker' in navigator) {
+      console.log("serviceWorker in navigator");
+      navigator.serviceWorker.register('/service-worker.js')
+      .then(initialiseState);
+    } else {
+      console.warn('Service workers aren\'t supported in this browser.');
+    }
+  });
+</script>
+
+    <script asynch src="/scripts/material.min.js"></script>
+    <link rel="stylesheet" href="/css/merged.min.css">
+  </body>
+
+  <!--div id="target-modal" class="rv-vanilla-modal">
+    <div class="rv-vanilla-modal-header group">
+      <button class="rv-vanilla-modal-close"><span class="text">×</span></button>
+      <h2 class="rv-vanilla-modal-title">Modal Title</h2>
+    </div>
+    <div class="rv-vanilla-modal-body">
+      <p>Modal Content</p>
+    </div>
+  </div-->
+  <!--script src="/scripts/rv-vanilla-modal.min.js"></script>
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    /* global RvVanillaModal */
+    'use strict';
+    var modal = new RvVanillaModal({
+        showOverlay: true
+    });
+
+    // each method
+    modal.each(function(element) {
+       var target = element.getAttribute('data-rv-vanilla-modal');
+       var targetElement = document.querySelector(target);
+       var closeBtn = targetElement.querySelector(modal.settings.closeSelector);
+
+       // close click listerner
+       closeBtn.addEventListener('click', function(event) {
+        event.preventDefault();
+        modal.close(targetElement);
+       });
+
+       // open click listerner
+       element.addEventListener('click', function(event) {
+        event.preventDefault();
+        modal.open(targetElement);
+       });
+    });
+  }, false);
+  </script-->
+
+</html>
+
+

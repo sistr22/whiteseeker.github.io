@@ -1,1 +1,354 @@
-function randomIntFromInterval(a,e){return Math.floor(Math.random()*(e-a+1)+a)}function generateMap(a){console.log("[worker] Start generating map");var e=a.width,n=a.height,r=a.roughness,t=parseFloat(a.initalt),c=a.seed;console.log("[worker] seed = "+c),Math.seedrandom(c);for(var o=4,d=(Math.floor(e/o),[]),s=0;n*e>s;s++)d[s]=-1;d[0]=t,d[e*n-1]=t,d[e-1]=t,d[e*(n-1)]=t;for(var p=[[[0,0],e-1,n-1,Math.max(1-t,t)-.001]],i=[],m=1,h=2,M=m;p.length+i.length>0;)if(M==m){if(p.length<=0){M=h;continue}var g=p.pop();if(g[1]<=1&&g[2]<=1)continue;var u=g[0],f=g[1],l=g[2],R=g[3],v=R*r,b=[u[0]+f/2,u[1]+l/2],j=ReadMap(d,[u[0],u[1]],e,n);j+=ReadMap(d,[u[0],u[1]+l],e,n),j+=ReadMap(d,[u[0]+f,u[1]+l],e,n),j+=ReadMap(d,[u[0]+f,u[1]],e,n),j/=4,d[b[0]+e*b[1]]=j,d[b[0]+e*b[1]]+=2*R*Math.random()-R,d[b[0]+e*b[1]]<0&&(d[b[0]+e*b[1]]=0),d[b[0]+e*b[1]]>1&&(d[b[0]+e*b[1]]=1);var w={c0:[u[0]+f/2,u[1]+l/2],c1:u,c2:[u[0]+f/2,u[1]-l/2],c3:[u[0]+f,u[1]],randomRange:v};i.push(w);var k={c0:[u[0]+f/2,u[1]+l/2],c1:[u[0]+f,u[1]],c2:[u[0]+f/2+f,u[1]+l/2],c3:[u[0]+f,u[1]+l],randomRange:v};i.push(k);var x={c0:[u[0]+f/2,u[1]+l/2],c1:[u[0]+f,u[1]+l],c2:[u[0]+f/2,u[1]+l/2+l],c3:[u[0],u[1]+l],randomRange:v};i.push(x);var z={c0:[u[0]+f/2,u[1]+l/2],c1:[u[0],u[1]+l],c2:[u[0]+f/2-f,u[1]+l/2],c3:u,randomRange:v};i.push(z)}else if(M==h){if(i.length<=0){M=m;continue}var F=i.pop(),b=[F.c1[0]+(F.c3[0]-F.c1[0])/2,F.c1[1]+(F.c3[1]-F.c1[1])/2],j=ReadMap(d,F.c0,e,n);j+=ReadMap(d,F.c1,e,n),j+=ReadMap(d,F.c2,e,n),j+=ReadMap(d,F.c3,e,n),j/=4,d[b[0]+e*b[1]]=j,d[b[0]+e*b[1]]+=2*F.randomRange*Math.random()-F.randomRange,d[b[0]+e*b[1]]<0&&(d[b[0]+e*b[1]]=0),d[b[0]+e*b[1]]>1&&(d[b[0]+e*b[1]]=1);var G=GetUpperLeft(F),I=Math.abs(F.c0[0]-F.c1[0]),L=Math.abs(F.c0[1]-F.c1[1]);I+L>1&&p.push([G,I,L,F.randomRange])}for(var s=0;n*e>s;s++)d[s]*=255;postMessage({type:"Result",data:d})}function GetUpperLeft(a){return[Math.min(a.c0[0],a.c1[0]),Math.min(a.c0[1],a.c1[1])]}function ReadMap(a,e,n,r){var t=sanetize(e,n,r);return a[t[0]+n*t[1]]}function sanetize(a,e,n){var r=[];return a[0]<0?r[0]=e+(a[0]-1):a[0]>=e?r[0]=a[0]-(e-1):r[0]=a[0],a[1]<0?r[1]=n+(a[1]-1):a[1]>=n?r[1]=a[1]-(n-1):r[1]=a[1],r}importScripts("//cdnjs.cloudflare.com/ajax/libs/seedrandom/2.4.0/seedrandom.min.js"),onmessage=function(a){console.log("Message received from main script"),generateMap(a.data)};
+importScripts("//cdnjs.cloudflare.com/ajax/libs/seedrandom/2.4.0/seedrandom.min.js");
+
+onmessage = function(e) {
+  console.log('Message received from main script');
+  generateMap(e.data);
+}
+
+function randomIntFromInterval(min,max)
+{
+    return Math.floor(Math.random()*(max-min+1)+min);
+}
+
+function generateMap(data) {
+    console.log("[worker] Start generating map");
+
+    // ----------------------------------------------------
+    // Get parameter from HTML
+
+    var width = data.width;
+    var height = data.height;
+    var roughness = data.roughness;
+    var initalt = parseFloat(data.initalt);
+
+    var seed = data.seed;
+    console.log("[worker] seed = " + seed);
+
+    Math.seedrandom(seed);
+
+    // ----------------------------------------------------
+    // Initialise the height map
+
+    // subd = Number of subdivision
+    var subd = 4;
+    // Space between subd (except for the last one)
+    var space_subd = Math.floor(width / subd);
+    var heightMap = [];
+    for(var i = 0 ; i < height*width ; i++) {
+    	heightMap[i] = -1;
+    }
+    heightMap[0] = initalt;
+    heightMap[width*height - 1] = initalt;
+    heightMap[width-1] = initalt;
+    heightMap[width*(height-1)] = initalt;
+
+    // ----------------------------------------------------
+    // Generate the 2D heightmap
+
+    // d -> diamond pass
+    // s -> square pass
+    // We start with a d pass and the 4 corner (we give the top left and bottom right to define the square)
+    var squareStack = [[[0, 0] /*upper left*/, width-1, height-1,
+                    Math.max(1-initalt, initalt)-0.001]];
+
+    var diamondStack = [];
+
+    var MODE_SQUARE = 1;
+    var MODE_DIAMOND = 2;
+    var mode = MODE_SQUARE;
+
+    while(squareStack.length + diamondStack.length > 0) {
+        //console.log("stacks length: square[" + squareStack.length + "] diamond[" + diamondStack.length + "]");
+
+        if(mode == MODE_SQUARE) {
+            if(squareStack.length <= 0) {
+                mode = MODE_DIAMOND;
+                continue;
+            }
+            var elt = squareStack.pop();
+
+            // Stop case
+            if(elt[1] <= 1 && elt[2] <= 1)
+                continue;
+
+            var tlc = elt[0];
+            var sw = elt[1];
+            var sh = elt[2];
+            var randomRange = elt[3];
+            var nextRandomRange = randomRange*roughness;
+
+            var middle = [tlc[0] + sw/2, tlc[1] + sh/2];
+            //console.log("tlc " + tlc);
+            //console.log("sw, sh " + sw + "   " + sh);
+            //console.log("randomRange " + randomRange);
+            //console.log("nextRandomRange " + nextRandomRange);
+
+            // Randomize the height value of the middle point
+            var average = ReadMap(heightMap, [tlc[0], tlc[1]], width, height);
+            average += ReadMap(heightMap, [tlc[0], tlc[1]+sh], width, height);
+            average += ReadMap(heightMap, [tlc[0] + sw, tlc[1]+sh], width, height);
+            average += ReadMap(heightMap, [tlc[0] + sw,tlc[1]], width, height);
+            average /= 4.0;
+            //console.log("avg = " + average);
+            heightMap[middle[0] + width*middle[1]] = average;
+            heightMap[middle[0] + width*middle[1]] += 2*randomRange*Math.random() - randomRange;
+            if(heightMap[middle[0] + width*middle[1]] < 0)
+                heightMap[middle[0] + width*middle[1]] = 0;
+            if(heightMap[middle[0] + width*middle[1]] > 1)
+                heightMap[middle[0] + width*middle[1]] = 1;
+            //console.log("middle val = " + heightMap[middle[0] + width*middle[1]]);
+
+            // Add the 4 diamonds
+            var d1 = {
+                c0:[tlc[0] + sw/2, tlc[1] + sh/2], // Used to define the square
+                c1:tlc, // Used to define the square
+                c2:[tlc[0] + sw/2, tlc[1] - sh/2],
+                c3:[tlc[0] + sw, tlc[1]],
+                randomRange:nextRandomRange
+            };
+            diamondStack.push(d1);
+
+            var d2 = {
+                c0:[tlc[0] + sw/2, tlc[1] + sh/2], // Used to define the square
+                c1:[tlc[0] + sw, tlc[1]], // Used to define the square
+                c2:[tlc[0] + sw/2 + sw, tlc[1] + sh/2],
+                c3:[tlc[0] + sw, tlc[1] + sh],
+                randomRange:nextRandomRange
+            };
+            diamondStack.push(d2);
+
+            var d3 = {
+                c0:[tlc[0] + sw/2, tlc[1] + sh/2], // Used to define the square
+                c1:[tlc[0] + sw, tlc[1] + sh], // Used to define the square
+                c2:[tlc[0] + sw/2, tlc[1] + sh/2 + sh],
+                c3:[tlc[0], tlc[1] + sh],
+                randomRange:nextRandomRange
+            };
+            diamondStack.push(d3);
+
+            var d4 = {
+                c0:[tlc[0] + sw/2, tlc[1] + sh/2], // Used to define the square
+                c1:[tlc[0], tlc[1] + sh], // Used to define the square
+                c2:[tlc[0] + sw/2 - sw, tlc[1] + sh/2],
+                c3:tlc,
+                randomRange:nextRandomRange
+            };
+            diamondStack.push(d4);
+
+        } else if(mode == MODE_DIAMOND) {
+            if(diamondStack.length <= 0) {
+                mode = MODE_SQUARE;
+                continue;
+            }
+
+            var d = diamondStack.pop();
+
+            //console.log("c1 " + d.c0);
+            //console.log("c3 " + d.c2);
+            var middle = [d.c1[0] + (d.c3[0] - d.c1[0])/2, d.c1[1] + (d.c3[1] - d.c1[1])/2];
+            //console.log("middle " + middle);
+
+            // Randomize the height value of the middle point
+            var average = ReadMap(heightMap, d.c0, width, height);
+            average += ReadMap(heightMap, d.c1, width, height);
+            average += ReadMap(heightMap, d.c2, width, height);
+            average += ReadMap(heightMap, d.c3, width, height);
+            average /= 4.0;
+
+            //console.log("avg = " + average);
+            heightMap[middle[0] + width*middle[1]] = average;
+            heightMap[middle[0] + width*middle[1]] += 2*d.randomRange*Math.random() - d.randomRange;
+            if(heightMap[middle[0] + width*middle[1]] < 0)
+                heightMap[middle[0] + width*middle[1]] = 0;
+            if(heightMap[middle[0] + width*middle[1]] > 1)
+                heightMap[middle[0] + width*middle[1]] = 1;
+            //console.log("middle val = " + heightMap[middle[0] + width*middle[1]]);
+
+            // Add the square
+            // Get the upper left corner
+            var ulc = GetUpperLeft(d);
+            var w = Math.abs(d.c0[0]-d.c1[0]);
+            var h = Math.abs(d.c0[1]-d.c1[1]);
+            if(w+h>1)
+                squareStack.push([ulc /*upper left*/, w, h,d.randomRange]);
+
+        }
+    }
+
+/*
+    while(stack.length > 0) {
+        console.log("stack.length = " + stack.length);
+        var elt = stack.pop();
+
+        // Stop case
+        if(elt[3][0] - elt[1][0] <= 1 && elt[3][1] - elt[1][1] <= 1)
+            continue;
+
+        
+        var middle = [elt[1][0] + Math.floor((elt[3][0] - elt[1][0])/2), elt[1][1] + Math.floor((elt[3][1] - elt[1][1])/2)];
+        console.log("middle = " + middle);
+
+        var randomRange = elt[5];
+        var nextRandomRange = randomRange*roughness;
+
+        // Randomize the height value of the middle point
+        var average = heightMap[elt[1][0] + width*elt[1][1]];
+        average += heightMap[elt[2][0] + width*elt[2][1]];
+        average += heightMap[elt[3][0] + width*elt[3][1]];
+        average += heightMap[elt[4][0] + width*elt[4][1]];
+        average /= 4.0;
+        console.log("avg = " + average);
+        heightMap[middle[0] + width*middle[1]] = average;
+        heightMap[middle[0] + width*middle[1]] += 2*randomRange*Math.random() - randomRange;
+        if(heightMap[middle[0] + width*middle[1]] < 0)
+            heightMap[middle[0] + width*middle[1]] = 0;
+        if(heightMap[middle[0] + width*middle[1]] > 1)
+            heightMap[middle[0] + width*middle[1]] = 1;
+        console.log("middle val = " + heightMap[middle[0] + width*middle[1]]);
+
+        // Calculate the diamonds
+
+        //Diamond 1 (left)
+        var pt1 = sanetize(elt[1], width, height);
+        var pt2 = sanetize(elt[2], width, height);
+        var pt3 = sanetize(middle, width, height);
+        var pt4 = sanetize([elt[1][0] - (middle[0]-elt[1][0]), middle[1]], width, height);
+        console.log("pt1 " + pt1 + " = " + heightMap[pt1[0] + width*pt1[1]]);
+        console.log("pt2 " + pt2 + " = " + heightMap[pt2[0] + width*pt2[1]]);
+        console.log("pt3 " + pt3 + " = " + heightMap[pt3[0] + width*pt3[1]]);
+        console.log("pt4 " + pt4 + " = " + heightMap[pt4[0] + width*pt4[1]]);
+
+        average  = heightMap[pt1[0] + width*pt1[1]];
+        average += heightMap[pt2[0] + width*pt2[1]];
+        average += heightMap[pt3[0] + width*pt3[1]];
+        average += heightMap[pt4[0] + width*pt4[1]];
+        average /= 4.0;
+
+        console.log("avg1 = " + average);
+        heightMap[elt[1][0] + width*middle[1]] = average;
+        heightMap[elt[1][0] + width*middle[1]] += 2*randomRange*Math.random() - randomRange;
+        if(heightMap[elt[1][0] + width*middle[1]] < 0)
+            heightMap[elt[1][0] + width*middle[1]] = 0;
+        if(heightMap[elt[1][0] + width*middle[1]] > 1)
+            heightMap[elt[1][0] + width*middle[1]] = 1;
+
+        //Diamond 2 (bottom)
+        pt1 = sanetize(middle, width, height);
+        pt2 = sanetize(elt[2], width, height);
+        pt3 = sanetize(elt[3], width, height);
+        pt4 = sanetize([middle[0], elt[2][1] - (middle[1]-elt[2][1])], width, height);
+        console.log("pt1 " + pt1 + " = " + heightMap[pt1[0] + width*pt1[1]]);
+        console.log("pt2 " + pt2 + " = " + heightMap[pt2[0] + width*pt2[1]]);
+        console.log("pt3 " + pt3 + " = " + heightMap[pt3[0] + width*pt3[1]]);
+        console.log("pt4 " + pt4 + " = " + heightMap[pt4[0] + width*pt4[1]]);
+
+        average  = heightMap[pt1[0] + width*pt1[1]];
+        average += heightMap[pt2[0] + width*pt2[1]];
+        average += heightMap[pt3[0] + width*pt3[1]];
+        average += heightMap[pt4[0] + width*pt4[1]];
+        average /= 4.0;
+
+        console.log("avg2 = " + average);
+        heightMap[middle[0] + width*elt[2][1]] = average;
+        heightMap[middle[0] + width*elt[2][1]] += 2*randomRange*Math.random() - randomRange;
+        if(heightMap[middle[0] + width*elt[2][1]] < 0)
+            heightMap[middle[0] + width*elt[2][1]] = 0;
+        if(heightMap[middle[0] + width*elt[2][1]] > 1)
+            heightMap[middle[0] + width*elt[2][1]] = 1;
+
+        //Diamond 3 (right)
+        pt1 = sanetize(middle, width, height);
+        pt2 = sanetize(elt[3], width, height);
+        pt3 = sanetize(elt[4], width, height);
+        pt4 = sanetize([elt[3][0] + (elt[3][0]-middle[0]), middle[1]], width, height);
+        console.log("pt1 " + pt1 + " = " + heightMap[pt1[0] + width*pt1[1]]);
+        console.log("pt2 " + pt2 + " = " + heightMap[pt2[0] + width*pt2[1]]);
+        console.log("pt3 " + pt3 + " = " + heightMap[pt3[0] + width*pt3[1]]);
+        console.log("pt4 " + pt4 + " = " + heightMap[pt4[0] + width*pt4[1]]);
+
+        average  = heightMap[pt1[0] + width*pt1[1]];
+        average += heightMap[pt2[0] + width*pt2[1]];
+        average += heightMap[pt3[0] + width*pt3[1]];
+        average += heightMap[pt4[0] + width*pt4[1]];
+        average /= 4.0;
+
+        console.log("avg3 = " + average);
+        heightMap[elt[3][0] + width*middle[1]] = average;
+        heightMap[elt[3][0] + width*middle[1]] += 2*randomRange*Math.random() - randomRange;
+        if(heightMap[elt[3][0] + width*middle[1]] < 0)
+            heightMap[elt[3][0] + width*middle[1]] = 0;
+        if(heightMap[elt[3][0] + width*middle[1]] > 1)
+            heightMap[elt[3][0] + width*middle[1]] = 1;
+
+        //Diamond 4 (top)
+        pt1 = sanetize(middle, width, height);
+        pt2 = sanetize(elt[4], width, height);
+        pt3 = sanetize(elt[1], width, height);
+        pt4 = sanetize([middle[0], elt[1][1] + (elt[1][1] - middle[1])], width, height);
+        console.log("pt1 " + pt1 + " = " + heightMap[pt1[0] + width*pt1[1]]);
+        console.log("pt2 " + pt2 + " = " + heightMap[pt2[0] + width*pt2[1]]);
+        console.log("pt3 " + pt3 + " = " + heightMap[pt3[0] + width*pt3[1]]);
+        console.log("pt4 " + pt4 + " = " + heightMap[pt4[0] + width*pt4[1]]);
+
+        average  = heightMap[pt1[0] + width*pt1[1]];
+        average += heightMap[pt2[0] + width*pt2[1]];
+        average += heightMap[pt3[0] + width*pt3[1]];
+        average += heightMap[pt4[0] + width*pt4[1]];
+        average /= 4.0;
+
+        console.log("avg4 = " + average);
+        heightMap[middle[0] + width*elt[1][1]] = average;
+        heightMap[middle[0] + width*elt[1][1]] += 2*randomRange*Math.random() - randomRange;
+        if(heightMap[middle[0] + width*elt[1][1]] < 0)
+            heightMap[middle[0] + width*elt[1][1]] = 0;
+        if(heightMap[middle[0] + width*elt[1][1]] > 1)
+            heightMap[middle[0] + width*elt[1][1]] = 1;
+
+        // Push the square phase
+        stack.push([0, [elt[1][0], middle[1]], elt[2], [middle[0], elt[2][1]], middle, nextRandomRange]);
+        //stack.push([0, middle, [middle[0], elt[2][1]], elt[3], [elt[3][0], middle[1]], nextRandomRange]);
+        //stack.push([0, [middle[0], elt[1][1]], middle, [elt[4][0], middle[1]], elt[4], nextRandomRange]);
+        //stack.push([0, elt[1], [elt[1][0], middle[1]], middle, [middle[0], elt[1][1]], nextRandomRange]);
+
+    }
+*/
+    // ----------------------------------------------------
+    // Create the final visualisation
+
+    for(var i = 0 ; i < height * width ; i++) {
+    	heightMap[i] *= 255;
+    }
+
+    postMessage({type:"Result", data:heightMap});
+
+    // ----------------------------------------------------
+
+}
+
+function GetUpperLeft(d) {
+    return [Math.min(d.c0[0], d.c1[0]), Math.min(d.c0[1], d.c1[1])];
+}
+
+function ReadMap(map, point, w, h) {
+    var ptsn = sanetize(point, w, h);
+
+    return map[ptsn[0] + w*ptsn[1]];
+}
+function sanetize(point, w, h) {
+    var res = [];
+    if(point[0] < 0)
+        res[0] = w+(point[0]-1);
+    else if(point[0] >= w)
+        res[0] = point[0]-(w-1);
+    else
+        res[0] = point[0];
+
+    if(point[1] < 0)
+        res[1] = h+(point[1]-1);
+    else if(point[1] >= h)
+        res[1] = point[1]-(h-1);
+    else
+        res[1] = point[1];
+
+    return res;
+}
