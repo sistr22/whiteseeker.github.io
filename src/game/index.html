@@ -100,33 +100,7 @@ custom_css: ['game/game.css']
       } else {
         // No user is signed in.
         console.log("User is NOT signed in");
-        // Display the login modal
-        var loginDialog = document.querySelector('#modal-login');
-        var googleButton = document.querySelector('#button_google');
-        var anonButton = document.querySelector('#button_anon');
-        googleButton.addEventListener('click', function(evt) {
-          var provider = new firebase.auth.GoogleAuthProvider();
-          firebase.auth().signInWithRedirect(provider).then(function(result) {
-            // This gives you a Google Access Token. You can use it to access the Google API.
-            var token = result.credential.accessToken;
-            // The signed-in user info.
-            var user = result.user;
-            // ...
-            loginDialog.close();
-          }).catch(function(error) {
-            // Handle Errors here.
-            var errorCode = error.code;
-            var errorMessage = error.message;
-            // The email of the user's account used.
-            var email = error.email;
-            // The firebase.auth.AuthCredential type that was used.
-            var credential = error.credential;
-            // ...
-          });
-        });
-        anonButton.addEventListener('click', function(evt) {
-          loginDialog.close();
-        });
+        
         loginDialog.showModal();
       }
     });
@@ -150,21 +124,52 @@ custom_css: ['game/game.css']
     }
   }
 
+  /* ------ START login modal ------ */
+  var loginDialog = document.querySelector('#modal-login');
+  var googleButton = document.querySelector('#button_google');
+  var anonButton = document.querySelector('#button_anon');
+  googleButton.addEventListener('click', function(evt) {
+    var provider = new firebase.auth.GoogleAuthProvider();
+    firebase.auth().signInWithRedirect(provider).then(function(result) {
+      // This gives you a Google Access Token. You can use it to access the Google API.
+      var token = result.credential.accessToken;
+      // The signed-in user info.
+      var user = result.user;
+      // ...
+      loginDialog.close();
+    }).catch(function(error) {
+      // Handle Errors here.
+      var errorCode = error.code;
+      var errorMessage = error.message;
+      // The email of the user's account used.
+      var email = error.email;
+      // The firebase.auth.AuthCredential type that was used.
+      var credential = error.credential;
+      // ...
+    });
+  });
+  anonButton.addEventListener('click', function(evt) {
+    loginDialog.close();
+  });
+  /* ------ END login modal ------ */
+
   /* ------ START option menu ------ */
   var optionDialog = document.querySelector('#modal-option');
   var closeButton = optionDialog.querySelector('#button_close');
+  var accountDetailsButton = optionDialog.querySelector('#button_account');
   var optionButton = document.querySelector('#button_option');
   /*if (! dialog.showModal) {
       dialogPolyfill.registerDialog(dialog);
   }*/
-  var closeClickHandler = function(event) {
-      optionDialog.close();
-  };
-  var showClickHandler = function(event) {
+  accountDetailsButton.addEventListener('click', function(event) {
+      loginDialog.showModal();
+  });
+  optionButton.addEventListener('click', function(event) {
       optionDialog.showModal();
-  };
-  optionButton.addEventListener('click', showClickHandler);
-  closeButton.addEventListener('click', closeClickHandler);
+  });
+  closeButton.addEventListener('click', function(event) {
+      optionDialog.close();
+  });
   /* ------ END option menu ------ */
 
   window.onload = start;
