@@ -65,7 +65,7 @@
 
 #money {
     position: absolute;
-    top: 2px;
+    top: 8px;
     left: 50%;
     transform: translate(-50%, 0%);
     cursor: default;
@@ -74,7 +74,11 @@
 
 #money_amount {
   display: inline;
+  font-size: 2em;
+  color: limegreen;
 }
 #money_unit {
   display: inline;
+  font-size: 2.2em;
+  color: yellow;
 }
