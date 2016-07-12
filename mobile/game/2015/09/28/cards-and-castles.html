@@ -447,22 +447,21 @@ Oh and BTW the game is cross platform Android, iOS and PC (<a href="http://store
           // Enable any UI which subscribes / unsubscribes from
           // push messages.
           var pushButton = document.querySelector('#switch-notif');
-          pushButton.MaterialCheckbox.enable();
-
+          if(pushButton) {
+            pushButton.MaterialCheckbox.enable();
+          }
           if (!subscription) {
-            // We aren't subscribed to push, so set UI  
-            // to allow the user to enable push
-            console.log("enable ui");
-            //pushButton.checked = false;
-            pushButton.MaterialCheckbox.uncheck();
+            if(pushButton) {
+              pushButton.MaterialCheckbox.uncheck();
+            }
 
             setTimeout(displaySnackBar,3000);
 
             return;  
           }
-
-          pushButton.MaterialCheckbox.check();
-          //pushButton.checked = true;
+          if(pushButton) {
+            pushButton.MaterialCheckbox.check();
+          }
 
           // Keep your server in sync with the latest subscriptionId
           sendSubscriptionToServer(subscription);
@@ -674,15 +673,17 @@ Oh and BTW the game is cross platform Android, iOS and PC (<a href="http://store
 
   window.addEventListener('load', function() {
     var pushButton = document.getElementById('switch-notif');
-    pushButton.addEventListener('click', function() {
-      if (isPushEnabled) {
-        console.log("unsubscribe()");
-        unsubscribe();
-      } else {
-        console.log("subscribe()");
-        subscribe();
-      }
-    });
+    if(pushButton) {
+      pushButton.addEventListener('click', function() {
+        if (isPushEnabled) {
+          console.log("unsubscribe()");
+          unsubscribe();
+        } else {
+          console.log("subscribe()");
+          subscribe();
+        }
+      });
+    }
 
     var pushSectionButton = document.getElementById('button-notif-subscribe');
     if (pushSectionButton) {

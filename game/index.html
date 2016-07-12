@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="description" content="A front-end template that helps you build fast, modern mobile web apps.">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Blog</title>
+
+  <!-- Add to homescreen for Chrome on Android -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="icon" sizes="192x192" href="/assets/images/icon_192_192.png">
+  <link rel="manifest" href="/manifest.json">
+
+  <!-- Add to homescreen for Safari on iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Material Design Lite">
+  <link rel="apple-touch-icon-precomposed" href="/assets/images/icon_192_192.png">
+
+  <!-- Tile icon for Win8 (144x144 + tile color) -->
+  <meta name="msapplication-TileImage" content="images/touch/ms-touch-icon-144x144-precomposed.png">
+  <meta name="msapplication-TileColor" content="#3372DF">
+
+  <meta name="theme-color" content="#3F51B5">
+  <link rel="shortcut icon" href="/assets/images/favicon.png">
+
+  <meta name="google-site-verification" content="G5DNU81K0TiZ4pd6NaBXaUwv0XgI_bI7NHlaMymkrN8" />
+  <!-- SEO: If your mobile URL is different from the desktop URL, add a canonical link to the desktop page https://developers.google.com/webmasters/smartphone-sites/feature-phones -->
+  <link rel="canonical" href="https://whiteseeker.github.io/game/index.html">
+
+  <link rel="stylesheet" href="/css/critical.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  
+  
+      
+       <link rel="stylesheet" href="/game/game.css">
+         
+  
+
+  <!-- Google Analytics -->
+  <script>
+  var host = "whiteseeker.github.io";
+  if ((host == window.location.host) && (window.location.protocol != "https:"))
+      window.location.protocol = "https";
+  
+  window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+  ga('create', 'UA-70962121-1', {'siteSpeedSampleRate': 40});
+  ga('send', 'pageview');
+  </script>
+  <script async src='//www.google-analytics.com/analytics.js'></script>
+  <script src="/scripts/modernizr-custom.min.js"></script>
+  <!-- End Google Analytics -->
+
+</head>
+
+
+  <body class="mdl-demo mdl-color--grey-100 mdl-color-text--grey-700 mdl-base">
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+      <main class="mdl-layout__content">
+        
+        <canvas class="game-canvas" id="glcanvas">
+  Your browser doesn't appear to support the 
+  <code>&lt;canvas&gt;</code> element.
+</canvas>
+
+<button id="button_option" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-js-ripple-effect">
+  <i class="material-icons">settings</i>
+</button>
+
+<div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
+  <div class="mdl-tabs__tab-bar">
+    <a href="#powers" class="mdl-tabs__tab is-active">Powers</a>
+    <a href="#upgrades" class="mdl-tabs__tab">Upgrades</a>
+    <a href="#abilities" class="mdl-tabs__tab">Abilities</a>
+  </div>
+  <div class="mdl-tabs__panel is-active" id="powers">
+    <div class="power-list-action mdl-list">
+  <div class="mdl-list__item">
+    <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect upg">
+      Upgrade
+    </button>
+    <span class="mdl-list__item-primary-content">
+      <i class="material-icons mdl-list__item-avatar">person</i>
+      <span>Euterpe's charm</span>
+    </span>
+    <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+      Use
+    </button>
+    <!--a class="mdl-list__item-secondary-action" href="#"><i class="material-icons">star</i></a-->
+  </div>
+  <div class="mdl-list__item">
+    <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect upg">
+      Upgrade
+    </button>
+    <span class="mdl-list__item-primary-content">
+      <i class="material-icons mdl-list__item-avatar">person</i>
+      <span>Super prod</span>
+    </span>
+    <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+      Use
+    </button>
+  </div>
+  <div class="mdl-list__item">
+    <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect upg">
+      Upgrade
+    </button>
+    <span class="mdl-list__item-primary-content">
+      <i class="material-icons mdl-list__item-avatar">person</i>
+      <span>Telekinesis</span>
+    </span>
+    <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+      Use
+    </button>
+  </div>
+  <div class="mdl-list__item">
+    <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect upg">
+      Upgrade
+    </button>
+    <span class="mdl-list__item-primary-content">
+      <i class="material-icons mdl-list__item-avatar">person</i>
+      <span>Alpha waves</span>
+    </span>
+    <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+      Use
+    </button>
+  </div>
+</div>
+  </div>
+  <div class="mdl-tabs__panel" id="upgrades">
+    lolo
+  </div>
+  <div class="mdl-tabs__panel" id="abilities">
+    lili
+  </div>
+</div>
+
+<dialog class="mdl-dialog" id="modal-option">
+  <div class="mdl-dialog__content">
+  <div class="option-list-action mdl-list">
+    <div class="mdl-list__item">
+      <span class="mdl-list__item-primary-content">
+        <span>Account</span>
+      </span>
+      <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+        Details
+      </button>
+    </div>
+    <div class="mdl-list__item">
+      <span class="mdl-list__item-primary-content">
+        <span>Notification</span>
+      </span>
+      <a class="mdl-list__item-secondary-action" href="#">
+        <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="opt-switch-notif">
+          <input type="checkbox" id="opt-switch-notif" class="mdl-switch__input" disabled>
+          <span class="mdl-switch__label"></span>
+        </label>
+      </a>
+    </div>
+    <div class="mdl-list__item">
+      <span class="mdl-list__item-primary-content">
+        <span>Sound</span>
+      </span>
+      <a class="mdl-list__item-secondary-action" href="#">
+        <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="switch-sound">
+          <input type="checkbox" id="switch-sound" class="mdl-switch__input">
+          <span class="mdl-switch__label"></span>
+        </label>
+      </a>
+    </div>
+  </div>
+</div>
+<div class="mdl-dialog__actions mdl-dialog__actions--full-width">
+  <button id="button_close" type="button" class="mdl-button">Close</button>
+</div>
+</dialog>
+
+<dialog class="mdl-dialog" id="modal-login">
+  <div class="mdl-dialog__content">
+  <div class="option-list-action mdl-list">
+    <div class="mdl-list__item">
+      <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" id="button_google">
+        Google sign-in
+      </button>
+    </div>
+    <div class="mdl-list__item">
+      <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+        Continue as anonymous
+      </button>
+    </div>
+  </div>
+</div>
+
+</dialog>
+
+<script type="text/javascript" src="/scripts/glMatrix-2.3.2.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/3.1.0/firebase.js"></script>
+<script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyBaKSt8JOUUokXd4vzVwg7covsTpzNM5jo",
+    authDomain: "luminous-inferno-9971.firebaseapp.com",
+    databaseURL: "https://luminous-inferno-9971.firebaseio.com",
+    storageBucket: "luminous-inferno-9971.appspot.com",
+  };
+  firebase.initializeApp(config);
+</script>
+
+<script id="shader-fs" type="x-shader/x-fragment">
+  precision mediump float;
+
+  void main(void) {
+    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+  }
+</script>
+
+<script id="shader-vs" type="x-shader/x-vertex">
+  attribute vec3 aVertexPosition;
+
+  uniform mat4 uMVMatrix;
+  uniform mat4 uPMatrix;
+
+  void main(void) {
+    gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+  }
+</script>
+
+<script type="text/javascript">
+
+  var gl;
+
+  function initWebGL(canvas) {
+    var res = null;
+    
+    try {
+      // Try to grab the standard context. If it fails, fallback to experimental.
+      res = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+    }
+    catch(e) {}
+    
+    // If we don't have a GL context, give up now
+    if (!res) {
+      alert("Unable to initialize WebGL. Your browser may not support it.");
+      res = null;
+    }
+    
+    return res;
+  }
+
+  function start() {
+
+    firebase.auth().onAuthStateChanged(function(user) {
+      if (user) {
+        // User is signed in.
+        console.log("User is signed in");
+      } else {
+        // No user is signed in.
+        console.log("User is NOT signed in");
+        // Display the login modal
+        var loginDialog = document.querySelector('#modal-login');
+        var googleButton = document.querySelector('#button_google');
+        googleButton.addEventListener('click', function(evt) {
+          var provider = new firebase.auth.GoogleAuthProvider();
+          firebase.auth().signInWithRedirect(provider).then(function(result) {
+            // This gives you a Google Access Token. You can use it to access the Google API.
+            var token = result.credential.accessToken;
+            // The signed-in user info.
+            var user = result.user;
+            // ...
+            loginDialog.close();
+          }).catch(function(error) {
+            // Handle Errors here.
+            var errorCode = error.code;
+            var errorMessage = error.message;
+            // The email of the user's account used.
+            var email = error.email;
+            // The firebase.auth.AuthCredential type that was used.
+            var credential = error.credential;
+            // ...
+          });
+        });
+        loginDialog.showModal();
+      }
+    });
+
+    var canvas = document.getElementById("glcanvas");
+
+    // Initialize the GL context
+    gl = initWebGL(canvas);
+    
+    // Only continue if WebGL is available and working
+    
+    if (gl) {
+      // Set clear color to black, fully opaque
+      gl.clearColor(0.3, 0.3, 0.3, 1.0);
+      // Enable depth testing
+      gl.enable(gl.DEPTH_TEST);
+      // Near things obscure far things
+      gl.depthFunc(gl.LEQUAL);
+      // Clear the color as well as the depth buffer.
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    }
+  }
+
+  /* ------ START option menu ------ */
+  var optionDialog = document.querySelector('#modal-option');
+  var closeButton = optionDialog.querySelector('#button_close');
+  var optionButton = document.querySelector('#button_option');
+  /*if (! dialog.showModal) {
+      dialogPolyfill.registerDialog(dialog);
+  }*/
+  var closeClickHandler = function(event) {
+      optionDialog.close();
+  };
+  var showClickHandler = function(event) {
+      optionDialog.showModal();
+  };
+  optionButton.addEventListener('click', showClickHandler);
+  closeButton.addEventListener('click', closeClickHandler);
+  /* ------ END option menu ------ */
+
+  window.onload = start;
+
+</script>
+
+
+
+      </main>
+    </div>
+
+    <script src="/scripts/material.min.js"></script>
+    <link rel="stylesheet" href="/css/merged.min.css">
+  </body>
+
+</html>
