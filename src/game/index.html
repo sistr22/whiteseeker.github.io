@@ -42,10 +42,10 @@ custom_css: ['game/game.css']
 <script>
   // Initialize Firebase
   var config = {
-    apiKey: "AIzaSyBaKSt8JOUUokXd4vzVwg7covsTpzNM5jo",
-    authDomain: "luminous-inferno-9971.firebaseapp.com",
-    databaseURL: "https://luminous-inferno-9971.firebaseio.com",
-    storageBucket: "luminous-inferno-9971.appspot.com",
+    apiKey: "AIzaSyBKKsD6yJWKlApefX-ii-RlQ0ccnz4oSis",
+    authDomain: "lirtition.firebaseapp.com",
+    databaseURL: "https://lirtition.firebaseio.com",
+    storageBucket: "lirtition.appspot.com",
   };
   firebase.initializeApp(config);
 </script>
@@ -103,6 +103,7 @@ custom_css: ['game/game.css']
         // Display the login modal
         var loginDialog = document.querySelector('#modal-login');
         var googleButton = document.querySelector('#button_google');
+        var anonButton = document.querySelector('#button_anon');
         googleButton.addEventListener('click', function(evt) {
           var provider = new firebase.auth.GoogleAuthProvider();
           firebase.auth().signInWithRedirect(provider).then(function(result) {
@@ -122,6 +123,9 @@ custom_css: ['game/game.css']
             var credential = error.credential;
             // ...
           });
+        });
+        anonButton.addEventListener('click', function(evt) {
+          loginDialog.close();
         });
         loginDialog.showModal();
       }
