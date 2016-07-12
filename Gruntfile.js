@@ -21,6 +21,7 @@ module.exports = function(grunt) {
         	'_site/scripts/material.min.js': ['src/css/material.js'],
           '_site/scripts/modernizr-custom.min.js': ['src/scripts/modernizr-custom.js'],
           '_site/service-worker.js': ['src/scripts/service-worker.js'],
+          '_site/scripts/glMatrix-2.3.2.min.js': ['src/scripts/glMatrix-2.3.2.js'],
       	}
       }
     },
@@ -155,6 +156,7 @@ module.exports = function(grunt) {
           '_site/scripts/material.min.js': ['src/css/material.js'],
           '_site/scripts/modernizr-custom.min.js': ['src/scripts/modernizr-custom.js'],
           '_site/service-worker.js': ['src/scripts/service-worker.js'],
+          '_site/scripts/glMatrix-2.3.2.min.js': ['src/scripts/glMatrix-2.3.2.js'],
         }
       },
     }
@@ -206,6 +208,7 @@ module.exports = function(grunt) {
 
   // Default task(s).
   grunt.registerTask('default', ['build']);
+  grunt.registerTask('dev', ['buildev']);
 
   grunt.registerTask('deploy', ['buildcontrol']);
 
