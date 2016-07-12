@@ -3,6 +3,16 @@
   height: 50vh;
 }
 
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none;   /* Chrome/Safari/Opera */
+  -khtml-user-select: none;    /* Konqueror */
+  -moz-user-select: none;      /* Firefox */
+  -ms-user-select: none;       /* Internet Explorer/Edge */
+  user-select: none;           /* Non-prefixed version, currently
+                                  not supported by any browser */
+}
+
 #button_option {
   position: absolute;
   top: 0;
@@ -51,4 +61,20 @@
   -webkit-transform: translate(-50%, -50%);
   transform: translate(-50%, -50%);
   z-index: 1;
+}
+
+#money {
+    position: absolute;
+    top: 2px;
+    left: 50%;
+    transform: translate(-50%, 0%);
+    cursor: default;
+    pointer-events: none;
+}
+
+#money_amount {
+  display: inline;
+}
+#money_unit {
+  display: inline;
 }

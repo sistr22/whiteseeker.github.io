@@ -61,7 +61,7 @@
     <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
       <main class="mdl-layout__content">
         
-        <canvas class="game-canvas" id="glcanvas">
+        <canvas class="game-canvas" id="glcanvas" touch-action="none">
   Your browser doesn't appear to support the 
   <code>&lt;canvas&gt;</code> element.
 </canvas>
@@ -69,6 +69,11 @@
 <button id="button_option" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-js-ripple-effect">
   <i class="material-icons">settings</i>
 </button>
+
+<div id="money" class="noselect">
+  <div id="money_amount">100</div>
+  <div id="money_unit">$</div>
+</div>
 
 <div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
   <div class="mdl-tabs__tab-bar">
@@ -197,6 +202,7 @@
 
 <script type="text/javascript" src="/scripts/glMatrix-2.3.2.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/3.1.0/firebase.js"></script>
+<script src="https://code.jquery.com/pep/0.4.1/pep.js"></script>
 <script>
   // Initialize Firebase
   var config = {
@@ -329,6 +335,13 @@
       optionDialog.close();
   });
   /* ------ END option menu ------ */
+
+  var moneyTF = document.getElementById("money_amount");
+  var canvas = document.getElementById("glcanvas");
+  canvas.addEventListener( "pointerdown", function( e ) {
+    console.log("pointerdown");
+    moneyTF.innerHTML = parseInt(moneyTF.innerHTML)+1; 
+  } );
 
   window.onload = start;
 
