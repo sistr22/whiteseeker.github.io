@@ -330,10 +330,12 @@
     var uid = user.uid;
     console.log("User uid: " + uid);
 
-    firebase.database().ref('/' + uid + '/game/').once('value').then(function(snapshot) {
+    firebase.database().ref('/' + uid + '/game/').on('value', function(snapshot) {
       console.log("money: " + snapshot.val().money);
-      if(snapshot.val().money > 0)
-        addMoney(snapshot.val().money);
+      if(snapshot.val().money > money) {
+        money = snapshot.val().money;
+        moneyTF.innerHTML = money; 
+      }
     });
   }
 
