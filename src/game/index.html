@@ -17,19 +17,19 @@ custom_css: ['game/game.css']
   <div id="money_unit">$</div>
 </div>
 
-<div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
+<div id="bottom-tabs" class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
   <div class="mdl-tabs__tab-bar">
     <a href="#powers" class="mdl-tabs__tab is-active">Powers</a>
-    <a href="#upgrades" class="mdl-tabs__tab">Upgrades</a>
-    <a href="#abilities" class="mdl-tabs__tab">Abilities</a>
+    <a href="#musicians" class="mdl-tabs__tab">Musicians</a>
+    <a href="#jokers" class="mdl-tabs__tab">Jokers</a>
   </div>
   <div class="mdl-tabs__panel is-active" id="powers">
     {% include_relative power.html %}
   </div>
-  <div class="mdl-tabs__panel" id="upgrades">
-    lolo
+  <div class="mdl-tabs__panel" id="musicians">
+    {% include_relative musicians.html %}
   </div>
-  <div class="mdl-tabs__panel" id="abilities">
+  <div class="mdl-tabs__panel" id="jokers">
     lili
   </div>
 </div>
