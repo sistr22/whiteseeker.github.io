@@ -75,11 +75,11 @@
   <div id="money_unit">$</div>
 </div>
 
-<div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
+<div id="bottom-tabs" class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
   <div class="mdl-tabs__tab-bar">
     <a href="#powers" class="mdl-tabs__tab is-active">Powers</a>
-    <a href="#upgrades" class="mdl-tabs__tab">Upgrades</a>
-    <a href="#abilities" class="mdl-tabs__tab">Abilities</a>
+    <a href="#musicians" class="mdl-tabs__tab">Musicians</a>
+    <a href="#jokers" class="mdl-tabs__tab">Jokers</a>
   </div>
   <div class="mdl-tabs__panel is-active" id="powers">
     <div class="power-list-action mdl-list">
@@ -134,10 +134,76 @@
   </div>
 </div>
   </div>
-  <div class="mdl-tabs__panel" id="upgrades">
-    lolo
+  <div class="mdl-tabs__panel" id="musicians">
+    <div class="musicians-list-action mdl-list">
+  <div class="mdl-list__item">
+    <span class="mdl-list__item-primary-content">
+      <i class="material-icons mdl-list__item-avatar">person</i>
+      <span>Piano</span>
+    </span>
+    <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+      Upgrade
+    </button>
+    <!--a class="mdl-list__item-secondary-action" href="#"><i class="material-icons">star</i></a-->
   </div>
-  <div class="mdl-tabs__panel" id="abilities">
+  <div class="mdl-list__item">
+    <span class="mdl-list__item-primary-content">
+      <i class="material-icons mdl-list__item-avatar">person</i>
+      <span>Violin</span>
+    </span>
+    <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+      <div class="upgrade-amount" style="display:inline;">150</div><div class="upgrade-unit"style="display:inline;">$</div><br/>
+      <div style="line-height: normal;">Upgrade</div>
+    </button>
+  </div>
+  <div class="mdl-list__item">
+    <span class="mdl-list__item-primary-content">
+      <i class="material-icons mdl-list__item-avatar">person</i>
+      <span>Cello</span>
+    </span>
+    <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+      Upgrade
+    </button>
+  </div>
+  <div class="mdl-list__item">
+    <span class="mdl-list__item-primary-content">
+      <i class="material-icons mdl-list__item-avatar">person</i>
+      <span>Triangle</span>
+    </span>
+    <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+      Upgrade
+    </button>
+  </div>
+  <div class="mdl-list__item">
+    <span class="mdl-list__item-primary-content">
+      <i class="material-icons mdl-list__item-avatar">person</i>
+      <span>Tambour</span>
+    </span>
+    <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+      Upgrade
+    </button>
+  </div>
+  <div class="mdl-list__item">
+    <span class="mdl-list__item-primary-content">
+      <i class="material-icons mdl-list__item-avatar">person</i>
+      <span>Bass</span>
+    </span>
+    <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+      Upgrade
+    </button>
+  </div>
+  <div class="mdl-list__item">
+    <span class="mdl-list__item-primary-content">
+      <i class="material-icons mdl-list__item-avatar">person</i>
+      <span>Cor</span>
+    </span>
+    <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+      Upgrade
+    </button>
+  </div>
+</div>
+  </div>
+  <div class="mdl-tabs__panel" id="jokers">
     lili
   </div>
 </div>
@@ -313,7 +379,14 @@
     });
   });
   anonButton.addEventListener('click', function(evt) {
-    loginDialog.close();
+    firebase.auth().signInAnonymously().then(function(result) {
+      loginDialog.close();
+    }).catch(function(error) {
+      // Handle Errors here.
+      var errorCode = error.code;
+      var errorMessage = error.message;
+      // ...
+    });
   });
   /* ------ END login modal ------ */
 

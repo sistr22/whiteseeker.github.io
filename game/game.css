@@ -13,6 +13,28 @@
                                   not supported by any browser */
 }
 
+#bottom-tabs {
+  max-height: 50vh;
+  display: flex;
+  flex-direction: column;
+}
+
+#bottom-tabs .mdl-tabs__panel {
+  overflow: scroll;
+}
+
+#bottom-tabs .mdl-list {
+  max-width: 350px;
+  margin: auto;
+}
+#bottom-tabs .mdl-list__item {
+  padding: 3px;
+}
+
+#bottom-tabs .mdl-tabs__tab-bar {
+  min-height: 48px;
+}
+
 #button_option {
   position: absolute;
   top: 0;
@@ -21,17 +43,21 @@
 }
 
 /* Power tab */
-.power-list-action {
+/*.power-list-action {
   max-width: 350px;
   margin: auto;
 }
 
 .power-list-action .mdl-list__item {
   padding: 3px;
-}
+}*/
 
 .power-list-action .upg {
   margin-right: 6px;
+}
+
+.musicians-list-action .mdl-button {
+  line-height: normal;
 }
 
 /* Option menu */
