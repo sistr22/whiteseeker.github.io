@@ -79,6 +79,10 @@ custom_css: ['game/game.css']
 
   var gl;
 
+  /* ------ START Game play var ------ */
+  var money = 0;
+  /* ------ END Game play var ------ */
+
   function initWebGL(canvas) {
     var res = null;
     
@@ -97,12 +101,36 @@ custom_css: ['game/game.css']
     return res;
   }
 
+  function loadGameData() {
+    var user = firebase.auth().currentUser;
+    var uid = user.uid;
+    console.log("User uid: " + uid);
+
+    firebase.database().ref('/' + uid + '/game/').once('value').then(function(snapshot) {
+      console.log("money: " + snapshot.val().money);
+      if(snapshot.val().money > 0)
+        addMoney(snapshot.val().money);
+    });
+  }
+
+  function addMoney(amount) {
+    money+=amount;
+    moneyTF.innerHTML = money; 
+
+    var user = firebase.auth().currentUser;
+    var uid = user.uid;
+    firebase.database().ref('/' + uid + '/game/').set({
+      money: money
+    });
+  }
+
   function start() {
 
     firebase.auth().onAuthStateChanged(function(user) {
       if (user) {
         // User is signed in.
         console.log("User is signed in");
+        loadGameData();
       } else {
         // No user is signed in.
         console.log("User is NOT signed in");
@@ -189,7 +217,7 @@ custom_css: ['game/game.css']
   var canvas = document.getElementById("glcanvas");
   canvas.addEventListener( "pointerdown", function( e ) {
     console.log("pointerdown");
-    moneyTF.innerHTML = parseInt(moneyTF.innerHTML)+1; 
+    addMoney(1);
   } );
 
   window.onload = start;

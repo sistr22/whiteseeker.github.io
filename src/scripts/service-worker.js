@@ -238,7 +238,17 @@ self.addEventListener('fetch', function(event) {
 
     // for the game, during the dev we cache nothing
     if(/^\/game\//.test(requestURL.pathname)) {
-      return fetch(event.request);
+      event.respondWith(
+        caches.open(CACHE_NAME).then(function(cache) {
+          return fetch(event.request).then(function(response) {
+            cache.put(event.request, response.clone());
+            return response;
+          }).catch(function() {
+            return cache.match(event.request);
+          });
+        })
+      );
+      return;
     }
 
     // Default pattern
