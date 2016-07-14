@@ -13,6 +13,21 @@
                                   not supported by any browser */
 }
 
+#game-spinner {
+  margin: auto;
+  height: 56px;
+  width: 56px;
+}
+
+#spinner-background {
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  background: rgba(1,1,1,0.5);
+  display: flex;
+}
+
 #bottom-tabs {
   max-height: 50vh;
   display: flex;
