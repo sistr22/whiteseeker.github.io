@@ -208,6 +208,10 @@
   </div>
 </div>
 
+<div id="spinner-background">
+  <div id="game-spinner" class="mdl-spinner mdl-js-spinner is-active"></div>
+</div>
+
 <dialog class="mdl-dialog" id="modal-option">
   <div class="mdl-dialog__content">
   <div class="option-list-action mdl-list">
@@ -330,8 +334,14 @@
     var uid = user.uid;
     console.log("User uid: " + uid);
 
+
+    var isLoaded = false;
     firebase.database().ref('/' + uid + '/game/').on('value', function(snapshot) {
-      console.log("money: " + snapshot.val().money);
+      if(!isLoaded) {
+        isLoaded = true;
+        console.log("Removing spinner");
+        document.getElementById("spinner-background").style.display = "none";
+      }
       if(snapshot.val().money > money) {
         money = snapshot.val().money;
         moneyTF.innerHTML = money; 
