@@ -42,8 +42,13 @@
   max-width: 350px;
   margin: auto;
 }
+
 #bottom-tabs .mdl-list__item {
   padding: 3px;
+}
+
+#bottom-tabs .upgrade-button {
+  line-height: normal;
 }
 
 #bottom-tabs .mdl-tabs__tab-bar {
@@ -58,21 +63,10 @@
 }
 
 /* Power tab */
-/*.power-list-action {
-  max-width: 350px;
-  margin: auto;
-}
 
-.power-list-action .mdl-list__item {
-  padding: 3px;
-}*/
 
 .power-list-action .upg {
   margin-right: 6px;
-}
-
-.musicians-list-action .mdl-button {
-  line-height: normal;
 }
 
 /* Option menu */
@@ -102,6 +96,7 @@
   -webkit-transform: translate(-50%, -50%);
   transform: translate(-50%, -50%);
   z-index: 1;
+  margin: 0;
 }
 
 #money {

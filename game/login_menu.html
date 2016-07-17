@@ -1,5 +1,6 @@
 <div class="mdl-dialog__content">
-  <div class="option-list-action mdl-list">
+
+  <div id="not-signed" class="option-list-action mdl-list">
     <div class="mdl-list__item">
       <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" id="button_google">
         Google sign-in
@@ -11,4 +12,38 @@
       </button>
     </div>
   </div>
+
+  <div id="google-signed" class="option-list-action mdl-list">
+    <div class="mdl-list__item">
+      <div class="mdl-list__item-primary-content">
+          <span>
+            You are connected with your google account: 
+            <span id="google-email">email</span>
+          </span>
+      </div>
+    </div>
+  </div>
+
+  <div id="anon-signed" class="option-list-action mdl-list">
+    <div class="mdl-list__item">
+      <span class="mdl-list__item-primary-content">
+          You are connected as anonymous. Link an account to avoid loosing your progress (^_^).
+      </span>
+    </div>
+    <div class="mdl-list__item">
+      <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" id="button_link_google">
+        Link a Google account
+      </button>
+    </div>
+  </div>
+
+  <div id="signed-buttons">
+    <button class="button_logout mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+      Logout
+    </button>
+    <button class="button_close mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+      close
+    </button>
+  </div>
+
 </div>
