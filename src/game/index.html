@@ -13,7 +13,7 @@ custom_css: ['game/game.css']
 </button>
 
 <div id="money" class="noselect">
-  <div id="money_amount">100</div>
+  <div id="money_amount">0</div>
   <div id="money_unit">$</div>
 </div>
 
@@ -21,7 +21,7 @@ custom_css: ['game/game.css']
   <div class="mdl-tabs__tab-bar">
     <a href="#powers" class="mdl-tabs__tab is-active">Powers</a>
     <a href="#musicians" class="mdl-tabs__tab">Musicians</a>
-    <a href="#jokers" class="mdl-tabs__tab">Jokers</a>
+    <!--a href="#jokers" class="mdl-tabs__tab">Jokers</a-->
   </div>
   <div class="mdl-tabs__panel is-active" id="powers">
     {% include_relative power.html %}
@@ -29,9 +29,9 @@ custom_css: ['game/game.css']
   <div class="mdl-tabs__panel" id="musicians">
     {% include_relative musicians.html %}
   </div>
-  <div class="mdl-tabs__panel" id="jokers">
+  <!-- div class="mdl-tabs__panel" id="jokers">
     lili
-  </div>
+  </div-->
 </div>
 
 <div id="spinner-background">
@@ -81,11 +81,17 @@ custom_css: ['game/game.css']
 
 <script type="text/javascript">
 
-  var gl;
 
-  /* ------ START Game play var ------ */
+  /* ------ START Global var ------ */
+  var gl;
+  var canvas;
   var money = 0;
-  /* ------ END Game play var ------ */
+  var moneyTF;
+  var cbs;
+  var loginDialog;
+  var optionDialog;
+  var uid = undefined;
+  /* ------ END Global var ------ */
 
   function initWebGL(canvas) {
     var res = null;
@@ -107,16 +113,15 @@ custom_css: ['game/game.css']
 
   function loadGameData() {
     var user = firebase.auth().currentUser;
-    var uid = user.uid;
+    uid = user.uid;
     console.log("User uid: " + uid);
 
 
     var isLoaded = false;
-    firebase.database().ref('/' + uid + '/game/').on('value', function(snapshot) {
+    listeners = firebase.database().ref('/' + uid + '/game/').on('value', function(snapshot) {
       if(!isLoaded) {
         isLoaded = true;
-        console.log("Removing spinner");
-        document.getElementById("spinner-background").style.display = "none";
+        loadingScreen(false, false); // Remove loading screen
       }
       if(snapshot.val().money > money) {
         money = snapshot.val().money;
@@ -125,39 +130,112 @@ custom_css: ['game/game.css']
     });
   }
 
+  function unloadGameData() {
+    var isLoaded = false;
+
+    money = 0;
+    moneyTF.innerHTML = 0;
+
+    firebase.database().ref('/' + uid + '/game/').off('value', cbs);
+
+    uid = undefined;
+  }
+
   function addMoney(amount) {
     money+=amount;
     moneyTF.innerHTML = money; 
 
-    var user = firebase.auth().currentUser;
-    var uid = user.uid;
     firebase.database().ref('/' + uid + '/game/').set({
       money: money
     });
   }
 
+  function loadingScreen(background, spinner) {
+    if(background) {
+      document.getElementById("spinner-background").style.display = "flex";
+    } else {
+      document.getElementById("spinner-background").style.display = "none";
+    }
+
+    if(spinner) {
+      document.getElementById("game-spinner").className += " is-active";
+    } else {
+      document.getElementById("game-spinner").className =
+        document.getElementById("game-spinner").className.replace(/\bis-active\b/,'');
+    }
+  }
+
+  function showLoginModal(show) {
+    var sub_menu_not_signed = document.getElementById("not-signed");
+    var sub_menu_google_signed = document.getElementById("google-signed");
+    var sub_menu_anon_signed = document.getElementById("anon-signed");
+    var signed_buttons = document.getElementById("signed-buttons");
+
+    if(show) {
+      var user = firebase.auth().currentUser;
+      if(user != null) {
+        // var name = user.displayName;
+        // var email = user.email;
+        // var photoUrl = user.photoURL;
+        // var uid = user.uid;
+        console.log("length: " + user.providerData.length);
+        var googleEmail = undefined;
+        user.providerData.forEach(function (profile) {
+          if(profile.providerId == "google.com") {
+            googleEmail = profile.email;
+          }
+        });
+        if(googleEmail != undefined) {
+          document.getElementById("google-email").innerHTML = googleEmail;
+          sub_menu_not_signed.style.display = "none";
+          sub_menu_google_signed.style.display = "block";
+          sub_menu_anon_signed.style.display = "none";
+        } else {
+          sub_menu_not_signed.style.display = "none";
+          sub_menu_google_signed.style.display = "none";
+          sub_menu_anon_signed.style.display = "block";
+        }
+        signed_buttons.style.display = "block";
+      } else {
+        // User is null, we ask to sign:
+        sub_menu_not_signed.style.display = "block";
+        sub_menu_google_signed.style.display = "none";
+        sub_menu_anon_signed.style.display = "none";
+        signed_buttons.style.display = "none";
+      }
+      loginDialog.showModal();
+    } else {
+      loginDialog.close();
+    }
+  }
+
   function start() {
+
+    loadingScreen(true, true);
 
     firebase.auth().onAuthStateChanged(function(user) {
       if (user) {
         // User is signed in.
         console.log("User is signed in");
         loadGameData();
+        showLoginModal(false);
       } else {
         // No user is signed in.
         console.log("User is NOT signed in");
-        
-        loginDialog.showModal();
+        loadingScreen(true, false); // Remove spinner but keep the dark overlay
+        showLoginModal(true);
       }
     });
 
-    var canvas = document.getElementById("glcanvas");
-
+    canvas = document.getElementById("glcanvas");
+    canvas.addEventListener( "pointerdown", function( e ) {
+      console.log("pointerdown");
+      addMoney(1);
+    });
     // Initialize the GL context
     gl = initWebGL(canvas);
     
     // Only continue if WebGL is available and working
-    
     if (gl) {
       // Set clear color to black, fully opaque
       gl.clearColor(0.3, 0.3, 0.3, 1.0);
@@ -171,10 +249,9 @@ custom_css: ['game/game.css']
   }
 
   /* ------ START login modal ------ */
-  var loginDialog = document.querySelector('#modal-login');
-  var googleButton = document.querySelector('#button_google');
-  var anonButton = document.querySelector('#button_anon');
-  googleButton.addEventListener('click', function(evt) {
+  loginDialog = document.querySelector('#modal-login');
+  
+  loginDialog.querySelector('#button_google').addEventListener('click', function(evt) {
     var provider = new firebase.auth.GoogleAuthProvider();
     firebase.auth().signInWithRedirect(provider).then(function(result) {
       // This gives you a Google Access Token. You can use it to access the Google API.
@@ -182,7 +259,7 @@ custom_css: ['game/game.css']
       // The signed-in user info.
       var user = result.user;
       // ...
-      loginDialog.close();
+      showLoginModal(false);
     }).catch(function(error) {
       // Handle Errors here.
       var errorCode = error.code;
@@ -194,9 +271,10 @@ custom_css: ['game/game.css']
       // ...
     });
   });
-  anonButton.addEventListener('click', function(evt) {
+
+  loginDialog.querySelector('#button_anon').addEventListener('click', function(evt) {
     firebase.auth().signInAnonymously().then(function(result) {
-      loginDialog.close();
+      showLoginModal(false);
     }).catch(function(error) {
       // Handle Errors here.
       var errorCode = error.code;
@@ -204,33 +282,40 @@ custom_css: ['game/game.css']
       // ...
     });
   });
+
+  loginDialog.querySelector('.button_close').addEventListener('click', function(evt) {
+    showLoginModal(false);
+  });
+
+  loginDialog.querySelector('.button_logout').addEventListener('click', function(evt) {
+    firebase.auth().signOut().then(function() {
+      showLoginModal(false);
+      optionDialog.close();
+      unloadGameData();
+      loadingScreen(true, false);
+      showLoginModal(true);
+    });
+  });
+
   /* ------ END login modal ------ */
 
   /* ------ START option menu ------ */
-  var optionDialog = document.querySelector('#modal-option');
-  var closeButton = optionDialog.querySelector('#button_close');
-  var accountDetailsButton = optionDialog.querySelector('#button_account');
-  var optionButton = document.querySelector('#button_option');
+  optionDialog = document.querySelector('#modal-option');
   /*if (! dialog.showModal) {
       dialogPolyfill.registerDialog(dialog);
   }*/
-  accountDetailsButton.addEventListener('click', function(event) {
-      loginDialog.showModal();
+  optionDialog.querySelector('#button_account').addEventListener('click', function(event) {
+      showLoginModal(true);
   });
-  optionButton.addEventListener('click', function(event) {
+  document.querySelector('#button_option').addEventListener('click', function(event) {
       optionDialog.showModal();
   });
-  closeButton.addEventListener('click', function(event) {
+  optionDialog.querySelector('#button_close').addEventListener('click', function(event) {
       optionDialog.close();
   });
   /* ------ END option menu ------ */
 
-  var moneyTF = document.getElementById("money_amount");
-  var canvas = document.getElementById("glcanvas");
-  canvas.addEventListener( "pointerdown", function( e ) {
-    console.log("pointerdown");
-    addMoney(1);
-  } );
+  moneyTF = document.getElementById("money_amount");
 
   window.onload = start;
 
