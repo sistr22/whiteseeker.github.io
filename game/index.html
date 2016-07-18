@@ -77,143 +77,114 @@
 
 <div id="bottom-tabs" class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
   <div class="mdl-tabs__tab-bar">
-    <a href="#powers" class="mdl-tabs__tab is-active">Powers</a>
-    <a href="#musicians" class="mdl-tabs__tab">Musicians</a>
+    <!--a href="#powers" class="mdl-tabs__tab">Powers</a-->
+    <a href="#musicians" class="mdl-tabs__tab is-active">Musicians</a>
     <!--a href="#jokers" class="mdl-tabs__tab">Jokers</a-->
   </div>
-  <div class="mdl-tabs__panel is-active" id="powers">
-    <div class="power-list-action mdl-list">
-  <div class="mdl-list__item">
-    <button class="upgrade-button mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
-      <div class="upgrade-amount" style="display:inline;">150</div><div class="upgrade-unit"style="display:inline;">$</div><br/>
-      <div style="line-height: normal;">Upgrade</div>
-    </button>
-    <span class="mdl-list__item-primary-content">
-      <i class="material-icons mdl-list__item-avatar">person</i>
-      <span>Euterpe's charm</span>
-    </span>
-    <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
-      Use
-    </button>
-    <!--a class="mdl-list__item-secondary-action" href="#"><i class="material-icons">star</i></a-->
-  </div>
-  <div class="mdl-list__item">
-    <button class="upgrade-button mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
-      <div class="upgrade-amount" style="display:inline;">150</div><div class="upgrade-unit"style="display:inline;">$</div><br/>
-      <div style="line-height: normal;">Upgrade</div>
-    </button>
-    <span class="mdl-list__item-primary-content">
-      <i class="material-icons mdl-list__item-avatar">person</i>
-      <span>Super prod</span>
-    </span>
-    <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
-      Use
-    </button>
-  </div>
-  <div class="mdl-list__item">
-    <button class="upgrade-button mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
-      <div class="upgrade-amount" style="display:inline;">150</div><div class="upgrade-unit"style="display:inline;">$</div><br/>
-      <div style="line-height: normal;">Upgrade</div>
-    </button>
-    <span class="mdl-list__item-primary-content">
-      <i class="material-icons mdl-list__item-avatar">person</i>
-      <span>Telekinesis</span>
-    </span>
-    <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
-      Use
-    </button>
-  </div>
-  <div class="mdl-list__item">
-    <button class="upgrade-button mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
-      <div class="upgrade-amount" style="display:inline;">150</div><div class="upgrade-unit"style="display:inline;">$</div><br/>
-      <div style="line-height: normal;">Upgrade</div>
-    </button>
-    <span class="mdl-list__item-primary-content">
-      <i class="material-icons mdl-list__item-avatar">person</i>
-      <span>Alpha waves</span>
-    </span>
-    <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
-      Use
-    </button>
-  </div>
-</div>
-  </div>
-  <div class="mdl-tabs__panel" id="musicians">
+  <!--div class="mdl-tabs__panel" id="powers">
+    { include_relative power.html }
+  </div-->
+  <div class="mdl-tabs__panel is-active" id="musicians">
     <div class="musicians-list-action mdl-list">
   <div class="mdl-list__item">
     <span class="mdl-list__item-primary-content">
       <i class="material-icons mdl-list__item-avatar">person</i>
-      <span>Piano</span>
+      <div style="display:block;padding-right:10px;">
+        <span class="intrument-name">Piano</span><span style="float:right;">Lvl 0</span>
+        <span style="float:left;clear:both;">Give <span>0</span> skill/sec (+<span>5</span>)</span>
+      </div>
     </span>
     <button class="upgrade-button mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
-      <div class="upgrade-amount" style="display:inline;">150</div><div class="upgrade-unit"style="display:inline;">$</div><br/>
-      <div style="line-height: normal;">Upgrade</div>
+      <div class="upgrade-amount">150</div>
+      <div class="upgrade-unit">$</div>
+      <div>Upgrade</div>
     </button>
     <!--a class="mdl-list__item-secondary-action" href="#"><i class="material-icons">star</i></a-->
   </div>
   <div class="mdl-list__item">
     <span class="mdl-list__item-primary-content">
       <i class="material-icons mdl-list__item-avatar">person</i>
-      <span>Violin</span>
+      <div style="display:block;padding-right:10px;">
+        <span class="intrument-name">Violin</span><span style="float:right;">Lvl 0</span>
+        <span style="float:left;clear:both;">Give <span>0</span> skill/sec (+<span>5</span>)</span>
+      </div>
     </span>
     <button class="upgrade-button mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
-      <div class="upgrade-amount" style="display:inline;">150</div><div class="upgrade-unit"style="display:inline;">$</div><br/>
-      <div style="line-height: normal;">Upgrade</div>
+      <div class="upgrade-amount">150</div>
+      <div class="upgrade-unit">$</div>
+      <div>Upgrade</div>
     </button>
   </div>
   <div class="mdl-list__item">
     <span class="mdl-list__item-primary-content">
       <i class="material-icons mdl-list__item-avatar">person</i>
-      <span>Cello</span>
+      <div style="display:block;padding-right:10px;">
+        <span class="intrument-name">Cello</span><span style="float:right;">Lvl 0</span>
+        <span style="float:left;clear:both;">Give <span>0</span> skill/sec (+<span>5</span>)</span>
+      </div>
     </span>
     <button class="upgrade-button mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
-      <div class="upgrade-amount" style="display:inline;">150</div><div class="upgrade-unit"style="display:inline;">$</div><br/>
-      <div style="line-height: normal;">Upgrade</div>
+      <div class="upgrade-amount">150</div>
+      <div class="upgrade-unit">$</div>
+      <div>Upgrade</div>
     </button>
   </div>
   <div class="mdl-list__item">
     <span class="mdl-list__item-primary-content">
       <i class="material-icons mdl-list__item-avatar">person</i>
-      <span>Triangle</span>
+      <div style="display:block;padding-right:10px;">
+        <span class="intrument-name">Triangle</span><span style="float:right;">Lvl 0</span>
+        <span style="float:left;clear:both;">Give <span>0</span> skill/sec (+<span>5</span>)</span>
+      </div>
     </span>
     <button class="upgrade-button mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
-      <div class="upgrade-amount" style="display:inline;">150</div><div class="upgrade-unit"style="display:inline;">$</div><br/>
-      <div style="line-height: normal;">Upgrade</div>
+      <div class="upgrade-amount">150</div>
+      <div class="upgrade-unit">$</div>
+      <div>Upgrade</div>
     </button>
   </div>
   <div class="mdl-list__item">
     <span class="mdl-list__item-primary-content">
       <i class="material-icons mdl-list__item-avatar">person</i>
-      <div style="display:block;">
-        <span>Tambour</span><span>Lvl 0</span>
-        <span>Give <span>0</span> skill/second (+<span>5</span>)</span>
+      <div style="display:block;padding-right:10px;">
+        <span class="intrument-name">Tambour</span><span style="float:right;">Lvl 0</span>
+        <span style="float:left;clear:both;">Give <span>0</span> skill/sec (+<span>5</span>)</span>
       </div>
     </span>
     <button class="upgrade-button mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
       <div>
-          <div class="upgrade-amount" style="display:inline;">150</div><div class="upgrade-unit"style="display:inline;">$</div><br/>
-        <div style="line-height: normal;">Upgrade</div>
+        <div class="upgrade-amount" style="display:inline;">150</div>
+        <div class="upgrade-unit" style="display:inline;">$</div>
+        <div>Upgrade</div>
       </div>
     </button>
   </div>
   <div class="mdl-list__item">
     <span class="mdl-list__item-primary-content">
       <i class="material-icons mdl-list__item-avatar">person</i>
-      <span>Bass</span>
+      <div style="display:block;padding-right:10px;">
+        <span class="intrument-name">Bass</span><span style="float:right;">Lvl 0</span>
+        <span style="float:left;clear:both;">Give <span>0</span> skill/sec (+<span>5</span>)</span>
+      </div>
     </span>
     <button class="upgrade-button mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
-      <div class="upgrade-amount" style="display:inline;">150</div><div class="upgrade-unit"style="display:inline;">$</div><br/>
-      <div style="line-height: normal;">Upgrade</div>
+      <div class="upgrade-amount">150</div>
+      <div class="upgrade-unit">$</div>
+      <div>Upgrade</div>
     </button>
   </div>
   <div class="mdl-list__item">
     <span class="mdl-list__item-primary-content">
       <i class="material-icons mdl-list__item-avatar">person</i>
-      <span>Cor</span>
+      <div style="display:block;padding-right:10px;">
+        <span class="intrument-name">Cor</span><span style="float:right;">Lvl 0</span>
+        <span style="float:left;clear:both;">Give <span>0</span> skill/sec (+<span>5</span>)</span>
+      </div>
     </span>
     <button class="upgrade-button mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
-      <div class="upgrade-amount" style="display:inline;">150</div><div class="upgrade-unit"style="display:inline;">$</div><br/>
-      <div style="line-height: normal;">Upgrade</div>
+      <div class="upgrade-amount">150</div>
+      <div class="upgrade-unit">$</div>
+      <div>Upgrade</div>
     </button>
   </div>
 </div>
