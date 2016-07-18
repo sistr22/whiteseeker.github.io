@@ -44,7 +44,7 @@
 }
 
 #bottom-tabs .mdl-list__item {
-  padding: 3px;
+  padding: 3px 0px;
 }
 
 #bottom-tabs .upgrade-button {
@@ -117,4 +117,19 @@
   display: inline;
   font-size: 2.2em;
   color: yellow;
+}
+
+.upgrade-unit {
+  display:inline;
+  font-weight: 300;
+}
+
+.upgrade-amount {
+  display:inline;
+  font-weight: 300;
+}
+
+.intrument-name {
+  float:left;
+  font-weight: 500;
 }

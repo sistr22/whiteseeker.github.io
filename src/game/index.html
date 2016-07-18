@@ -19,14 +19,14 @@ custom_css: ['game/game.css']
 
 <div id="bottom-tabs" class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
   <div class="mdl-tabs__tab-bar">
-    <a href="#powers" class="mdl-tabs__tab is-active">Powers</a>
-    <a href="#musicians" class="mdl-tabs__tab">Musicians</a>
+    <!--a href="#powers" class="mdl-tabs__tab">Powers</a-->
+    <a href="#musicians" class="mdl-tabs__tab is-active">Musicians</a>
     <!--a href="#jokers" class="mdl-tabs__tab">Jokers</a-->
   </div>
-  <div class="mdl-tabs__panel is-active" id="powers">
-    {% include_relative power.html %}
-  </div>
-  <div class="mdl-tabs__panel" id="musicians">
+  <!--div class="mdl-tabs__panel" id="powers">
+    { include_relative power.html }
+  </div-->
+  <div class="mdl-tabs__panel is-active" id="musicians">
     {% include_relative musicians.html %}
   </div>
   <!-- div class="mdl-tabs__panel" id="jokers">
