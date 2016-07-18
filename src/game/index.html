@@ -91,7 +91,30 @@ custom_css: ['game/game.css']
   var loginDialog;
   var optionDialog;
   var uid = undefined;
+  var musicians = [];
+  var musiciansLvlTF = [];
   /* ------ END Global var ------ */
+
+  var MusicianEnum = {
+    PIANO: 0,
+    VIOLIN: 1,
+    CELLO: 2,
+    TRIANGLE: 3,
+    TAMBOUR: 4,
+    BASS: 5,
+    FRENCH_HORN: 6,
+    SIZE: 7,
+    properties: {
+      0: {name: "piano"},
+      1: {name: "violin"},
+      2: {name: "cello"},
+      3: {name: "triangle"},
+      4: {name: "tambour"},
+      5: {name: "bass"},
+      6: {name: "french_horn"},
+    }
+  };
+
 
   function initWebGL(canvas) {
     var res = null;
@@ -116,17 +139,46 @@ custom_css: ['game/game.css']
     uid = user.uid;
     console.log("User uid: " + uid);
 
+    for(var i = 0 ; i < MusicianEnum.SIZE ; i++) {
+      musicians[i] = 0;
+    }
 
-    var isLoaded = false;
-    listeners = firebase.database().ref('/' + uid + '/game/').on('value', function(snapshot) {
-      if(!isLoaded) {
-        isLoaded = true;
-        loadingScreen(false, false); // Remove loading screen
+    var isMoneyLoaded = false;
+    var isMusiciansLoaded = false;
+
+    listeners = firebase.database().ref('/' + uid + '/game/money/').on('value', function(snapshot) {
+      if(!isMoneyLoaded) {
+        isMoneyLoaded = true;
+        if(isMoneyLoaded && isMusiciansLoaded)
+          loadingScreen(false, false); // Remove loading screen
       }
-      if(snapshot.val().money > money) {
-        money = snapshot.val().money;
+
+      if(snapshot.val() > money) {
+        money = snapshot.val();
         moneyTF.innerHTML = money; 
       }
+    });
+
+    firebase.database().ref('/' + uid + '/game/musicians/').once('value', function(snapshot) {
+      isMusiciansLoaded = true;
+      if(isMoneyLoaded && isMusiciansLoaded)
+        loadingScreen(false, false); // Remove loading screen
+
+      snapshot.forEach(function(childSnapshot) {
+        var instID = parseInt(childSnapshot.key);
+        console.log("childSnapshot.key: " + instID);
+        musicians[instID] = parseInt(childSnapshot.val().lvl);
+        musiciansLvlTF[instID].innerHTML = "Lvl " + musicians[instID];
+      });
+    });
+
+    firebase.database().ref('/' + uid + '/game/musicians/').on('child_changed'
+      , function(snapshot) {
+        //console.log("iiii: " + snapshot.params.ID);
+        console.log("dddddd:" + snapshot.key);
+        console.log("dddddd:" + snapshot.val().lvl);
+
+        musiciansLvlTF[parseInt(snapshot.key)].innerHTML = "Lvl " + snapshot.val().lvl;
     });
   }
 
@@ -145,9 +197,21 @@ custom_css: ['game/game.css']
     money+=amount;
     moneyTF.innerHTML = money; 
 
-    firebase.database().ref('/' + uid + '/game/').set({
+    firebase.database().ref('/' + uid + '/game/').update({
       money: money
     });
+  }
+
+  function upgradeMusician(musician) {
+    console.log("upgradeMusician [" + musician + "]")
+    console.log("name: " + MusicianEnum.properties[musician].name);
+    musicians[musician] += 1;
+
+    firebase.database().ref('/' + uid + '/game/musicians/' + musician + "/").update({
+      lvl: musicians[musician]
+    });
+
+    musiciansLvlTF[musician].innerHTML = "Lvl " + musicians[musician];
   }
 
   function loadingScreen(background, spinner) {
@@ -305,15 +369,32 @@ custom_css: ['game/game.css']
       dialogPolyfill.registerDialog(dialog);
   }*/
   optionDialog.querySelector('#button_account').addEventListener('click', function(event) {
-      showLoginModal(true);
+    showLoginModal(true);
   });
   document.querySelector('#button_option').addEventListener('click', function(event) {
-      optionDialog.showModal();
+    optionDialog.showModal();
   });
   optionDialog.querySelector('#button_close').addEventListener('click', function(event) {
-      optionDialog.close();
+    optionDialog.close();
   });
   /* ------ END option menu ------ */
+
+  /* ------ START musicians tab ------ */
+  /*var pianoElt = document.querySelector('#piano');
+  pianoElt.querySelector('.upgrade-button').addEventListener('click', function(event) {
+    upgradeMusician(MusicianEnum.PIANO);
+  });*/
+  for(var i = 0 ; i < MusicianEnum.SIZE ; i++)
+  {
+    (function(ii) {
+      var elt = document.getElementById(MusicianEnum.properties[ii].name);
+      musiciansLvlTF[ii] = elt.getElementsByClassName('instrument-lvl')[0];
+      elt.getElementsByClassName('upgrade-button')[0].addEventListener('click', function(event) {
+        upgradeMusician(ii);
+      });
+    })(i);
+  }
+  /* ------ END musicians tab ------ */
 
   moneyTF = document.getElementById("money_amount");
 

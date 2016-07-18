@@ -129,7 +129,11 @@
   font-weight: 300;
 }
 
-.intrument-name {
+.instrument-name {
   float:left;
   font-weight: 500;
+}
+
+.instrument-lvl {
+  float:right;
 }
