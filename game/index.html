@@ -86,11 +86,11 @@
   </div-->
   <div class="mdl-tabs__panel is-active" id="musicians">
     <div class="musicians-list-action mdl-list">
-  <div class="mdl-list__item">
+  <div class="mdl-list__item" id="piano">
     <span class="mdl-list__item-primary-content">
       <i class="material-icons mdl-list__item-avatar">person</i>
       <div style="display:block;padding-right:10px;">
-        <span class="intrument-name">Piano</span><span style="float:right;">Lvl 0</span>
+        <span class="instrument-name">Piano</span><span class="instrument-lvl">Lvl 0</span>
         <span style="float:left;clear:both;">Give <span>0</span> skill/sec (+<span>5</span>)</span>
       </div>
     </span>
@@ -101,11 +101,11 @@
     </button>
     <!--a class="mdl-list__item-secondary-action" href="#"><i class="material-icons">star</i></a-->
   </div>
-  <div class="mdl-list__item">
+  <div class="mdl-list__item" id="violin">
     <span class="mdl-list__item-primary-content">
       <i class="material-icons mdl-list__item-avatar">person</i>
       <div style="display:block;padding-right:10px;">
-        <span class="intrument-name">Violin</span><span style="float:right;">Lvl 0</span>
+        <span class="instrument-name">Violin</span><span class="instrument-lvl">Lvl 0</span>
         <span style="float:left;clear:both;">Give <span>0</span> skill/sec (+<span>5</span>)</span>
       </div>
     </span>
@@ -115,11 +115,11 @@
       <div>Upgrade</div>
     </button>
   </div>
-  <div class="mdl-list__item">
+  <div class="mdl-list__item" id="cello">
     <span class="mdl-list__item-primary-content">
       <i class="material-icons mdl-list__item-avatar">person</i>
       <div style="display:block;padding-right:10px;">
-        <span class="intrument-name">Cello</span><span style="float:right;">Lvl 0</span>
+        <span class="instrument-name">Cello</span><span class="instrument-lvl">Lvl 0</span>
         <span style="float:left;clear:both;">Give <span>0</span> skill/sec (+<span>5</span>)</span>
       </div>
     </span>
@@ -129,11 +129,11 @@
       <div>Upgrade</div>
     </button>
   </div>
-  <div class="mdl-list__item">
+  <div class="mdl-list__item" id="triangle">
     <span class="mdl-list__item-primary-content">
       <i class="material-icons mdl-list__item-avatar">person</i>
       <div style="display:block;padding-right:10px;">
-        <span class="intrument-name">Triangle</span><span style="float:right;">Lvl 0</span>
+        <span class="instrument-name">Triangle</span><span class="instrument-lvl">Lvl 0</span>
         <span style="float:left;clear:both;">Give <span>0</span> skill/sec (+<span>5</span>)</span>
       </div>
     </span>
@@ -143,11 +143,11 @@
       <div>Upgrade</div>
     </button>
   </div>
-  <div class="mdl-list__item">
+  <div class="mdl-list__item" id="tambour">
     <span class="mdl-list__item-primary-content">
       <i class="material-icons mdl-list__item-avatar">person</i>
       <div style="display:block;padding-right:10px;">
-        <span class="intrument-name">Tambour</span><span style="float:right;">Lvl 0</span>
+        <span class="instrument-name">Tambour</span><span class="instrument-lvl">Lvl 0</span>
         <span style="float:left;clear:both;">Give <span>0</span> skill/sec (+<span>5</span>)</span>
       </div>
     </span>
@@ -159,11 +159,11 @@
       </div>
     </button>
   </div>
-  <div class="mdl-list__item">
+  <div class="mdl-list__item" id="bass">
     <span class="mdl-list__item-primary-content">
       <i class="material-icons mdl-list__item-avatar">person</i>
       <div style="display:block;padding-right:10px;">
-        <span class="intrument-name">Bass</span><span style="float:right;">Lvl 0</span>
+        <span class="instrument-name">Bass</span><span class="instrument-lvl">Lvl 0</span>
         <span style="float:left;clear:both;">Give <span>0</span> skill/sec (+<span>5</span>)</span>
       </div>
     </span>
@@ -173,11 +173,11 @@
       <div>Upgrade</div>
     </button>
   </div>
-  <div class="mdl-list__item">
+  <div class="mdl-list__item" id="french_horn">
     <span class="mdl-list__item-primary-content">
       <i class="material-icons mdl-list__item-avatar">person</i>
       <div style="display:block;padding-right:10px;">
-        <span class="intrument-name">Cor</span><span style="float:right;">Lvl 0</span>
+        <span class="instrument-name">French horn</span><span class="instrument-lvl">Lvl 0</span>
         <span style="float:left;clear:both;">Give <span>0</span> skill/sec (+<span>5</span>)</span>
       </div>
     </span>
@@ -242,6 +242,7 @@
   <div class="mdl-dialog__content">
 
   <div id="not-signed" class="option-list-action mdl-list">
+    <span>Welcome to Orchestra</span>
     <div class="mdl-list__item">
       <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" id="button_google">
         Google sign-in
@@ -268,14 +269,14 @@
   <div id="anon-signed" class="option-list-action mdl-list">
     <div class="mdl-list__item">
       <span class="mdl-list__item-primary-content">
-          You are connected as anonymous. Link an account to avoid loosing your progress (^_^).
+          You are connected as anonymous.
       </span>
     </div>
-    <div class="mdl-list__item">
-      <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" id="button_link_google">
+    <!--div class="mdl-list__item">
+      <button class="button_link_google mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
         Link a Google account
       </button>
-    </div>
+    </div-->
   </div>
 
   <div id="signed-buttons">
@@ -336,7 +337,30 @@
   var loginDialog;
   var optionDialog;
   var uid = undefined;
+  var musicians = [];
+  var musiciansLvlTF = [];
   /* ------ END Global var ------ */
+
+  var MusicianEnum = {
+    PIANO: 0,
+    VIOLIN: 1,
+    CELLO: 2,
+    TRIANGLE: 3,
+    TAMBOUR: 4,
+    BASS: 5,
+    FRENCH_HORN: 6,
+    SIZE: 7,
+    properties: {
+      0: {name: "piano"},
+      1: {name: "violin"},
+      2: {name: "cello"},
+      3: {name: "triangle"},
+      4: {name: "tambour"},
+      5: {name: "bass"},
+      6: {name: "french_horn"},
+    }
+  };
+
 
   function initWebGL(canvas) {
     var res = null;
@@ -361,17 +385,54 @@
     uid = user.uid;
     console.log("User uid: " + uid);
 
+    for(var i = 0 ; i < MusicianEnum.SIZE ; i++) {
+      musicians[i] = 0;
+    }
 
-    var isLoaded = false;
-    listeners = firebase.database().ref('/' + uid + '/game/').on('value', function(snapshot) {
-      if(!isLoaded) {
-        isLoaded = true;
+    var isMoneyLoaded = false;
+    var isMusiciansLoaded = false;
+
+    /* ---------------- INITIALISATION LISTENERS --------------------- */
+    firebase.database().ref('/' + uid + '/game/money/').once('value', function(snapshot) {
+      isMoneyLoaded = true;
+      if(isMoneyLoaded && isMusiciansLoaded)
         loadingScreen(false, false); // Remove loading screen
-      }
-      if(snapshot.val().money > money) {
-        money = snapshot.val().money;
+
+      if(snapshot.val() > money) {
+        money = snapshot.val();
         moneyTF.innerHTML = money; 
       }
+    });
+
+    firebase.database().ref('/' + uid + '/game/musicians/').once('value', function(snapshot) {
+      isMusiciansLoaded = true;
+      if(isMoneyLoaded && isMusiciansLoaded)
+        loadingScreen(false, false); // Remove loading screen
+
+      snapshot.forEach(function(childSnapshot) {
+        var instID = parseInt(childSnapshot.key);
+        console.log("childSnapshot.key: " + instID);
+        musicians[instID] = parseInt(childSnapshot.val().lvl);
+        musiciansLvlTF[instID].innerHTML = "Lvl " + musicians[instID];
+      });
+    });
+
+    /* ---------------- CONTINOUS LISTENERS --------------------- */
+
+    listeners = firebase.database().ref('/' + uid + '/game/money').on('value', function(snapshot) {
+      if(snapshot.val() >= money) {
+        money = snapshot.val();
+        moneyTF.innerHTML = money; 
+      }
+    });
+
+    firebase.database().ref('/' + uid + '/game/musicians/').on('child_changed'
+      , function(snapshot) {
+        //console.log("iiii: " + snapshot.params.ID);
+        console.log("dddddd:" + snapshot.key);
+        console.log("dddddd:" + snapshot.val().lvl);
+
+        musiciansLvlTF[parseInt(snapshot.key)].innerHTML = "Lvl " + snapshot.val().lvl;
     });
   }
 
@@ -388,11 +449,32 @@
 
   function addMoney(amount) {
     money+=amount;
-    moneyTF.innerHTML = money; 
+    // Displayed amount will be updated automatically in the firebase "on" listener
 
-    firebase.database().ref('/' + uid + '/game/').set({
+    firebase.database().ref('/' + uid + '/game/money').transaction(
+      function(currentData){
+        console.log("transactionUpdate: " + currentData);
+        return currentData+1;
+      },
+      function(error, commmited, snapshot) {
+        console.log("onComplete(" + commmited + ", " + snapshot.val());
+      },
+      true);
+    /*firebase.database().ref('/' + uid + '/game/').update({
       money: money
+    });*/
+  }
+
+  function upgradeMusician(musician) {
+    console.log("upgradeMusician [" + musician + "]")
+    console.log("name: " + MusicianEnum.properties[musician].name);
+    musicians[musician] += 1;
+
+    firebase.database().ref('/' + uid + '/game/musicians/' + musician + "/").update({
+      lvl: musicians[musician]
     });
+
+    musiciansLvlTF[musician].innerHTML = "Lvl " + musicians[musician];
   }
 
   function loadingScreen(background, spinner) {
@@ -550,15 +632,32 @@
       dialogPolyfill.registerDialog(dialog);
   }*/
   optionDialog.querySelector('#button_account').addEventListener('click', function(event) {
-      showLoginModal(true);
+    showLoginModal(true);
   });
   document.querySelector('#button_option').addEventListener('click', function(event) {
-      optionDialog.showModal();
+    optionDialog.showModal();
   });
   optionDialog.querySelector('#button_close').addEventListener('click', function(event) {
-      optionDialog.close();
+    optionDialog.close();
   });
   /* ------ END option menu ------ */
+
+  /* ------ START musicians tab ------ */
+  /*var pianoElt = document.querySelector('#piano');
+  pianoElt.querySelector('.upgrade-button').addEventListener('click', function(event) {
+    upgradeMusician(MusicianEnum.PIANO);
+  });*/
+  for(var i = 0 ; i < MusicianEnum.SIZE ; i++)
+  {
+    (function(ii) {
+      var elt = document.getElementById(MusicianEnum.properties[ii].name);
+      musiciansLvlTF[ii] = elt.getElementsByClassName('instrument-lvl')[0];
+      elt.getElementsByClassName('upgrade-button')[0].addEventListener('click', function(event) {
+        upgradeMusician(ii);
+      });
+    })(i);
+  }
+  /* ------ END musicians tab ------ */
 
   moneyTF = document.getElementById("money_amount");
 
