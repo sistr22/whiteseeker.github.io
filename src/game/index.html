@@ -146,12 +146,11 @@ custom_css: ['game/game.css']
     var isMoneyLoaded = false;
     var isMusiciansLoaded = false;
 
-    listeners = firebase.database().ref('/' + uid + '/game/money/').on('value', function(snapshot) {
-      if(!isMoneyLoaded) {
-        isMoneyLoaded = true;
-        if(isMoneyLoaded && isMusiciansLoaded)
-          loadingScreen(false, false); // Remove loading screen
-      }
+    /* ---------------- INITIALISATION LISTENERS --------------------- */
+    firebase.database().ref('/' + uid + '/game/money/').once('value', function(snapshot) {
+      isMoneyLoaded = true;
+      if(isMoneyLoaded && isMusiciansLoaded)
+        loadingScreen(false, false); // Remove loading screen
 
       if(snapshot.val() > money) {
         money = snapshot.val();
@@ -170,6 +169,15 @@ custom_css: ['game/game.css']
         musicians[instID] = parseInt(childSnapshot.val().lvl);
         musiciansLvlTF[instID].innerHTML = "Lvl " + musicians[instID];
       });
+    });
+
+    /* ---------------- CONTINOUS LISTENERS --------------------- */
+
+    listeners = firebase.database().ref('/' + uid + '/game/money').on('value', function(snapshot) {
+      if(snapshot.val() >= money) {
+        money = snapshot.val();
+        moneyTF.innerHTML = money; 
+      }
     });
 
     firebase.database().ref('/' + uid + '/game/musicians/').on('child_changed'
@@ -195,11 +203,20 @@ custom_css: ['game/game.css']
 
   function addMoney(amount) {
     money+=amount;
-    moneyTF.innerHTML = money; 
+    // Displayed amount will be updated automatically in the firebase "on" listener
 
-    firebase.database().ref('/' + uid + '/game/').update({
+    firebase.database().ref('/' + uid + '/game/money').transaction(
+      function(currentData){
+        console.log("transactionUpdate: " + currentData);
+        return currentData+1;
+      },
+      function(error, commmited, snapshot) {
+        console.log("onComplete(" + commmited + ", " + snapshot.val());
+      },
+      true);
+    /*firebase.database().ref('/' + uid + '/game/').update({
       money: money
-    });
+    });*/
   }
 
   function upgradeMusician(musician) {
