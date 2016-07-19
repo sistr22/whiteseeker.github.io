@@ -340,6 +340,7 @@
   var uid = undefined;
   var musicians = [];
   var musiciansLvlTF = [];
+  var stopSynch = true;
   /* ------ END Global var ------ */
 
   var MusicianEnum = {
@@ -435,11 +436,15 @@
         musiciansLvlTF[parseInt(snapshot.key)].innerHTML = "Lvl " + snapshot.val().lvl;
     });
 
+    stopSynch = false;
     synchMoney();
   }
 
   var tmpAddedMoney;
   function synchMoney() {
+    if(stopSynch)
+      return;
+    
     if(localMoney > 0) {
       firebase.database().ref('/' + uid + '/game/money').transaction(
         function(currentData){
@@ -471,6 +476,7 @@
     firebase.database().ref('/' + uid + '/game/').off('value', cbs);
 
     uid = undefined;
+    stopSynch = true;
   }
 
   function addMoney(amount) {
