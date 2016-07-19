@@ -85,7 +85,8 @@ custom_css: ['game/game.css']
   /* ------ START Global var ------ */
   var gl;
   var canvas;
-  var money = 0;
+  var serverMoney = 0;
+  var localMoney = 0;
   var moneyTF;
   var cbs;
   var loginDialog;
@@ -153,8 +154,8 @@ custom_css: ['game/game.css']
         loadingScreen(false, false); // Remove loading screen
 
       if(snapshot.val() > money) {
-        money = snapshot.val();
-        moneyTF.innerHTML = money; 
+        serverMoney = snapshot.val();
+        moneyTF.innerHTML = (serverMoney + localMoney); 
       }
     });
 
@@ -174,10 +175,9 @@ custom_css: ['game/game.css']
     /* ---------------- CONTINOUS LISTENERS --------------------- */
 
     listeners = firebase.database().ref('/' + uid + '/game/money').on('value', function(snapshot) {
-      if(snapshot.val() >= money) {
-        money = snapshot.val();
-        moneyTF.innerHTML = money; 
-      }
+      console.log("on CB: " + snapshot.val());
+      serverMoney = snapshot.val();
+      moneyTF.innerHTML = (serverMoney + localMoney); 
     });
 
     firebase.database().ref('/' + uid + '/game/musicians/').on('child_changed'
@@ -188,12 +188,38 @@ custom_css: ['game/game.css']
 
         musiciansLvlTF[parseInt(snapshot.key)].innerHTML = "Lvl " + snapshot.val().lvl;
     });
+
+    synchMoney();
+  }
+
+  var tmpAddedMoney;
+  function synchMoney() {
+    if(localMoney > 0) {
+      firebase.database().ref('/' + uid + '/game/money').transaction(
+        function(currentData){
+          console.log("transactionUpdate: " + currentData);
+          tmpAddedMoney = localMoney;
+          return currentData+tmpAddedMoney;
+        },
+        function(error, commmited, snapshot) {
+          console.log("onComplete(" + commmited + ", " + snapshot.val());
+          if(commmited) {
+            localMoney -= tmpAddedMoney;
+            serverMoney = snapshot.val();
+            moneyTF.innerHTML = (serverMoney + localMoney); 
+          }
+        },
+        false);
+    }
+
+    setTimeout(synchMoney, 5000);
   }
 
   function unloadGameData() {
     var isLoaded = false;
 
-    money = 0;
+    serverMoney = 0;
+    localMoney = 0;
     moneyTF.innerHTML = 0;
 
     firebase.database().ref('/' + uid + '/game/').off('value', cbs);
@@ -202,18 +228,9 @@ custom_css: ['game/game.css']
   }
 
   function addMoney(amount) {
-    money+=amount;
-    // Displayed amount will be updated automatically in the firebase "on" listener
+    localMoney+=amount;
+    moneyTF.innerHTML = (serverMoney + localMoney);
 
-    firebase.database().ref('/' + uid + '/game/money').transaction(
-      function(currentData){
-        console.log("transactionUpdate: " + currentData);
-        return currentData+1;
-      },
-      function(error, commmited, snapshot) {
-        console.log("onComplete(" + commmited + ", " + snapshot.val());
-      },
-      true);
     /*firebase.database().ref('/' + uid + '/game/').update({
       money: money
     });*/
