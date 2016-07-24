@@ -326,23 +326,12 @@
 </script>
 
 <script type="text/javascript">
-
-
-  /* ------ START Global var ------ */
-  var gl;
-  var canvas;
-  var serverMoney = 0;
-  var localMoney = 0;
-  var moneyTF;
-  var cbs;
-  var loginDialog;
-  var optionDialog;
-  var uid = undefined;
-  var musicians = [];
-  var musiciansLvlTF = [];
-  var stopSynch = true;
-  /* ------ END Global var ------ */
-
+  /* ------ Enums ------ */
+  var StateEnum = {
+    INIT: 0,
+    PLAY: 1,
+    PAUSE: 2,
+  }
   var MusicianEnum = {
     PIANO: 0,
     VIOLIN: 1,
@@ -362,7 +351,39 @@
       6: {name: "french_horn"},
     }
   };
+  /* ------ Global variables ------ */
+  var gl;
+  var canvas;
+  var g_state = StateEnum.INIT;
+  var serverMoney = 0;
+  var localMoney = 0;
+  var moneyTF;
+  var loginDialog;
+  var optionDialog;
+  var uid = undefined;
+  var musicians = [];
+  var musiciansLvlTF = [];
+  var listeners = [];
+  var stopSynch = true;
+  
+  function getHiddenProp(){
+      var prefixes = ['webkit','moz','ms','o'];
+      // if 'hidden' is natively supported just return it
+      if ('hidden' in document) return 'hidden';
+      // otherwise loop over all the known prefixes until we find one
+      for (var i = 0; i < prefixes.length; i++){
+          if ((prefixes[i] + 'Hidden') in document) 
+              return prefixes[i] + 'Hidden';
+      }
+      // otherwise it's not supported
+      return null;
+  }
 
+  function isHidden() {
+      var prop = getHiddenProp();
+      if (!prop) return false;
+      return document[prop];
+  }
 
   function initWebGL(canvas) {
     var res = null;
@@ -380,6 +401,39 @@
     }
     
     return res;
+  }
+
+  function setGameState(state) {
+    if(g_state == state)
+      return;
+
+    switch(state) {
+      case StateEnum.PLAY:
+        listeners.push(firebase.database().ref('/' + uid + '/game/money').on('value', function(snapshot) {
+          console.log("on CB: " + snapshot.val());
+          serverMoney = snapshot.val();
+          moneyTF.innerHTML = (serverMoney + localMoney); 
+        }));
+
+        listeners.push(firebase.database().ref('/' + uid + '/game/musicians/').on('child_changed'
+          , function(snapshot) {
+            //console.log("iiii: " + snapshot.params.ID);
+            console.log("dddddd:" + snapshot.key);
+            console.log("dddddd:" + snapshot.val().lvl);
+
+            musiciansLvlTF[parseInt(snapshot.key)].innerHTML = "Lvl " + snapshot.val().lvl;
+        }));
+        stopSynch = false;
+        synchMoney();
+        break;
+      case StateEnum.PAUSE:
+        // Remove firebase listeners
+        firebase.database().ref('/' + uid + '/game/musicians/').off('value', listeners.pop());
+        firebase.database().ref('/' + uid + '/game/money').off('value', listeners.pop());
+        // Stop synch function
+        stopSynch = true;
+        break;
+    }
   }
 
   function loadGameData() {
@@ -418,34 +472,23 @@
         musiciansLvlTF[instID].innerHTML = "Lvl " + musicians[instID];
       });
     });
-
     /* ---------------- CONTINOUS LISTENERS --------------------- */
-
-    listeners = firebase.database().ref('/' + uid + '/game/money').on('value', function(snapshot) {
-      console.log("on CB: " + snapshot.val());
-      serverMoney = snapshot.val();
-      moneyTF.innerHTML = (serverMoney + localMoney); 
-    });
-
-    firebase.database().ref('/' + uid + '/game/musicians/').on('child_changed'
-      , function(snapshot) {
-        //console.log("iiii: " + snapshot.params.ID);
-        console.log("dddddd:" + snapshot.key);
-        console.log("dddddd:" + snapshot.val().lvl);
-
-        musiciansLvlTF[parseInt(snapshot.key)].innerHTML = "Lvl " + snapshot.val().lvl;
-    });
-
-    stopSynch = false;
-    synchMoney();
+    setGameState(StateEnum.PLAY);
   }
 
   var tmpAddedMoney;
   function synchMoney() {
     if(stopSynch)
       return;
-    
+
     if(localMoney > 0) {
+      tmpAddedMoney = localMoney;
+      localMoney = 0;
+      firebase.database().ref('/' + uid + '/game/').update(
+        {
+          money: (tmpAddedMoney + serverMoney)
+        });
+      /*
       firebase.database().ref('/' + uid + '/game/money').transaction(
         function(currentData){
           console.log("transactionUpdate: " + currentData);
@@ -461,6 +504,7 @@
           }
         },
         false);
+      */
     }
 
     setTimeout(synchMoney, 5000);
@@ -468,15 +512,13 @@
 
   function unloadGameData() {
     var isLoaded = false;
-
+    setGameState(StateEnum.PAUSE);
     serverMoney = 0;
     localMoney = 0;
     moneyTF.innerHTML = 0;
-
-    firebase.database().ref('/' + uid + '/game/').off('value', cbs);
-
     uid = undefined;
     stopSynch = true;
+    setGameState(StateEnum.INIT);
   }
 
   function addMoney(amount) {
@@ -666,10 +708,6 @@
   /* ------ END option menu ------ */
 
   /* ------ START musicians tab ------ */
-  /*var pianoElt = document.querySelector('#piano');
-  pianoElt.querySelector('.upgrade-button').addEventListener('click', function(event) {
-    upgradeMusician(MusicianEnum.PIANO);
-  });*/
   for(var i = 0 ; i < MusicianEnum.SIZE ; i++)
   {
     (function(ii) {
@@ -684,10 +722,28 @@
 
   moneyTF = document.getElementById("money_amount");
 
+  function visChange() {
+    if (isHidden()) {
+      console.log("Tab Hidden!");
+      if(g_state == StateEnum.PLAY) {
+        setGameState(StateEnum.PAUSE);
+      }
+    } else {
+       console.log("Tab Visible!");
+       if(g_state == StateEnum.PAUSE) {
+        setGameState(StateEnum.PLAY);
+      }
+    }
+  }
+  var visProp = getHiddenProp();
+  if (visProp) {
+    var evtname = visProp.replace(/[H|h]idden/,'') + 'visibilitychange';
+    document.addEventListener(evtname, visChange);
+  }
+
   window.onload = start;
 
 </script>
-
 
 
       </main>
