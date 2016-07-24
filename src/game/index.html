@@ -119,6 +119,7 @@ custom_css: ['game/game.css']
   var musiciansLvlTF = [];
   var listeners = [];
   var stopSynch = true;
+  var lastTime = undefined;
   
   function getHiddenProp(){
       var prefixes = ['webkit','moz','ms','o'];
@@ -161,6 +162,8 @@ custom_css: ['game/game.css']
     if(g_state == state)
       return;
 
+    console.log("setGameState(" + state + ")");
+
     switch(state) {
       case StateEnum.PLAY:
         listeners.push(firebase.database().ref('/' + uid + '/game/money').on('value', function(snapshot) {
@@ -177,8 +180,12 @@ custom_css: ['game/game.css']
 
             musiciansLvlTF[parseInt(snapshot.key)].innerHTML = "Lvl " + snapshot.val().lvl;
         }));
+        if(lastTime == undefined)
+          lastTime = Date.now();
         stopSynch = false;
         synchMoney();
+        gameLoop();
+        g_state = StateEnum.PLAY;
         break;
       case StateEnum.PAUSE:
         // Remove firebase listeners
@@ -186,6 +193,10 @@ custom_css: ['game/game.css']
         firebase.database().ref('/' + uid + '/game/money').off('value', listeners.pop());
         // Stop synch function
         stopSynch = true;
+        g_state = StateEnum.PAUSE;
+        break;
+      case StateEnum.INIT:
+        g_state = StateEnum.INIT;
         break;
     }
   }
@@ -205,8 +216,11 @@ custom_css: ['game/game.css']
     /* ---------------- INITIALISATION LISTENERS --------------------- */
     firebase.database().ref('/' + uid + '/game/money/').once('value', function(snapshot) {
       isMoneyLoaded = true;
-      if(isMoneyLoaded && isMusiciansLoaded)
+      if(isMoneyLoaded && isMusiciansLoaded) {
         loadingScreen(false, false); // Remove loading screen
+        // Start game
+        setGameState(StateEnum.PLAY);
+      }
 
       if(snapshot.val() > money) {
         serverMoney = snapshot.val();
@@ -216,8 +230,11 @@ custom_css: ['game/game.css']
 
     firebase.database().ref('/' + uid + '/game/musicians/').once('value', function(snapshot) {
       isMusiciansLoaded = true;
-      if(isMoneyLoaded && isMusiciansLoaded)
+      if(isMoneyLoaded && isMusiciansLoaded) {
         loadingScreen(false, false); // Remove loading screen
+        // Start game
+        setGameState(StateEnum.PLAY);
+      }
 
       snapshot.forEach(function(childSnapshot) {
         var instID = parseInt(childSnapshot.key);
@@ -226,8 +243,25 @@ custom_css: ['game/game.css']
         musiciansLvlTF[instID].innerHTML = "Lvl " + musicians[instID];
       });
     });
-    /* ---------------- CONTINOUS LISTENERS --------------------- */
-    setGameState(StateEnum.PLAY);
+  }
+
+  var moneyCounter = 0;
+  function gameLoop() {
+    if(stopSynch)
+      return;
+
+    var now = Date.now();
+    var delta = now - lastTime;
+
+    moneyCounter += delta;
+    var roundSec = Math.floor(moneyCounter/1000);
+    moneyCounter -= 1000*roundSec;
+    addMoney(roundSec);
+    
+
+    lastTime = now
+
+    setTimeout(gameLoop, 500);
   }
 
   var tmpAddedMoney;
@@ -240,7 +274,8 @@ custom_css: ['game/game.css']
       localMoney = 0;
       firebase.database().ref('/' + uid + '/game/').update(
         {
-          money: (tmpAddedMoney + serverMoney)
+          money: (tmpAddedMoney + serverMoney),
+          lastUpdate: firebase.database.ServerValue.TIMESTAMP
         });
       /*
       firebase.database().ref('/' + uid + '/game/money').transaction(
