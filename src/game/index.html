@@ -210,38 +210,53 @@ custom_css: ['game/game.css']
       musicians[i] = 0;
     }
 
+    var isTimestampLoaded = false;
     var isMoneyLoaded = false;
     var isMusiciansLoaded = false;
 
     /* ---------------- INITIALISATION LISTENERS --------------------- */
-    firebase.database().ref('/' + uid + '/game/money/').once('value', function(snapshot) {
-      isMoneyLoaded = true;
-      if(isMoneyLoaded && isMusiciansLoaded) {
+    firebase.database().ref('/' + uid + '/game/lastUpdate/').once('value', function(snapshot) {
+      isTimestampLoaded = true;
+
+      if(snapshot.val()) {
+        lastTime = snapshot.val();
+      }
+
+      if(isMoneyLoaded && isMusiciansLoaded && isTimestampLoaded) {
         loadingScreen(false, false); // Remove loading screen
         // Start game
         setGameState(StateEnum.PLAY);
       }
+    });
 
+    firebase.database().ref('/' + uid + '/game/money/').once('value', function(snapshot) {
+      isMoneyLoaded = true;
       if(snapshot.val() > money) {
         serverMoney = snapshot.val();
         moneyTF.innerHTML = (serverMoney + localMoney); 
+      }
+
+      if(isMoneyLoaded && isMusiciansLoaded && isTimestampLoaded) {
+        loadingScreen(false, false); // Remove loading screen
+        // Start game
+        setGameState(StateEnum.PLAY);
       }
     });
 
     firebase.database().ref('/' + uid + '/game/musicians/').once('value', function(snapshot) {
       isMusiciansLoaded = true;
-      if(isMoneyLoaded && isMusiciansLoaded) {
-        loadingScreen(false, false); // Remove loading screen
-        // Start game
-        setGameState(StateEnum.PLAY);
-      }
-
       snapshot.forEach(function(childSnapshot) {
         var instID = parseInt(childSnapshot.key);
         console.log("childSnapshot.key: " + instID);
         musicians[instID] = parseInt(childSnapshot.val().lvl);
         musiciansLvlTF[instID].innerHTML = "Lvl " + musicians[instID];
       });
+
+      if(isMoneyLoaded && isMusiciansLoaded && isTimestampLoaded) {
+        loadingScreen(false, false); // Remove loading screen
+        // Start game
+        setGameState(StateEnum.PLAY);
+      }
     });
   }
 
@@ -256,9 +271,8 @@ custom_css: ['game/game.css']
     moneyCounter += delta;
     var roundSec = Math.floor(moneyCounter/1000);
     moneyCounter -= 1000*roundSec;
-    addMoney(roundSec);
+    updateMoney(roundSec);
     
-
     lastTime = now
 
     setTimeout(gameLoop, 500);
@@ -269,13 +283,13 @@ custom_css: ['game/game.css']
     if(stopSynch)
       return;
 
-    if(localMoney > 0) {
+    if(localMoney != 0) {
       tmpAddedMoney = localMoney;
       localMoney = 0;
       firebase.database().ref('/' + uid + '/game/').update(
         {
           money: (tmpAddedMoney + serverMoney),
-          lastUpdate: firebase.database.ServerValue.TIMESTAMP
+          lastUpdate: lastTime
         });
       /*
       firebase.database().ref('/' + uid + '/game/money').transaction(
@@ -310,7 +324,7 @@ custom_css: ['game/game.css']
     setGameState(StateEnum.INIT);
   }
 
-  function addMoney(amount) {
+  function updateMoney(amount) {
     localMoney+=amount;
     moneyTF.innerHTML = (serverMoney + localMoney);
 
@@ -319,10 +333,20 @@ custom_css: ['game/game.css']
     });*/
   }
 
+  function getMusicianUpgPrice(musician, nbLvls) {
+    return 150*nbLvls;
+  }
+
   function upgradeMusician(musician) {
     console.log("upgradeMusician [" + musician + "]")
     console.log("name: " + MusicianEnum.properties[musician].name);
-    musicians[musician] += 1;
+
+    var nbLvls = 1;
+    var price = getMusicianUpgPrice(musician, nbLvls);
+    if(localMoney + serverMoney > price) {
+      updateMoney(-price);
+      musicians[musician] += nbLvls;
+    }
 
     firebase.database().ref('/' + uid + '/game/musicians/' + musician + "/").update({
       lvl: musicians[musician]
@@ -411,7 +435,7 @@ custom_css: ['game/game.css']
     canvas = document.getElementById("glcanvas");
     canvas.addEventListener( "pointerdown", function( e ) {
       console.log("pointerdown");
-      addMoney(1);
+      updateMoney(1);
     });
     // Initialize the GL context
     gl = initWebGL(canvas);
