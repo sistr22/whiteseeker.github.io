@@ -645,6 +645,10 @@
     });
 
     musiciansLvlTF[musician].innerHTML = "Lvl " + musicians[musician];
+    //Upgrade musician price:
+    var display = formatNum(getMusicianUpgPrice(musician, 1), 2);
+    musiciansTF[musician].cost_amount.innerHTML = display.val;
+    musiciansTF[musician].cost_unit.innerHTML = display.unit;
   }
 
   function loadingScreen(background, spinner) {
