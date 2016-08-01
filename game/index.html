@@ -361,8 +361,10 @@
   var loginDialog;
   var optionDialog;
   var uid = undefined;
+  var g_musiciansStats = [];
   var musicians = [];
   var musiciansLvlTF = [];
+  var musiciansTF = [];
   var listeners = [];
   var stopSynch = true;
   var lastTime = undefined;
@@ -415,7 +417,9 @@
         listeners.push(firebase.database().ref('/' + uid + '/game/money').on('value', function(snapshot) {
           console.log("on CB: " + snapshot.val());
           serverMoney = snapshot.val();
-          moneyTF.innerHTML = (serverMoney + localMoney); 
+          var display = formatNum(serverMoney + localMoney, 2);
+          moneyTF.amount.innerHTML = display.val;
+          moneyTF.unit.innerHTML = display.unit;
         }));
 
         listeners.push(firebase.database().ref('/' + uid + '/game/musicians/').on('child_changed'
@@ -447,6 +451,17 @@
     }
   }
 
+  var g_units = ["", "k", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "De", "UnD", "DuD", "TrD", "QaD", "QiD", "SeD", "SpD", "OcD", "NoD", "Vi", "UnV"];
+  function floorNum(n) {
+    return (Math.abs(n) - Math.abs(Math.floor(n)) >= 0.9999999999999991) ? Math.ceil(n) : Math.floor(n);
+  };
+  function formatNum(n, d) {
+    var l = (floorNum(Math.log(Math.abs(n)) / Math.log(10)) <= 0) ? 0 : floorNum(Math.log(Math.abs(n)) / Math.log(10));
+    var p = (l % 3 === 0) ? 2 : (((l - 1) % 3 === 0) ? 1 : 0);
+    var r = (Math.abs(n) < 1000) ? ((typeof d === "number") ? n.toFixed(d) : floorNum(n)) : (floorNum(n / (Math.pow(10, floorNum(l / 3) * 3 - p))) / Math.pow(10, p));
+    return { val:r, unit:g_units[floorNum(l / 3)].concat("$") };
+  };
+
   function loadGameData() {
     var user = firebase.auth().currentUser;
     uid = user.uid;
@@ -459,8 +474,40 @@
     var isTimestampLoaded = false;
     var isMoneyLoaded = false;
     var isMusiciansLoaded = false;
+    var isGameplayValueLoaded = false;
+
+    function isFinish() {
+      if(isGameplayValueLoaded && isMoneyLoaded && isMusiciansLoaded && isTimestampLoaded) {
+        loadingScreen(false, false); // Remove loading screen
+        // Update musicians upgrade price
+        for(var i = 0 ; i < MusicianEnum.SIZE ; i++) {
+          var display = formatNum(getMusicianUpgPrice(i, 1), 2);
+          musiciansTF[i].cost_amount.innerHTML = display.val;
+          musiciansTF[i].cost_unit.innerHTML = display.unit;
+        }
+        // Start game
+        setGameState(StateEnum.PLAY);
+      }
+    }
 
     /* ---------------- INITIALISATION LISTENERS --------------------- */
+    firebase.database().ref('/gameplay/musicians/').once('value', function(snapshot) {
+      isGameplayValueLoaded = true;
+
+      // Store values
+      snapshot.forEach(function(childSnapshot) {
+        var musId = parseInt(childSnapshot.key);
+        g_musiciansStats[musId] = {
+          base_cost: parseFloat(childSnapshot.val().base_cost),
+          coeff_cost: parseFloat(childSnapshot.val().coeff_cost)
+        };
+        console.log("tata");
+        console.log("stats [" + musId + "] " + g_musiciansStats[musId].base_cost + " " + g_musiciansStats[musId].coeff_cost + " ;");
+      });
+
+      isFinish();      
+    });
+
     firebase.database().ref('/' + uid + '/game/lastUpdate/').once('value', function(snapshot) {
       isTimestampLoaded = true;
 
@@ -468,25 +515,19 @@
         lastTime = snapshot.val();
       }
 
-      if(isMoneyLoaded && isMusiciansLoaded && isTimestampLoaded) {
-        loadingScreen(false, false); // Remove loading screen
-        // Start game
-        setGameState(StateEnum.PLAY);
-      }
+      isFinish();
     });
 
     firebase.database().ref('/' + uid + '/game/money/').once('value', function(snapshot) {
       isMoneyLoaded = true;
       if(snapshot.val() > money) {
         serverMoney = snapshot.val();
-        moneyTF.innerHTML = (serverMoney + localMoney); 
+        var display = formatNum(serverMoney + localMoney, 2);
+        moneyTF.amount.innerHTML = display.val; 
+        moneyTF.unit.innerHTML = display.unit;
       }
 
-      if(isMoneyLoaded && isMusiciansLoaded && isTimestampLoaded) {
-        loadingScreen(false, false); // Remove loading screen
-        // Start game
-        setGameState(StateEnum.PLAY);
-      }
+      isFinish();
     });
 
     firebase.database().ref('/' + uid + '/game/musicians/').once('value', function(snapshot) {
@@ -498,11 +539,7 @@
         musiciansLvlTF[instID].innerHTML = "Lvl " + musicians[instID];
       });
 
-      if(isMoneyLoaded && isMusiciansLoaded && isTimestampLoaded) {
-        loadingScreen(false, false); // Remove loading screen
-        // Start game
-        setGameState(StateEnum.PLAY);
-      }
+      isFinish();
     });
   }
 
@@ -572,15 +609,23 @@
 
   function updateMoney(amount) {
     localMoney+=amount;
-    moneyTF.innerHTML = (serverMoney + localMoney);
-
-    /*firebase.database().ref('/' + uid + '/game/').update({
-      money: money
-    });*/
+    var display = formatNum(serverMoney + localMoney, 2);
+    moneyTF.amount.innerHTML = display.val;
+    moneyTF.unit.innerHTML = display.unit;
   }
 
   function getMusicianUpgPrice(musician, nbLvls) {
-    return 150*nbLvls;
+    console.log("yy" + g_musiciansStats[musician].base_cost);
+    if(g_musiciansStats[musician] != null) {
+      var s = g_musiciansStats[musician];
+      console.log("s.base_cost: " + s.base_cost + " " + typeof s.base_cost);
+      console.log("s.base_coeff: " + s.coeff_cost + " " + typeof s.coeff_cost);
+      console.log("musicians[musician]: " + musicians[musician] + " " + typeof musicians[musician]);
+      return s.base_cost * Math.pow(s.coeff_cost, parseInt(musicians[musician]) + 1);
+    } else {
+      console.log("unknown musician: " + musician);
+      return 150*nbLvls;
+    }
   }
 
   function upgradeMusician(musician) {
@@ -589,6 +634,7 @@
 
     var nbLvls = 1;
     var price = getMusicianUpgPrice(musician, nbLvls);
+    console.log("price = " + price);
     if(localMoney + serverMoney > price) {
       updateMoney(-price);
       musicians[musician] += nbLvls;
@@ -775,11 +821,18 @@
       elt.getElementsByClassName('upgrade-button')[0].addEventListener('click', function(event) {
         upgradeMusician(ii);
       });
+      musiciansTF[ii] = {
+        cost_amount: elt.getElementsByClassName('upgrade-amount')[0],
+        cost_unit: elt.getElementsByClassName('upgrade-unit')[0]
+      }
     })(i);
   }
   /* ------ END musicians tab ------ */
 
-  moneyTF = document.getElementById("money_amount");
+  moneyTF = {
+    amount: document.getElementById("money_amount"),
+    unit: document.getElementById("money_unit")
+  }
 
   function visChange() {
     if (isHidden()) {
