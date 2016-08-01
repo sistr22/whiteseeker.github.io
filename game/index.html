@@ -433,7 +433,7 @@
         if(lastTime == undefined)
           lastTime = Date.now();
         stopSynch = false;
-        synchMoney();
+        setTimeout(synchMoney, 5000);
         gameLoop();
         g_state = StateEnum.PLAY;
         break;
