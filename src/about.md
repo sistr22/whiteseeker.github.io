@@ -19,6 +19,6 @@ This blog is made thanks to:
  * [Material Design Lite](http://www.getmdl.io/){: target="_blank"} library for the theme & design
  * [PhotoSwipe](http://photoswipe.com/){: target="_blank"} for the photo gallery
  * [Modernizr](https://modernizr.com/){: target="_blank"} to detect if a browser support webp format or not
- * [Firebase](https://firebase.google.com/){: target="_blank"} for hosting & push notification{: target="_blank"})
+ * [Firebase](https://firebase.google.com/){: target="_blank"} for hosting & push notification
 
 
