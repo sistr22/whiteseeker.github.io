@@ -60,7 +60,7 @@ custom_css: ['game/game.css']
   firebase.initializeApp(config);
 </script>
 
-<script id="shader-fs" type="x-shader/x-fragment">
+<!--script id="shader-fs" type="x-shader/x-fragment">
   precision mediump float;
 
   void main(void) {
@@ -77,7 +77,7 @@ custom_css: ['game/game.css']
   void main(void) {
     gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
   }
-</script>
+</script-->
 
 <script type="text/javascript">
   /* ------ Enums ------ */
@@ -85,7 +85,7 @@ custom_css: ['game/game.css']
     INIT: 0,
     PLAY: 1,
     PAUSE: 2,
-  }
+  };
   var MusicianEnum = {
     PIANO: 0,
     VIOLIN: 1,
@@ -184,7 +184,7 @@ custom_css: ['game/game.css']
 
             musiciansLvlTF[parseInt(snapshot.key)].innerHTML = "Lvl " + snapshot.val().lvl;
         }));
-        if(lastTime == undefined)
+        if(lastTime === undefined)
           lastTime = Date.now();
         stopSynch = false;
         setTimeout(synchMoney, 5000);
@@ -208,13 +208,23 @@ custom_css: ['game/game.css']
   var g_units = ["", "k", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "De", "UnD", "DuD", "TrD", "QaD", "QiD", "SeD", "SpD", "OcD", "NoD", "Vi", "UnV"];
   function floorNum(n) {
     return (Math.abs(n) - Math.abs(Math.floor(n)) >= 0.9999999999999991) ? Math.ceil(n) : Math.floor(n);
-  };
+  }
   function formatNum(n, d) {
     var l = (floorNum(Math.log(Math.abs(n)) / Math.log(10)) <= 0) ? 0 : floorNum(Math.log(Math.abs(n)) / Math.log(10));
     var p = (l % 3 === 0) ? 2 : (((l - 1) % 3 === 0) ? 1 : 0);
     var r = (Math.abs(n) < 1000) ? ((typeof d === "number") ? n.toFixed(d) : floorNum(n)) : (floorNum(n / (Math.pow(10, floorNum(l / 3) * 3 - p))) / Math.pow(10, p));
     return { val:r, unit:g_units[floorNum(l / 3)].concat("$") };
-  };
+  }
+
+  function updateMusicianUI(m) {
+    var display = formatNum(getMusicianUpgPrice(m, 1), 2);
+    musiciansTF[m].cost_amount.innerHTML = display.val;
+    musiciansTF[m].cost_unit.innerHTML = display.unit;
+    var currentProd = getMusicianProd(m, musicians[m]);
+    var displayCurrentProd = formatNum(currentProd);
+    musiciansTF[m].prod_amount.innerHTML = displayCurrentProd.val;
+    musiciansTF[m].prod_unit.innerHTML = displayCurrentProd.unit;
+  }
 
   function loadGameData() {
     var user = firebase.auth().currentUser;
@@ -232,15 +242,20 @@ custom_css: ['game/game.css']
 
     function isFinish() {
       if(isGameplayValueLoaded && isMoneyLoaded && isMusiciansLoaded && isTimestampLoaded) {
+        console.log("isFinish => true");
         loadingScreen(false, false); // Remove loading screen
         // Update musicians upgrade price
         for(var i = 0 ; i < MusicianEnum.SIZE ; i++) {
-          var display = formatNum(getMusicianUpgPrice(i, 1), 2);
-          musiciansTF[i].cost_amount.innerHTML = display.val;
-          musiciansTF[i].cost_unit.innerHTML = display.unit;
+          updateMusicianUI(i);
         }
         // Start game
         setGameState(StateEnum.PLAY);
+      } else {
+        console.log("isFinish => false");
+        console.log("isTimestampLoaded = " + isTimestampLoaded);
+        console.log("isMoneyLoaded = " + isMoneyLoaded);
+        console.log("isMusiciansLoaded = " + isMusiciansLoaded);
+        console.log("isGameplayValueLoaded = " + isGameplayValueLoaded);
       }
     }
 
@@ -253,10 +268,10 @@ custom_css: ['game/game.css']
         var musId = parseInt(childSnapshot.key);
         g_musiciansStats[musId] = {
           base_cost: parseFloat(childSnapshot.val().base_cost),
-          coeff_cost: parseFloat(childSnapshot.val().coeff_cost)
+          coeff_cost: parseFloat(childSnapshot.val().coeff_cost),
+          base_prod: parseFloat(childSnapshot.val().base_prod),
+          coeff_prod: parseFloat(childSnapshot.val().coeff_prod),
         };
-        console.log("tata");
-        console.log("stats [" + musId + "] " + g_musiciansStats[musId].base_cost + " " + g_musiciansStats[musId].coeff_cost + " ;");
       });
 
       isFinish();      
@@ -295,6 +310,7 @@ custom_css: ['game/game.css']
 
       isFinish();
     });
+    console.log("<-loadGameData");
   }
 
   var moneyCounter = 0;
@@ -310,7 +326,7 @@ custom_css: ['game/game.css']
     moneyCounter -= 1000*roundSec;
     updateMoney(roundSec);
     
-    lastTime = now
+    lastTime = now;
 
     setTimeout(gameLoop, 500);
   }
@@ -382,8 +398,21 @@ custom_css: ['game/game.css']
     }
   }
 
+  function getMusicianProd(musician, lvl) {
+    console.log("prod" + g_musiciansStats[musician].base_prod);
+    if(g_musiciansStats[musician] != null) {
+      var s = g_musiciansStats[musician];
+      console.log("s.base_prod: " + s.base_prod + " " + typeof s.base_prod);
+      console.log("s.coeff_prod: " + s.coeff_prod + " " + typeof s.coeff_prod);
+      return Math.pow(s.base_prod*lvl + Math.pow(s.coeff_prod*Math.sin(lvl/s.coeff_prod), 2), 3);
+    } else {
+      console.log("unknown musician: " + musician);
+      return 1*lvl;
+    }
+  }
+
   function upgradeMusician(musician) {
-    console.log("upgradeMusician [" + musician + "]")
+    console.log("upgradeMusician [" + musician + "]");
     console.log("name: " + MusicianEnum.properties[musician].name);
 
     var nbLvls = 1;
@@ -400,9 +429,7 @@ custom_css: ['game/game.css']
 
     musiciansLvlTF[musician].innerHTML = "Lvl " + musicians[musician];
     //Upgrade musician price:
-    var display = formatNum(getMusicianUpgPrice(musician, 1), 2);
-    musiciansTF[musician].cost_amount.innerHTML = display.val;
-    musiciansTF[musician].cost_unit.innerHTML = display.unit;
+    updateMusicianUI(musician);
   }
 
   function loadingScreen(background, spinner) {
@@ -428,7 +455,7 @@ custom_css: ['game/game.css']
 
     if(show) {
       var user = firebase.auth().currentUser;
-      if(user != null) {
+      if(user !== null) {
         // var name = user.displayName;
         // var email = user.email;
         // var photoUrl = user.photoURL;
@@ -440,7 +467,7 @@ custom_css: ['game/game.css']
             googleEmail = profile.email;
           }
         });
-        if(googleEmail != undefined) {
+        if(googleEmail !== undefined) {
           document.getElementById("google-email").innerHTML = googleEmail;
           sub_menu_not_signed.style.display = "none";
           sub_menu_google_signed.style.display = "block";
@@ -581,8 +608,11 @@ custom_css: ['game/game.css']
       });
       musiciansTF[ii] = {
         cost_amount: elt.getElementsByClassName('upgrade-amount')[0],
-        cost_unit: elt.getElementsByClassName('upgrade-unit')[0]
-      }
+        cost_unit: elt.getElementsByClassName('upgrade-unit')[0],
+        prod_amount: elt.getElementsByClassName('prod-amount')[0],
+        prod_nxt_amount: elt.getElementsByClassName('prod-nxt-amount')[0],
+        prod_unit: elt.getElementsByClassName('prod-unit')[0],
+      };
     })(i);
   }
   /* ------ END musicians tab ------ */
@@ -590,7 +620,7 @@ custom_css: ['game/game.css']
   moneyTF = {
     amount: document.getElementById("money_amount"),
     unit: document.getElementById("money_unit")
-  }
+  };
 
   function visChange() {
     if (isHidden()) {

@@ -1,8 +1,17 @@
-importScripts('https://cdn.firebase.com/js/client/2.4.2/firebase.js');
+importScripts('https://www.gstatic.com/firebasejs/3.6.0/firebase-app.js');
+importScripts('https://www.gstatic.com/firebasejs/3.6.0/firebase-messaging.js');
+
+firebase.initializeApp({
+  'messagingSenderId': '1075313249404'
+});
+
+// Retrieve an instance of Firebase Messaging
+const messaging = firebase.messaging();
 
 var CACHE_NAME = 'my-site-cache-v1';
 //var OLD_CACHE = 'blog-dynamique-cache-v1';
 
+// Polyfill for String.endsWith
 if (!String.prototype.endsWith) {
   String.prototype.endsWith = function(searchString, position) {
       var subjectString = this.toString();
@@ -22,7 +31,20 @@ function handleErrors(response) {
     return response;
 }
 
-var notifurl = "/"
+messaging.setBackgroundMessageHandler(function(payload) {
+  console.log('Received background message ', payload);
+  // Customize notification here
+  const notificationTitle = 'Background Message Title';
+  const notificationOptions = {
+    body: 'Background Message body.',
+    icon: '/assets/images/icon_192_192.png'
+  };
+
+  return self.registration.showNotification(notificationTitle,
+      notificationOptions);
+});
+
+/*var notifurl = "/"
 self.addEventListener('push', function(event) {  
   // Get a database reference to our notification
   var ref = new Firebase("https://luminous-inferno-9971.firebaseio.com/pninfos");
@@ -78,8 +100,8 @@ self.addEventListener('push', function(event) {
     })
   );  
 });
-
-self.addEventListener('notificationclick', function(event) {
+*/
+/*self.addEventListener('notificationclick', function(event) {
   console.log('On notification click: ', event.notification.tag);  
   // Android doesn't close the notification when you click on it  
   // See: http://crbug.com/463146  
@@ -104,7 +126,7 @@ self.addEventListener('notificationclick', function(event) {
       }
     })
   );
-});
+});*/
 
 this.addEventListener('activate', function(event) {
   var cacheWhitelist = [CACHE_NAME];

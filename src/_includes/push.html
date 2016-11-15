@@ -1,4 +1,5 @@
-<script src="https://www.gstatic.com/firebasejs/3.1.0/firebase.js"></script>
+<script src="https://www.gstatic.com/firebasejs/3.6.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/3.6.0/firebase-messaging.js"></script>
 <script>
   // Initialize Firebase
   var config = {
@@ -6,10 +7,13 @@
     authDomain: "luminous-inferno-9971.firebaseapp.com",
     databaseURL: "https://luminous-inferno-9971.firebaseio.com",
     storageBucket: "luminous-inferno-9971.appspot.com",
+    messagingSenderId: "1075313249404"
   };
   firebase.initializeApp(config);
 
-  console.log("navigator.language: " + navigator.language);
+  // Retrieve Firebase Messaging object.
+  const messaging = firebase.messaging();
+
   var isPushEnabled = false;
   var pushNotifToken;
   var pushNotifEndPoint;
@@ -36,45 +40,45 @@
       return;
     }
 
-    console.log("check for a subscription ");
-    // We need the service worker registration to check for a subscription  
     navigator.serviceWorker.ready.then(function(serviceWorkerRegistration) {
-      console.log("service worker is ready");
-      // Do we already have a push message subscription?
-      serviceWorkerRegistration.pushManager.getSubscription()
-        .then(function(subscription) {
-          console.log("enable ui");
-          // Enable any UI which subscribes / unsubscribes from
-          // push messages.
-          var pushButton = document.querySelector('#switch-notif');
+      messaging.useServiceWorker(serviceWorkerRegistration);
+      console.log("check for a subscription ");
+      messaging.getToken()
+      .then(function(currentToken) {
+        var pushButton = document.querySelector('#switch-notif');  
+        if (currentToken) {
+          isPushEnabled = true;
           if(pushButton) {
             pushButton.MaterialCheckbox.enable();
-          }
-          if (!subscription) {
-            if(pushButton) {
-              pushButton.MaterialCheckbox.uncheck();
-            }
-
-            setTimeout(displaySnackBar,3000);
-
-            return;  
-          }
-          if(pushButton) {
             pushButton.MaterialCheckbox.check();
           }
-
-          // Keep your server in sync with the latest subscriptionId
-          sendSubscriptionToServer(subscription);
-
-          // Set your UI to show they have subscribed for
-          // push messages
-          //pushButton.textContent = 'Disable Push Messages';
-          isPushEnabled = true;
-        })  
-        .catch(function(err) {
-          console.warn('Error during getSubscription()', err);
-        });
-    });  
+          var pnTokenElt = document.getElementById('div_pn_token');
+          if(pnTokenElt) {
+            pnTokenElt.innerHTML = currentToken;
+          }
+        } else {
+          // Show permission request.
+          isPushEnabled = false;
+          console.log('No Instance ID token available. Request permission to generate one.');
+          // Show permission UI.
+          if(pushButton) {
+            pushButton.MaterialCheckbox.enable();
+            pushButton.MaterialCheckbox.uncheck();
+            setTimeout(displaySnackBar,3000);
+          }
+        }
+      })
+      .catch(function(err) {
+        var pushButton = document.querySelector('#switch-notif');  
+        console.log('An error occurred while retrieving token. ', err);
+        isPushEnabled = false;
+        if(pushButton) {
+          pushButton.MaterialCheckbox.enable();
+          pushButton.MaterialCheckbox.uncheck();
+          setTimeout(displaySnackBar,3000);
+        }
+      });
+    });
   }
 
   function snackbarHandler() {
@@ -97,7 +101,7 @@
     }
   }
 
-  function sendSubscriptionToServer(subscription) {
+  /*function sendSubscriptionToServer(subscription) {
     var timeOffset = new Date().getTimezoneOffset();
     pushNotifEndPoint = subscription.endpoint;
     if(subscription.endpoint.startsWith("https://android.googleapis.com/gcm/send/")) {
@@ -122,9 +126,48 @@
     if(pnEndpointElt) {
       pnEndpointElt.innerHTML = pushNotifEndPoint;
     }
-  }
+  }*/
 
-  function subscribe() {  
+  function subscribe() {
+    // Disable the button so it can't be changed while  
+    // we process the permission request  
+    var pushButton = document.querySelector('#switch-notif');
+    pushButton.MaterialCheckbox.disable();
+
+    messaging.requestPermission()
+    .then(function() {
+      console.log('Notification permission granted.');
+      
+      messaging.getToken()
+      .then(function(currentToken) {
+        var pushButton = document.querySelector('#switch-notif');  
+        if (currentToken) {
+          isPushEnabled = true;
+          pushButton.MaterialCheckbox.enable();
+          pushButton.MaterialCheckbox.check();
+        } else {
+          // Show permission request.
+          console.log('No Instance ID token available. Request permission to generate one.');
+          // Show permission UI.
+          pushButton.MaterialCheckbox.disable();
+        }
+      })
+      .catch(function(err) {
+        var pushButton = document.querySelector('#switch-notif');  
+        console.log('An error occurred while retrieving token. ', err);
+        pushButton.MaterialCheckbox.enable();
+        pushButton.MaterialCheckbox.uncheck();
+      });
+
+    })
+    .catch(function(err) {
+      var pushButton = document.querySelector('#switch-notif');  
+      console.log('Unable to get permission to notify.', err);
+      pushButton.MaterialCheckbox.enable();
+      pushButton.MaterialCheckbox.uncheck();
+    });
+
+    /*
     // Disable the button so it can't be changed while  
     // we process the permission request  
     var pushButton = document.querySelector('#switch-notif');  
@@ -165,7 +208,8 @@
             //pushButton.textContent = 'Enable Push Messages';  
           }  
         });  
-    });  
+    });
+*/
   }
 
   function unsubscribe() {  
@@ -173,7 +217,30 @@
     //pushButton.disabled = true;
     pushButton.MaterialCheckbox.disable();
 
-    navigator.serviceWorker.ready.then(function(serviceWorkerRegistration) {
+
+    messaging.getToken()
+    .then(function(currentToken) {
+      var pushButton = document.querySelector('#switch-notif');  
+      if (currentToken) {
+        messaging.deleteToken(currentToken);
+        isPushEnabled = false;
+        pushButton.MaterialCheckbox.enable();
+        pushButton.MaterialCheckbox.uncheck();
+      } else {
+        isPushEnabled = false;
+        pushButton.MaterialCheckbox.enable();
+        pushButton.MaterialCheckbox.uncheck();
+      }
+    })
+    .catch(function(err) {
+      var pushButton = document.querySelector('#switch-notif');
+      isPushEnabled = false;  
+      console.log('An error occurred while retrieving token. ', err);
+      pushButton.MaterialCheckbox.enable();
+      pushButton.MaterialCheckbox.uncheck();
+    });
+
+    /*navigator.serviceWorker.ready.then(function(serviceWorkerRegistration) {
       // To unsubscribe from push messaging, you need get the
       // subscription object, which you can call unsubscribe() on.
       serviceWorkerRegistration.pushManager.getSubscription().then(
@@ -268,7 +335,7 @@
         }).catch(function(e) {  
           console.error('Error thrown while unsubscribing from push messaging.', e);  
         });  
-    });  
+    });*/
   }
 
   window.addEventListener('load', function() {

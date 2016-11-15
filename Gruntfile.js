@@ -75,13 +75,13 @@ module.exports = function(grunt) {
     },
 
     penthouse: {
-      extract : {
-        outfile : '_site/css/critical.css',
-        css : '_site/css/merged.min.css',
-        url : 'http://localhost:4000',
-        width : 1200,
-        height : 900,
-        skipErrors : false // this is the default
+      build: {
+        outfile: '_site/css/critical.css',
+        css: '_site/css/merged.min.css',
+        url: 'http://localhost:4000',
+        width: 1200,
+        height: 900,
+        skipErrors: false // this is the default
       }
     },
 
