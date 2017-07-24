@@ -16,7 +16,7 @@
     "webppngdev": "find ./_site/assets/images/ -type f -name '*.png' | while read file; do node webpconverter.js $file dev; done",
     
     "clean": "rm -r _site/*",
-    "serve": "ws -d _site/"
+    "serve": "firebase serve"
   },
   "devDependencies": {
     "check-dependencies": "^1.0.1",
