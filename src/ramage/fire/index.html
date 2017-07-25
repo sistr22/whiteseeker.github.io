@@ -1,0 +1,87 @@
+---
+layout: post
+title: RaMaGe
+category : gamedev
+custom_css: ['ramage/map.css']
+tags : [gamedev, procedural, beginner]
+---
+<!DOCTYPE html>
+<html>
+<body>
+  <div style="display: flex; justify-content: space-around;">
+    <div name="canal_def">
+      <canvas id="r_canva" class="canal_canva" width="128" height="128" style="margin: auto; display: block; padding: 0px 0px 5px 0px;">Your browser does not support the HTML5 canvas tag.</canvas>
+      <div class="canal_parameters" style="float: left;margin: 0 auto;">
+        <select class="algo_type">
+          <option value="fract_3d">Fractal 3D</option>
+          <option value="perlin">Perlin</option>
+          <option value="shotgun">Shotgun</option>
+        </select>
+        <div><input id="r_generateMap" class="refresh_button" type="button" value="Refresh"/></div>
+      </div>
+    </div>
+    <div name="canal_def">
+      <canvas id="g_canva" class="canal_canva" width="128" height="128" style="margin: auto; display: block; padding: 0px 0px 5px 0px;">Your browser does not support the HTML5 canvas tag.</canvas>
+      <div class="canal_parameters" style="float: left;margin: 0 auto;">
+        <select class="algo_type">
+          <option value="fract_3d">Fractal 3D</option>
+          <option value="perlin">Perlin</option>
+          <option value="shotgun">Shotgun</option>
+        </select>
+        <div><input id="g_generateMap" class="refresh_button" type="button" value="Refresh"/></div>
+      </div>
+    </div>
+    <div name="canal_def">
+      <canvas id="b_canva" class="canal_canva" width="128" height="128" style="margin: auto; display: block; padding: 0px 0px 5px 0px;">Your browser does not support the HTML5 canvas tag.</canvas>
+      <div class="canal_parameters" style="float: left;margin: 0 auto;">
+        <select class="algo_type">
+          <option value="fract_3d">Fractal 3D</option>
+          <option value="perlin">Perlin</option>
+          <option value="shotgun">Shotgun</option>
+        </select>
+        <div><input id="b_generateMap" class="refresh_button" type="button" value="Refresh"/></div>
+      </div>
+    </div>
+    <div name="canal_def">
+      <canvas id="a_canva" class="canal_canva" width="128" height="128" style="margin: auto; display: block; padding: 0px 0px 5px 0px;">Your browser does not support the HTML5 canvas tag.</canvas>
+      <div class="canal_parameters" style="float: left;margin: 0 auto;">
+        <select class="algo_type">
+          <option value="fract_3d">Fractal 3D</option>
+          <option value="perlin">Perlin</option>
+          <option value="shotgun">Shotgun</option>
+        </select>
+        <div><input id="a_generateMap" class="refresh_button" type="button" value="Refresh"/></div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <canvas id="final_canva" width="512" height="512" style="margin: auto; display: block; padding: 0px 0px 5px 0px;">Your browser does not support the HTML5 canvas tag.</canvas>
+    <div id="final_parameters" style="float: left;margin: 0 auto;">
+      <div><input id="final_generateMap" type="button" value="Generate"/></div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+
+  var canalDefElts = document.getElementsByName("canal_def");
+  for (var elt = 0 ; elt < canalDefElts.length ; elt++) {
+    var refreshButton = canalDefElts[elt].querySelector(".refresh_button");
+    console.log("refresh button id: " + refreshButton.id);
+    refreshButton.onclick = (function(c_def) { 
+      return function() {
+        refreshCanal(c_def);
+      };
+    })(canalDefElts[elt]);
+  }
+
+  function refreshCanal(canalDef) {
+    var canva = canalDef.querySelector(".canal_canva");
+    console.log("canva id: " + canva.id);
+    var algo_list = canalDef.querySelector(".canal_parameters .algo_type");
+    console.log("algo: " + algo_list.options[algo_list.selectedIndex].value);
+
+  }
+
+  </script>
+</body>
+</html>
