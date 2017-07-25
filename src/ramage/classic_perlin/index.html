@@ -9,8 +9,10 @@
             Must be a power of 2 + 1
         </div>
         <div class="formField">Seed <input id="perlin_seed" type="text" name="drop" value="Bretagne" required></div>
-        <div class="formField">Roughness <input id="perlin_roughness" type="number" step="0.05" min="0" max="1" name="drop" value="0.55" required></div>
-        <div class="formField">Initial altitude <input id="perlin_initalt" type="number" step="0.05" min="0" max="1" name="drop" value="0.2" required></div>
+        <div class="formField">Perlin size <input id="perlin_size" type="number" step="1" min="2" name="drop" value="64" required><span id= "error_perlin_size" class="mdl-badge" data-badge="x" style="display: none;"/></div>
+        <div class="mdl-tooltip" for="error_perlin_size">
+            Must be a power of 2
+        </div>
         <div class="formField"><button id="perlin_generateMap" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">Generate map</button></div>
     </form>
 </div>
@@ -51,11 +53,15 @@ function validateForm() {
     var seed = document.getElementById('perlin_seed').value;
     console.log("seed = " + seed);
 
-    var roughness = document.getElementById("perlin_roughness").value;
-    console.log("roughness = " + roughness);
-
-    var initalt = document.getElementById("perlin_initalt").value;
-    console.log("initalt = " + initalt);
+    elt = document.getElementById("error_perlin_size");
+    var perlin_size = document.getElementById("perlin_size").value;
+    console.log("perlin size = " + perlin_size);
+    if(!IsPowerOfTwo(perlin_size)){
+        elt.style.display=null;
+        res = false;
+    } else {
+        elt.style.display="none";
+    }
 
     return res;
 }
@@ -75,16 +81,13 @@ function classic_startGenerateMap() {
     var seed = document.getElementById('perlin_seed').value;
     console.log("seed = " + seed);
 
-    var roughness = document.getElementById("perlin_roughness").value;
-    console.log("roughness = " + roughness);
-
-    var initalt = document.getElementById("perlin_initalt").value;
-    console.log("initalt = " + initalt);
+    var perlin_size = document.getElementById("perlin_size").value;
+    console.log("perlin size = " + perlin_size);
 
     if(typeof(Worker) !== "undefined") {
         if(typeof(wm) == "undefined") {
             wm = new Worker("classic_perlin/perlinNoiseGenerator.js");
-            wm.postMessage({width:width, height:height, seed: seed, roughness: roughness, initalt: initalt});
+            wm.postMessage({width:width, height:height, seed: seed, perlin_size: perlin_size});
         }
         wm.onmessage = function(event) {
             if(event.data.type == "Result") {

@@ -5,13 +5,33 @@ onmessage = function(e) {
   generateMap(e.data);
 }
 
-function Terrain(detail) {
-    this.size = Math.pow(2, detail) + 1;
-    this.max = this.size - 1;
+function Terrain(detail, tileable) {
+    this.tileable = tileable;
+    if (tileable) {
+        this.size = Math.pow(2, detail);
+        this.max = this.size;
+    } else {
+        this.size = Math.pow(2, detail) + 1;
+        this.max = this.size - 1;
+    }
     this.map = new Float32Array(this.size * this.size);
   }
 Terrain.prototype.get = function(x, y) {
-    if (x < 0 || x > this.max || y < 0 || y > this.max) return -1;
+    if (!this.tileable) {
+        // No wrapping
+        if (x < 0 || x > this.max || y < 0 || y > this.max)
+            return -1;
+    } else {
+        // With wrapping
+        while (x < 0)
+            x += this.size;
+        if (x >= this.size)
+            x %= this.size;
+        while (y < 0)
+            y += this.size;
+        if (y >= this.size)
+            y %= this.size;
+    }
     return this.map[x + this.size * y];
 };
 Terrain.prototype.set = function(x, y, val) {
@@ -19,10 +39,14 @@ Terrain.prototype.set = function(x, y, val) {
 };
 Terrain.prototype.generate = function(roughness, initalt) {
     var self = this;
-    this.set(0, 0, initalt);
-    this.set(this.max, 0, initalt);
-    this.set(this.max, this.max, initalt);
-    this.set(0, this.max, initalt);
+    if (this.tileable) {
+        this.set(0, 0, initalt);
+    } else {
+        this.set(0, 0, initalt);
+        this.set(this.max, 0, initalt);
+        this.set(this.max, this.max, initalt);
+        this.set(0, this.max, initalt);
+    }
     divide(this.max, this.max);
     function divide(size, total_size) {
         var x, y, half = size / 2;
@@ -77,6 +101,7 @@ function generateMap(data) {
 
     var pot = data.pot;
     var roughness = data.roughness;
+    var tileable = data.tileable;
     var initalt = parseFloat(data.initalt);
     var width = Math.pow(2, pot) + 1;
     var height = Math.pow(2, pot) + 1;
@@ -89,12 +114,13 @@ function generateMap(data) {
     // ----------------------------------------------------
     // Initialise the height map
 
+    var terrain = new Terrain(pot, tileable);
+
     var heightMap = [];
-    for(var i = 0 ; i < height*width ; i++) {
+    for(var i = 0 ; i < terrain.size*terrain.size ; i++) {
         heightMap[i] = -1;
     }
 
-    var terrain = new Terrain(pot);
 
     // ----------------------------------------------------
     // Generate the 2D heightmap
@@ -106,28 +132,28 @@ function generateMap(data) {
 
     var max = -1;
     var min = 800;
-    for(var x_i = 0 ; x_i < width ; x_i++) {
-        for(var y_i = 0 ; y_i < height ; y_i++) {
+    for(var x_i = 0 ; x_i < terrain.size ; x_i++) {
+        for(var y_i = 0 ; y_i < terrain.size ; y_i++) {
             var val = terrain.get(x_i, y_i);
             max = val>max?val:max;
             min = val<min?val:min;
         }
     }
 
-    for(var x_i = 0 ; x_i < width ; x_i++) {
-        for(var y_i = 0 ; y_i < height ; y_i++) {
+    for(var x_i = 0 ; x_i < terrain.size ; x_i++) {
+        for(var y_i = 0 ; y_i < terrain.size ; y_i++) {
             //heightMap[x_i + y_i*width] = 255*(terrain.get(x_i, y_i)-min)/(max-min);
             var val = terrain.get(x_i, y_i);
             val = val<0?0:val;
             val = val>1?1:val;
-            heightMap[x_i + y_i*width] = 255*val;
+            heightMap[x_i + y_i*terrain.size] = 255*val;
         }
     }
 
     console.log("max: " + max);
     console.log("min: " + min);
 
-    postMessage({type:"Result", data:heightMap});
+    postMessage({type:"Result", data:heightMap, width:terrain.size, height:terrain.size});
 
     // ----------------------------------------------------
 

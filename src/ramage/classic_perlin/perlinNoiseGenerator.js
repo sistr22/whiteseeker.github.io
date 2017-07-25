@@ -15,7 +15,12 @@ var perm = new Array(size_array); // int array of size == size_array
 var grads_x = new Array(size_array);
 var grads_y = new Array(size_array); // float array of size == size_array
 
-function init() {
+function init(sizearray) {
+    size_array = sizearray;
+    mask = size_array - 1;
+    perm = new Array(size_array); // int array of size == size_array
+    grads_x = new Array(size_array);
+    grads_y = new Array(size_array); // float array of size == size_array
     for (var index = 0; index < size_array; index++) {
         var other = randomIntFromInterval(0, index);
         if (index > other)
@@ -55,10 +60,10 @@ function generateMap(data) {
 
     var width = data.width;
     var height = data.height;
+    var perlin_size = data.perlin_size;
     console.log("[worker] width = " + width);
     console.log("[worker] height = " + height);
-    var roughness = data.roughness;
-    var initalt = parseFloat(data.initalt);
+    console.log("[worker] perlin_size = " + perlin_size);
 
     var seed = data.seed;
     console.log("[worker] seed = " + seed);
@@ -68,7 +73,7 @@ function generateMap(data) {
     // ----------------------------------------------------
     // Initialisation
 
-    init();
+    init(perlin_size);
 
     var heightMap = [];
     for(var i = 0 ; i < height*width ; i++) {
