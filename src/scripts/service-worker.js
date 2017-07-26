@@ -273,6 +273,34 @@ self.addEventListener('fetch', function(event) {
       return;
     }
 
+    // for the ramage stuff => network fallback cache
+    if(/^\/ramage\/.*/.test(requestURL.pathname)) {
+      event.respondWith(
+        caches.open(CACHE_NAME).then(function(cache) {
+          return fetch(event.request).then(function(response) {
+            cache.put(event.request, response.clone());
+            return response;
+          });
+        })
+      );
+      return;
+    }
+
+    if(requestURL.origin == "https://fonts.googleapis.com") {
+      console.log("Loading google font");
+      event.respondWith(
+        caches.open(CACHE_NAME).then(function(cache) {
+          return fetch(event.request).then(function(response) {
+            cache.put(event.request, response.clone());
+            return response;
+          }).catch(function() {
+            return cache.match(event.request);
+          });
+        })
+      );
+      return;
+    }
+
     // Default pattern
     event.respondWith(
       caches.open(CACHE_NAME).then(function(cache) {
@@ -284,21 +312,6 @@ self.addEventListener('fetch', function(event) {
         });
       })
     );
-  }
-
-  if(requestURL.origin == "https://fonts.googleapis.com") {
-    console.log("Loading google font");
-    event.respondWith(
-      caches.open(CACHE_NAME).then(function(cache) {
-        return fetch(event.request).then(function(response) {
-          cache.put(event.request, response.clone());
-          return response;
-        }).catch(function() {
-          return cache.match(event.request);
-        });
-      })
-    );
-    return;
   }
 
 });
