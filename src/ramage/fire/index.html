@@ -51,22 +51,18 @@ tags : [gamedev, procedural, beginner]
         <div><input id="g_generateMap" class="refresh_button" type="button" value="Refresh"/></div>
       </div>
     </div>
-    <div name="canal_def">
+    <div name="blue_def">
       <canvas id="b_canva" class="canal_canva" width="128" height="128" style="margin: auto; display: block; padding: 0px 0px 5px 0px;">Your browser does not support the HTML5 canvas tag.</canvas>
       <div class="canal_parameters" style="float: left;margin: 0 auto;">
-        <select class="algo_type">
-          <option value="fract_3d">Fractal 3D</option>
-          <option value="perlin">Perlin</option>
-        </select>
+        
         <div class="algo_options">
           <div class="fract_3d_opts">
-            Seed<br><input class="seed" type="text" name="drop" value="Donemat"><br>
-            Roughness<br><input class="roughness" type="number" step="0.2" min="0" max="100" name="drop" value="2"><br>
-            Initial altitude<br><input class="initalt" type="number" step="0.05" min="0" max="1" name="drop" value="0.2"><br>
-          </div>
-          <div class="perlin_opts">
-            Seed<br><input class="seed" type="text" name="drop" value="Donemat"><br>
-            Perlin size<br><input class="perlin_size" type="number" step="1" min="2" name="drop" value="64"><br>
+            Plain ellipse<br>
+            Minor<input id="plain_minor" type="number" step="0.05" min="0" max="1000" name="drop" value="256"><br>
+            Major<input id="plain_major" type="number" step="0.05" min="0" max="1000" name="drop" value="400"><br>
+            Blur ellipse<br>
+            Minor<input id="blur_minor" type="number" step="0.05" min="0" max="1000" name="drop" value="300"><br>
+            Major<input id="blur_major" type="number" step="0.05" min="0" max="1000" name="drop" value="500"><br>
           </div>
         </div>
         <div><input id="b_generateMap" class="refresh_button" type="button" value="Refresh"/></div>
@@ -81,12 +77,12 @@ tags : [gamedev, procedural, beginner]
         </select>
         <div class="algo_options">
           <div class="fract_3d_opts">
-            Seed<br><input class="seed" type="text" name="drop" value="Degemer"><br>
+            Seed<br><input class="seed" type="text" name="drop" value="Donemat"><br>
             Roughness<br><input class="roughness" type="number" step="0.2" min="0" max="100" name="drop" value="2"><br>
             Initial altitude<br><input class="initalt" type="number" step="0.05" min="0" max="1" name="drop" value="0.2"><br>
           </div>
           <div class="perlin_opts">
-            Seed<br><input class="seed" type="text" name="drop" value="Degemer"><br>
+            Seed<br><input class="seed" type="text" name="drop" value="Donemat"><br>
             Perlin size<br><input class="perlin_size" type="number" step="1" min="2" name="drop" value="64"><br>
           </div>
         </div>
@@ -143,7 +139,7 @@ tags : [gamedev, procedural, beginner]
       finalNoise = (finalNoise * perturb) + uv - 0.02;
 
       vec4 color = texture2D(uSampler, finalNoise);
-      color = vec4(color.x*2.0, color.y*0.9, (color.y/color.x)*0.2, 1.0);
+      color = vec4(color.x*2.0, color.y*0.9, /*(color.y/color.x)*0.2*/0, 1.0);
       finalNoise = clamp(finalNoise, 0.05, 1.0);
       color.w = texture2D(uSampler, finalNoise).z*2.0;
       color.w = color.w*texture2D(uSampler, uv).z;
@@ -219,6 +215,16 @@ tags : [gamedev, procedural, beginner]
 
       gl.enable(gl.BLEND);
       gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+      this.startTime = Date.now()/1000.0;
+      this.isDrawing = false;
+    }
+
+    startDrawing() {
+      if(!this.isDrawing) {
+        this.isDrawing = true;
+        this.draw();
+      }
     }
 
     initShaders() {
@@ -235,6 +241,7 @@ tags : [gamedev, procedural, beginner]
       this.shaderProgram.textureCoordAttribute = gl.getAttribLocation(this.shaderProgram, "aTextureCoord");
       this.shaderProgram.uniformMVP = gl.getUniformLocation(this.shaderProgram, "MVP");
       this.shaderProgram.samplerUniform = gl.getUniformLocation(this.shaderProgram, "uSampler");
+      this.shaderProgram.uniformTime = gl.getUniformLocation(this.shaderProgram, "time");
 
       if (!this.gl.getProgramParameter(this.shaderProgram, this.gl.LINK_STATUS)) {
         alert("Shader error !");
@@ -318,15 +325,16 @@ tags : [gamedev, procedural, beginner]
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
       gl.bindTexture(gl.TEXTURE_2D, null);
-
     }
 
     draw() {
       var gl = this.gl;
-      console.log("Renderer.draw");
+      var now = Date.now()/1000.0 - this.startTime;
       gl.clear(gl.COLOR_BUFFER_BIT);
 
       gl.uniformMatrix4fv(this.shaderProgram.uniformMVP, false, this.MVP);
+      
+      gl.uniform1f(this.shaderProgram.uniformTime, now);
 
       gl.enableVertexAttribArray(this.shaderProgram.vertexPositionAttribute);
       gl.bindBuffer(gl.ARRAY_BUFFER, this.squareVertexPositionBuffer);
@@ -342,24 +350,31 @@ tags : [gamedev, procedural, beginner]
 
 
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.squareVertexPositionBuffer.numItems);
+
+      gl.disableVertexAttribArray(this.shaderProgram.textureCoordAttribute);
+      gl.disableVertexAttribArray(this.shaderProgram.vertexPositionAttribute);
+
+      window.setTimeout(function(rend){return function(){rend.draw();};}(this), 1000 / 60);
     }
   }
 
   var data_channel = [];
-  var canalDefElts = document.getElementsByName("canal_def");
   var renderer = new Renderer();
-
   renderer.init();
 
+  var canalDefElts = document.getElementsByName("canal_def");
   for (var elt = 0 ; elt < canalDefElts.length ; elt++) {
     var refreshButton = canalDefElts[elt].querySelector(".refresh_button");
     console.log("refresh button id: " + refreshButton.id);
     
+    var chanid = elt;
+    if(elt == 2)
+      chanid = elt+1;
     refreshButton.onclick = (function(c_def, channel_id) { 
       return function() {
         refreshCanal(c_def, channel_id);
       };
-    })(canalDefElts[elt], elt);
+    })(canalDefElts[elt], chanid);
 
     var algo_list = canalDefElts[elt].querySelector(".canal_parameters .algo_type");
     algo_list.addEventListener("change", (function(c_def) {
@@ -368,6 +383,45 @@ tags : [gamedev, procedural, beginner]
       };
     })(canalDefElts[elt]));
     updateOptionDisplay(canalDefElts[elt]);
+  }
+
+
+  var blueCanal = document.getElementsByName("blue_def")[0];
+  var refreshButton = blueCanal.querySelector(".refresh_button");
+  refreshButton.onclick = refreshBlueCanal;
+
+  function insideElipse(center, semi_axis, point) {
+    var val = Math.pow(point[0]-center[0], 2)/Math.pow(semi_axis[0], 2) + Math.pow(point[1]-center[1], 2)/Math.pow(semi_axis[1], 2);
+    if(val <= 1)
+      return true;
+    return false;
+  }
+
+  function refreshBlueCanal() {
+    console.log("refreshBlueCanal");
+    var canva = document.getElementById("b_canva");
+    var ctx = canva.getContext("2d");
+
+    var plain_semi_axis = [document.getElementById("plain_minor").value/2.0, document.getElementById("plain_major").value/2.0];
+    console.log("plain semi-axis: [" + plain_semi_axis[0] + ", " +  plain_semi_axis[1] + "]");
+    var center_ellipse = [256, 256];
+
+
+    var width = 512;
+    var height = 512;
+
+    var heightMap = [];
+    for(var x = 0 ; x < width ; x++) {
+      for(var y = 0 ; y < height ; y++) {
+        if(insideElipse(center_ellipse, plain_semi_axis, [x,y]))
+          heightMap[x+y*width] = 255;
+        else
+          heightMap[x+y*width] = 0;
+      }
+    }
+
+    data_channel[2] = heightMap;
+    update_Thumbmail(heightMap, 512, 512, canva);
   }
 
   function updateOptionDisplay(canalDef) {
@@ -385,15 +439,6 @@ tags : [gamedev, procedural, beginner]
         opts[i].style.display = 'none';
       }
     }
-    /*switch(algo_list.selectedIndex) {
-      case 0:
-        // Fractal 3d
-        break;
-      case 1:
-        // Perlin noise
-
-        break;
-    }*/
   }
 
   function refreshCanal(canalDef, channel_id) {
@@ -504,7 +549,7 @@ tags : [gamedev, procedural, beginner]
 
     ctx.putImageData(imgData, 0, 0);
     renderer.updateTexture(imgData);
-    renderer.draw();
+    renderer.startDrawing();
   }
 
   </script>
