@@ -97,14 +97,260 @@ tags : [gamedev, procedural, beginner]
   <div>
     <canvas id="final_canva" width="512" height="512" style="margin: auto; display: block; padding: 0px 0px 5px 0px;">Your browser does not support the HTML5 canvas tag.</canvas>
     <div id="final_parameters" style="float: left;margin: 0 auto;">
-      <div><input id="final_generateMap" type="button" value="Generate"/></div>
+    </div>
+  </div>
+  <div>
+    <canvas id="render_canva" width="512" height="512" style="margin: auto; display: block; padding: 0px 0px 5px 0px;">Your browser does not support the HTML5 canvas tag.</canvas>
+    <div id="render_parameters" style="float: left;margin: 0 auto;">
+      Fire speed <input class="firespeed" type="number" step="0.2" min="0" max="100" value="0.4"><br>
+      <div><input id="render_generateMap" type="button" value="Refresh"/></div>
     </div>
   </div>
 
+
+  <script type="text/javascript" src="/scripts/gl-matrix-2.4.0.min.js"></script>
+  <script id="shader-fs" type="x-shader/x-fragment">
+    precision mediump float;
+
+    varying vec2 vTextureCoord;
+
+    uniform sampler2D uSampler;
+    uniform float time;
+
+    void main(void) {
+      vec2 uv = vTextureCoord;
+
+      // Generate noisy x value
+      vec2 n0Uv = vec2(uv.x*1.4 + 0.01, uv.y + time*0.69);
+      vec2 n1Uv = vec2(uv.x*0.5 - 0.033, uv.y*2.0 + time*0.12);
+      vec2 n2Uv = vec2(uv.x*0.94 + 0.02, uv.y*3.0 + time*0.61);
+      float n0 = (texture2D(uSampler, n0Uv).w-0.5)*2.0;
+      float n1 = (texture2D(uSampler, n1Uv).w-0.5)*2.0;
+      float n2 = (texture2D(uSampler, n2Uv).w-0.5)*2.0;
+      float noiseA = clamp(n0 + n1 + n2, -1.0, 1.0);
+
+      // Generate noisy y value
+      vec2 n0UvB = vec2(uv.x*0.7 - 0.01, uv.y + time*0.27);
+      vec2 n1UvB = vec2(uv.x*0.45 + 0.033, uv.y*1.9 + time*0.61);
+      vec2 n2UvB = vec2(uv.x*0.8 - 0.02, uv.y*2.5 + time*0.51);
+      float n0B = (texture2D(uSampler, n0UvB).w-0.5)*2.0;
+      float n1B = (texture2D(uSampler, n1UvB).w-0.5)*2.0;
+      float n2B = (texture2D(uSampler, n2UvB).w-0.5)*2.0;
+      float noiseB = clamp(n0B + n1B + n2B, -1.0, 1.0);
+
+      vec2 finalNoise = vec2(noiseA, noiseB);
+      float perturb = (1.0 - uv.y) * 0.35 + 0.02;
+      finalNoise = (finalNoise * perturb) + uv - 0.02;
+
+      vec4 color = texture2D(uSampler, finalNoise);
+      color = vec4(color.x*2.0, color.y*0.9, (color.y/color.x)*0.2, 1.0);
+      finalNoise = clamp(finalNoise, 0.05, 1.0);
+      color.w = texture2D(uSampler, finalNoise).z*2.0;
+      color.w = color.w*texture2D(uSampler, uv).z;
+      gl_FragColor = color;
+
+      //gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+      //gl_FragColor = vec4(vTextureCoord.s, vTextureCoord.t, 1.0, 1.0);;
+    }
+  </script>
+
+  <script id="shader-vs" type="x-shader/x-vertex">
+    attribute vec3 aVertexPosition;
+    attribute vec2 aTextureCoord;
+
+    varying vec2 vTextureCoord;
+
+    uniform mat4 MVP;
+
+    void main(void) {
+      gl_Position = MVP * vec4(aVertexPosition, 1.0);
+      vTextureCoord = aTextureCoord;
+    }
+  </script>
+
   <script type="text/javascript">
+
+  class Renderer  {
+    constructor() {
+      this.canva = document.getElementById("render_canva");
+
+      try {
+        this.gl = this.canva.getContext("webgl2");
+        this.gl.viewportWidth = this.canva.width;
+        this.gl.viewportHeight = this.canva.height;
+      } catch(e) {
+        alert("WebGL error!");
+      }
+    }
+
+    init() {
+      var gl = this.gl;
+      this.initShaders();
+      this.initBuffers();
+
+      var imgData = new ImageData(512, 512);
+      for (var x = 0; x < 512; x++) {
+        for (var y = 0; y < 512; y++) {
+          for (var chan = 0 ; chan < 4 ; chan++) {
+            if (chan != 3) {
+              imgData.data[4*(x + y*512)+chan] = 10;
+            } else {
+              imgData.data[4*(x + y*512)+chan] = 255;
+            }
+          }
+        }
+      }
+      this.updateTexture(imgData);
+
+      // Projection matrix
+      this.P = mat4.create();
+      mat4.perspective(this.P, glMatrix.toRadian(45.0), 1.0, 0.1, 100.0);
+      // View matrix
+      this.V = mat4.create();
+      mat4.lookAt(this.V,
+                [2,1,3], // Camera is at (4,3,3), in World Space
+                [0,0,0], // and looks at the origin
+                [0,1,0]);  // Head is up (set to 0,-1,0 to look upside-down));
+      this.MVP = mat4.create();
+      mat4.multiply(this.MVP, this.P, this.V);
+
+      gl.clearColor(0.05, 0.05, 0.3, 1.0);
+      gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    }
+
+    initShaders() {
+      var gl = this.gl;
+      var fragmentShader = this.getShader("shader-fs");
+      var vertexShader = this.getShader("shader-vs");
+
+      this.shaderProgram = gl.createProgram();
+      gl.attachShader(this.shaderProgram, vertexShader);
+      gl.attachShader(this.shaderProgram, fragmentShader);
+      gl.linkProgram(this.shaderProgram);
+
+      this.shaderProgram.vertexPositionAttribute = gl.getAttribLocation(this.shaderProgram, "aVertexPosition");
+      this.shaderProgram.textureCoordAttribute = gl.getAttribLocation(this.shaderProgram, "aTextureCoord");
+      this.shaderProgram.uniformMVP = gl.getUniformLocation(this.shaderProgram, "MVP");
+      this.shaderProgram.samplerUniform = gl.getUniformLocation(this.shaderProgram, "uSampler");
+
+      if (!this.gl.getProgramParameter(this.shaderProgram, this.gl.LINK_STATUS)) {
+        alert("Shader error !");
+      }
+
+      this.gl.useProgram(this.shaderProgram);
+    }
+
+    getShader(id) {
+      var shaderScript = document.getElementById(id);
+      if (!shaderScript) {
+          return null;
+      }
+
+      var str = "";
+      var k = shaderScript.firstChild;
+      while (k) {
+        if (k.nodeType == 3)
+          str += k.textContent;
+        k = k.nextSibling;
+      }
+
+      var shader;
+      if (shaderScript.type == "x-shader/x-fragment") {
+        shader = this.gl.createShader(this.gl.FRAGMENT_SHADER);
+      } else if (shaderScript.type == "x-shader/x-vertex") {
+        shader = this.gl.createShader(this.gl.VERTEX_SHADER);
+      } else {
+        return null;
+      }
+
+      this.gl.shaderSource(shader, str);
+      this.gl.compileShader(shader);
+
+      if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
+        alert(this.gl.getShaderInfoLog(shader));
+        return null;
+      }
+
+      return shader;
+    }
+
+    initBuffers() {
+      var gl = this.gl;
+      this.squareVertexPositionBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.squareVertexPositionBuffer);
+      var vertices = [
+           1.0,  1.0,  0.0,
+          -1.0,  1.0,  0.0,
+           1.0, -1.0,  0.0,
+          -1.0, -1.0,  0.0
+      ];
+      gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+      this.squareVertexPositionBuffer.itemSize = 3;
+      this.squareVertexPositionBuffer.numItems = 4;
+
+      this.squareVertexTextureCoordBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.squareVertexTextureCoordBuffer);
+      var textureCoords = [
+        1, 1,
+        0, 1,
+        1, 0,
+        0, 0
+      ];
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoords), gl.STATIC_DRAW);
+      this.squareVertexTextureCoordBuffer.itemSize = 2;
+      this.squareVertexTextureCoordBuffer.numItems = 4;
+    }
+
+    updateTexture(imgdata) {
+      console.log("Renderer.updateTexture");
+      var gl = this.gl;
+
+      if(this.tex)
+        gl.deleteTexture(this.tex);
+      this.tex =  gl.createTexture();
+
+      gl.bindTexture(gl.TEXTURE_2D, this.tex);
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 512, 512, 0, gl.RGBA, gl.UNSIGNED_BYTE, imgdata);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+      gl.bindTexture(gl.TEXTURE_2D, null);
+
+    }
+
+    draw() {
+      var gl = this.gl;
+      console.log("Renderer.draw");
+      gl.clear(gl.COLOR_BUFFER_BIT);
+
+      gl.uniformMatrix4fv(this.shaderProgram.uniformMVP, false, this.MVP);
+
+      gl.enableVertexAttribArray(this.shaderProgram.vertexPositionAttribute);
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.squareVertexPositionBuffer);
+      gl.vertexAttribPointer(this.shaderProgram.vertexPositionAttribute, this.squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+      gl.enableVertexAttribArray(this.shaderProgram.textureCoordAttribute);
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.squareVertexTextureCoordBuffer);
+      gl.vertexAttribPointer(this.shaderProgram.textureCoordAttribute, this.squareVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, this.tex);
+      gl.uniform1i(this.shaderProgram.samplerUniform, 0);
+
+
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.squareVertexPositionBuffer.numItems);
+    }
+  }
 
   var data_channel = [];
   var canalDefElts = document.getElementsByName("canal_def");
+  var renderer = new Renderer();
+
+  renderer.init();
+
   for (var elt = 0 ; elt < canalDefElts.length ; elt++) {
     var refreshButton = canalDefElts[elt].querySelector(".refresh_button");
     console.log("refresh button id: " + refreshButton.id);
@@ -257,6 +503,8 @@ tags : [gamedev, procedural, beginner]
     }
 
     ctx.putImageData(imgData, 0, 0);
+    renderer.updateTexture(imgData);
+    renderer.draw();
   }
 
   </script>

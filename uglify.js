@@ -6,14 +6,14 @@ var inputs = ['src/css/photoswipe/photoswipe-ui-default.js',
               'src/css/material.js',
               'src/scripts/modernizr-custom.js',
               'src/scripts/service-worker.js',
-              'src/scripts/glMatrix-2.3.2.js' ];
+              'src/scripts/gl-matrix-2.4.0.js' ];
 
 var outputs= ['_site/css/photoswipe/photoswipe-ui-default.min.js',
               '_site/css/photoswipe/photoswipe.min.js',
               '_site/scripts/material.min.js',
               '_site/scripts/modernizr-custom.min.js',
               '_site/service-worker.js',
-              '_site/scripts/glMatrix-2.3.2.min.js'];
+              '_site/scripts/gl-matrix-2.4.0.min.js'];
 
 var uglifyOpts = null;
 if(process.argv[2] == "dev") {
