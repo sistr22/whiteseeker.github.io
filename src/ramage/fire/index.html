@@ -15,8 +15,18 @@ tags : [gamedev, procedural, beginner]
         <select class="algo_type">
           <option value="fract_3d">Fractal 3D</option>
           <option value="perlin">Perlin</option>
-          <option value="shotgun">Shotgun</option>
         </select>
+        <div class="algo_options">
+          <div class="fract_3d_opts">
+            Seed<br><input class="seed" type="text" name="drop" value="Breizh"><br>
+            Roughness<br><input class="roughness" type="number" step="0.2" min="0" max="100" name="drop" value="2"><br>
+            Initial altitude<br><input class="initalt" type="number" step="0.05" min="0" max="1" name="drop" value="0.2"><br>
+          </div>
+          <div class="perlin_opts">
+            Seed<br><input class="seed" type="text" name="drop" value="Breizh"><br>
+            Perlin size<br><input class="perlin_size" type="number" step="1" min="2" name="drop" value="64"><br>
+          </div>
+        </div>
         <div><input id="r_generateMap" class="refresh_button" type="button" value="Refresh"/></div>
       </div>
     </div>
@@ -26,8 +36,18 @@ tags : [gamedev, procedural, beginner]
         <select class="algo_type">
           <option value="fract_3d">Fractal 3D</option>
           <option value="perlin">Perlin</option>
-          <option value="shotgun">Shotgun</option>
         </select>
+        <div class="algo_options">
+          <div class="fract_3d_opts">
+            Seed<br><input class="seed" type="text" name="drop" value="Kreiz Breizh"><br>
+            Roughness<br><input class="roughness" type="number" step="0.2" min="0" max="100" name="drop" value="2"><br>
+            Initial altitude<br><input class="initalt" type="number" step="0.05" min="0" max="1" name="drop" value="0.2"><br>
+          </div>
+          <div class="perlin_opts">
+            Seed<br><input class="seed" type="text" name="drop" value="Kreiz Breizh"><br>
+            Perlin size<br><input class="perlin_size" type="number" step="1" min="2" name="drop" value="64"><br>
+          </div>
+        </div>
         <div><input id="g_generateMap" class="refresh_button" type="button" value="Refresh"/></div>
       </div>
     </div>
@@ -37,8 +57,18 @@ tags : [gamedev, procedural, beginner]
         <select class="algo_type">
           <option value="fract_3d">Fractal 3D</option>
           <option value="perlin">Perlin</option>
-          <option value="shotgun">Shotgun</option>
         </select>
+        <div class="algo_options">
+          <div class="fract_3d_opts">
+            Seed<br><input class="seed" type="text" name="drop" value="Donemat"><br>
+            Roughness<br><input class="roughness" type="number" step="0.2" min="0" max="100" name="drop" value="2"><br>
+            Initial altitude<br><input class="initalt" type="number" step="0.05" min="0" max="1" name="drop" value="0.2"><br>
+          </div>
+          <div class="perlin_opts">
+            Seed<br><input class="seed" type="text" name="drop" value="Donemat"><br>
+            Perlin size<br><input class="perlin_size" type="number" step="1" min="2" name="drop" value="64"><br>
+          </div>
+        </div>
         <div><input id="b_generateMap" class="refresh_button" type="button" value="Refresh"/></div>
       </div>
     </div>
@@ -48,8 +78,18 @@ tags : [gamedev, procedural, beginner]
         <select class="algo_type">
           <option value="fract_3d">Fractal 3D</option>
           <option value="perlin">Perlin</option>
-          <option value="shotgun">Shotgun</option>
         </select>
+        <div class="algo_options">
+          <div class="fract_3d_opts">
+            Seed<br><input class="seed" type="text" name="drop" value="Degemer"><br>
+            Roughness<br><input class="roughness" type="number" step="0.2" min="0" max="100" name="drop" value="2"><br>
+            Initial altitude<br><input class="initalt" type="number" step="0.05" min="0" max="1" name="drop" value="0.2"><br>
+          </div>
+          <div class="perlin_opts">
+            Seed<br><input class="seed" type="text" name="drop" value="Degemer"><br>
+            Perlin size<br><input class="perlin_size" type="number" step="1" min="2" name="drop" value="64"><br>
+          </div>
+        </div>
         <div><input id="a_generateMap" class="refresh_button" type="button" value="Refresh"/></div>
       </div>
     </div>
@@ -63,23 +103,160 @@ tags : [gamedev, procedural, beginner]
 
   <script type="text/javascript">
 
+  var data_channel = [];
   var canalDefElts = document.getElementsByName("canal_def");
   for (var elt = 0 ; elt < canalDefElts.length ; elt++) {
     var refreshButton = canalDefElts[elt].querySelector(".refresh_button");
     console.log("refresh button id: " + refreshButton.id);
-    refreshButton.onclick = (function(c_def) { 
+    
+    refreshButton.onclick = (function(c_def, channel_id) { 
       return function() {
-        refreshCanal(c_def);
+        refreshCanal(c_def, channel_id);
       };
-    })(canalDefElts[elt]);
+    })(canalDefElts[elt], elt);
+
+    var algo_list = canalDefElts[elt].querySelector(".canal_parameters .algo_type");
+    algo_list.addEventListener("change", (function(c_def) {
+      return function() {
+        updateOptionDisplay(c_def);
+      };
+    })(canalDefElts[elt]));
+    updateOptionDisplay(canalDefElts[elt]);
   }
 
-  function refreshCanal(canalDef) {
+  function updateOptionDisplay(canalDef) {
+    var algo_list = canalDef.querySelector(".canal_parameters .algo_type");
+    var opts = [];
+    opts[0] = canalDef.querySelector(".fract_3d_opts");
+    opts[1] = canalDef.querySelector(".perlin_opts");
+
+    for (var i = 0 ; i < opts.length ; i++) {
+      if (i == algo_list.selectedIndex) {
+        // Display the options
+        opts[i].style.display = 'block';
+      } else {
+        // hide the options
+        opts[i].style.display = 'none';
+      }
+    }
+    /*switch(algo_list.selectedIndex) {
+      case 0:
+        // Fractal 3d
+        break;
+      case 1:
+        // Perlin noise
+
+        break;
+    }*/
+  }
+
+  function refreshCanal(canalDef, channel_id) {
     var canva = canalDef.querySelector(".canal_canva");
     console.log("canva id: " + canva.id);
     var algo_list = canalDef.querySelector(".canal_parameters .algo_type");
     console.log("algo: " + algo_list.options[algo_list.selectedIndex].value);
 
+    var final_canva = document.getElementById("final_canva");
+    var width = final_canva.width;
+    var height = final_canva.height;
+
+    var worker_path;
+    var params;
+    switch(algo_list.selectedIndex) {
+      case 0:
+        worker_path = "../map_fractal_3d/wormsThreeDMapGenerator.js";
+
+        // Get the options
+        var opts = canalDef.querySelector(".fract_3d_opts");
+        var roughness = opts.querySelector(".roughness").value;
+        var initalt = opts.querySelector(".initalt").value;
+        var seed = opts.querySelector(".seed").value;
+
+        params = {pot:9, seed: seed, roughness: roughness, initalt: initalt, tileable: true};
+        break;
+      case 1:
+        worker_path = "../classic_perlin/perlinNoiseGenerator.js";
+
+        // Get the options
+        var opts = canalDef.querySelector(".perlin_opts");
+        var perlin_size = opts.querySelector(".perlin_size").value;
+        var seed = opts.querySelector(".seed").value;
+
+        params = {width:width, height:height, seed: seed, perlin_size: perlin_size};
+        break;
+    }
+    console.log("Worker path: " + worker_path);
+
+    if(typeof(Worker) !== "undefined") {
+      if(typeof(w) == "undefined") {
+        w = new Worker(worker_path);
+        w.postMessage(params);
+      } else {
+        console.log("Seems like a worker is already working ... can't invoke another one !");
+      }
+      w.onmessage = function(event) {
+        if(event.data.type == "Result") {
+          data_channel[channel_id] = event.data.data;
+          update_Thumbmail(event.data.data, event.data.width, event.data.height, canva);
+          w.terminate();
+          w = undefined;
+        } else if(event.data.type == "Update") {
+          console.log("update : " + event.data.val);
+        } else {
+          console.log("event type: " + event.type);
+        }
+      };
+    } else {
+        console.log("Sorry, your browser does not support Web Workers...");
+    }
+  }
+
+  function update_Thumbmail(data, data_width, data_height, canva) {
+    console.log("data_width: " + data_width);
+    console.log("data_height: " + data_height);
+    console.log("canva.width: " + canva.width);
+    console.log("canva.height: " + canva.height);
+    var ctx = canva.getContext("2d");
+    var imgData = ctx.createImageData(canva.width, canva.height);
+
+    var scale_ratio_w = data_width / canva.width;
+    var scale_ratio_h = data_height / canva.height;
+
+    for (var x = 0; x < canva.width; x++) {
+      for (var y = 0; y < canva.height; y++) {
+        var resized_x = Math.floor(x*scale_ratio_w);
+        var resized_y = Math.floor(y*scale_ratio_h);
+        var pix = data[data.length - (resized_x + resized_y*data_width)];
+        imgData.data[4*(x + y*canva.width)+0] = pix;
+        imgData.data[4*(x + y*canva.width)+1] = pix;
+        imgData.data[4*(x + y*canva.width)+2] = pix;
+        imgData.data[4*(x + y*canva.width)+3] = 255;
+      }
+    }
+
+    ctx.putImageData(imgData, 0, 0);
+    updateFinalTexture();
+  }
+
+  function updateFinalTexture() {
+    var canva = document.getElementById("final_canva");
+
+    var ctx = canva.getContext("2d");
+    var imgData = ctx.createImageData(canva.width, canva.height);
+
+    for (var x = 0; x < canva.width; x++) {
+      for (var y = 0; y < canva.height; y++) {
+        for (var chan = 0 ; chan < 4 ; chan++) {
+          if (data_channel[chan]) {
+            imgData.data[4*(x + y*canva.width)+chan] = data_channel[chan][data_channel[chan].length - (x + y*canva.width)];
+          } else {
+            imgData.data[4*(x + y*canva.width)+chan] = 255;
+          }
+        }
+      }
+    }
+
+    ctx.putImageData(imgData, 0, 0);
   }
 
   </script>

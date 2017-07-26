@@ -74,11 +74,10 @@ function blur(data) {
 
     console.log("[worker] maxVal: " + maxVal);
 	console.log("[worker] minVal: " + minVal);
-
 	
     // ----------------------------------------------------
     // Send back the result
-    postMessage({type:"Result", data:gaussianResult, maxVal:maxVal, minVal:minVal});
+    postMessage({type:"Result", data:gaussianResult, maxVal:maxVal, minVal:minVal, width:width, height:height});
 
     // ----------------------------------------------------
 

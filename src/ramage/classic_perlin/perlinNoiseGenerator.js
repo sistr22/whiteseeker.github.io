@@ -92,7 +92,7 @@ function generateMap(data) {
     // ----------------------------------------------------
     // Create the final visualisation
 
-    postMessage({type:"Result", data:heightMap});
+    postMessage({type:"Result", data:heightMap, width:width, height:height});
 
     // ----------------------------------------------------
 
