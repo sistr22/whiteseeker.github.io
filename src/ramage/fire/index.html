@@ -14,7 +14,7 @@ tags : [gamedev, procedural, beginner]
       <div class="canal_parameters" style="float: left;margin: 0 auto;">
         <select class="algo_type">
           <option value="fract_3d">Fractal 3D</option>
-          <option value="perlin">Perlin</option>
+          <option value="perlin" selected>Perlin</option>
         </select>
         <div class="algo_options">
           <div class="fract_3d_opts">
@@ -23,8 +23,8 @@ tags : [gamedev, procedural, beginner]
             Initial altitude<br><input class="initalt" type="number" step="0.05" min="0" max="1" name="drop" value="0.2"><br>
           </div>
           <div class="perlin_opts">
-            Seed<br><input class="seed" type="text" name="drop" value="Breizh"><br>
-            Perlin size<br><input class="perlin_size" type="number" step="1" min="2" name="drop" value="64"><br>
+            Seed<br><input class="seed" type="text" name="drop" value="Kreiz Breizh"><br>
+            Perlin size<br><input class="perlin_size" type="number" step="1" min="2" name="drop" value="4"><br>
           </div>
         </div>
         <div><input id="r_generateMap" class="refresh_button" type="button" value="Refresh"/></div>
@@ -35,7 +35,7 @@ tags : [gamedev, procedural, beginner]
       <div class="canal_parameters" style="float: left;margin: 0 auto;">
         <select class="algo_type">
           <option value="fract_3d">Fractal 3D</option>
-          <option value="perlin">Perlin</option>
+          <option value="perlin" selected>Perlin</option>
         </select>
         <div class="algo_options">
           <div class="fract_3d_opts">
@@ -45,7 +45,7 @@ tags : [gamedev, procedural, beginner]
           </div>
           <div class="perlin_opts">
             Seed<br><input class="seed" type="text" name="drop" value="Kreiz Breizh"><br>
-            Perlin size<br><input class="perlin_size" type="number" step="1" min="2" name="drop" value="64"><br>
+            Perlin size<br><input class="perlin_size" type="number" step="1" min="2" name="drop" value="4"><br>
           </div>
         </div>
         <div><input id="g_generateMap" class="refresh_button" type="button" value="Refresh"/></div>
@@ -72,7 +72,7 @@ tags : [gamedev, procedural, beginner]
       <canvas id="a_canva" class="canal_canva" width="128" height="128" style="margin: auto; display: block; padding: 0px 0px 5px 0px;">Your browser does not support the HTML5 canvas tag.</canvas>
       <div class="canal_parameters" style="float: left;margin: 0 auto;">
         <select class="algo_type">
-          <option value="fract_3d">Fractal 3D</option>
+          <option value="fract_3d" selected>Fractal 3D</option>
           <option value="perlin">Perlin</option>
         </select>
         <div class="algo_options">
@@ -95,75 +95,71 @@ tags : [gamedev, procedural, beginner]
     <div id="final_parameters" style="float: left;margin: 0 auto;">
     </div>
   </div>
-  <div>
+  <div width="100%">
     <canvas id="render_canva" width="512" height="512" style="margin: auto; display: block; padding: 0px 0px 5px 0px;">Your browser does not support the HTML5 canvas tag.</canvas>
-    <div id="render_parameters" style="float: left;margin: 0 auto;">
-      Fire speed <input class="firespeed" type="number" step="0.2" min="0" max="100" value="0.4"><br>
-      <div><input id="render_generateMap" type="button" value="Refresh"/></div>
+    <div id="render_parameters" style="float: left;margin: 0 auto;width:100%;" >
+      Fragment shader<br>
+      <textarea rows="50" style="width:100%;" id="shader-fs">
+precision mediump float;
+
+varying vec2 vTextureCoord;
+
+uniform sampler2D uSampler;
+uniform float time;
+
+void main(void) {
+  vec2 uv = vTextureCoord;
+
+  // Generate noisy x value
+  vec2 n0Uv = vec2(uv.x*1.4 + 0.01, uv.y + time*0.69);
+  vec2 n1Uv = vec2(uv.x*0.5 - 0.033, uv.y*2.0 + time*0.12);
+  vec2 n2Uv = vec2(uv.x*0.94 + 0.02, uv.y*3.0 + time*0.61);
+  float n0 = (texture2D(uSampler, n0Uv).w-0.5)*2.0;
+  float n1 = (texture2D(uSampler, n1Uv).w-0.5)*2.0;
+  float n2 = (texture2D(uSampler, n2Uv).w-0.5)*2.0;
+  float noiseA = clamp(n0 + n1 + n2, -1.0, 1.0);
+
+  // Generate noisy y value
+  vec2 n0UvB = vec2(uv.x*0.7 - 0.01, uv.y + time*0.27);
+  vec2 n1UvB = vec2(uv.x*0.45 + 0.033, uv.y*1.9 + time*0.61);
+  vec2 n2UvB = vec2(uv.x*0.8 - 0.02, uv.y*2.5 + time*0.51);
+  float n0B = (texture2D(uSampler, n0UvB).w-0.5)*2.0;
+  float n1B = (texture2D(uSampler, n1UvB).w-0.5)*2.0;
+  float n2B = (texture2D(uSampler, n2UvB).w-0.5)*2.0;
+  float noiseB = clamp(n0B + n1B + n2B, -1.0, 1.0);
+
+  vec2 finalNoise = vec2(noiseA, noiseB);
+  float perturb = (1.0 - uv.y) * 0.35 + 0.02;
+  finalNoise = (finalNoise * perturb) + uv - 0.02;
+
+  vec4 color = texture2D(uSampler, finalNoise);
+  color = vec4(color.x*2.0, color.y*0.9, /*(color.y/color.x)*0.2*/0, 1.0);
+  finalNoise = clamp(finalNoise, 0.05, 1.0);
+  color.w = texture2D(uSampler, uv).z*2.0;
+  color.w = color.w*texture2D(uSampler, uv).z;
+  gl_FragColor = color;
+}
+      </textarea><br>
+      Vertex shader<br>
+      <textarea rows="50" style="width:100%;" id="shader-vs">
+attribute vec3 aVertexPosition;
+attribute vec2 aTextureCoord;
+
+varying vec2 vTextureCoord;
+
+uniform mat4 MVP;
+
+void main(void) {
+  gl_Position = MVP * vec4(aVertexPosition, 1.0);
+  vTextureCoord = aTextureCoord;
+}
+      </textarea>
+
+      <div><input id="refresh_shader" type="button" value="Refresh"/></div>
     </div>
   </div>
 
-
   <script type="text/javascript" src="/scripts/gl-matrix-2.4.0.min.js"></script>
-  <script id="shader-fs" type="x-shader/x-fragment">
-    precision mediump float;
-
-    varying vec2 vTextureCoord;
-
-    uniform sampler2D uSampler;
-    uniform float time;
-
-    void main(void) {
-      vec2 uv = vTextureCoord;
-
-      // Generate noisy x value
-      vec2 n0Uv = vec2(uv.x*1.4 + 0.01, uv.y + time*0.69);
-      vec2 n1Uv = vec2(uv.x*0.5 - 0.033, uv.y*2.0 + time*0.12);
-      vec2 n2Uv = vec2(uv.x*0.94 + 0.02, uv.y*3.0 + time*0.61);
-      float n0 = (texture2D(uSampler, n0Uv).w-0.5)*2.0;
-      float n1 = (texture2D(uSampler, n1Uv).w-0.5)*2.0;
-      float n2 = (texture2D(uSampler, n2Uv).w-0.5)*2.0;
-      float noiseA = clamp(n0 + n1 + n2, -1.0, 1.0);
-
-      // Generate noisy y value
-      vec2 n0UvB = vec2(uv.x*0.7 - 0.01, uv.y + time*0.27);
-      vec2 n1UvB = vec2(uv.x*0.45 + 0.033, uv.y*1.9 + time*0.61);
-      vec2 n2UvB = vec2(uv.x*0.8 - 0.02, uv.y*2.5 + time*0.51);
-      float n0B = (texture2D(uSampler, n0UvB).w-0.5)*2.0;
-      float n1B = (texture2D(uSampler, n1UvB).w-0.5)*2.0;
-      float n2B = (texture2D(uSampler, n2UvB).w-0.5)*2.0;
-      float noiseB = clamp(n0B + n1B + n2B, -1.0, 1.0);
-
-      vec2 finalNoise = vec2(noiseA, noiseB);
-      float perturb = (1.0 - uv.y) * 0.35 + 0.02;
-      finalNoise = (finalNoise * perturb) + uv - 0.02;
-
-      vec4 color = texture2D(uSampler, finalNoise);
-      color = vec4(color.x*2.0, color.y*0.9, /*(color.y/color.x)*0.2*/0, 1.0);
-      finalNoise = clamp(finalNoise, 0.05, 1.0);
-      color.w = texture2D(uSampler, uv).z/*2.0*/;
-      color.w = color.w*texture2D(uSampler, uv).w;
-      gl_FragColor = color;
-
-      //gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
-      //gl_FragColor = vec4(vTextureCoord.s, vTextureCoord.t, 1.0, 1.0);;
-    }
-  </script>
-
-  <script id="shader-vs" type="x-shader/x-vertex">
-    attribute vec3 aVertexPosition;
-    attribute vec2 aTextureCoord;
-
-    varying vec2 vTextureCoord;
-
-    uniform mat4 MVP;
-
-    void main(void) {
-      gl_Position = MVP * vec4(aVertexPosition, 1.0);
-      vTextureCoord = aTextureCoord;
-    }
-  </script>
-
   <script type="text/javascript">
 
   class Renderer  {
@@ -181,7 +177,7 @@ tags : [gamedev, procedural, beginner]
 
     init() {
       var gl = this.gl;
-      this.initShaders();
+      this.updateShaders();
       this.initBuffers();
 
       var imgData = new ImageData(512, 512);
@@ -227,8 +223,11 @@ tags : [gamedev, procedural, beginner]
       }
     }
 
-    initShaders() {
+    updateShaders() {
       var gl = this.gl;
+      if(this.shaderProgram)
+        gl.deleteProgram(this.shaderProgram);
+
       var fragmentShader = this.getShader("shader-fs");
       var vertexShader = this.getShader("shader-vs");
 
@@ -256,24 +255,16 @@ tags : [gamedev, procedural, beginner]
           return null;
       }
 
-      var str = "";
-      var k = shaderScript.firstChild;
-      while (k) {
-        if (k.nodeType == 3)
-          str += k.textContent;
-        k = k.nextSibling;
-      }
-
       var shader;
-      if (shaderScript.type == "x-shader/x-fragment") {
+      if (id.endsWith("fs")) {
         shader = this.gl.createShader(this.gl.FRAGMENT_SHADER);
-      } else if (shaderScript.type == "x-shader/x-vertex") {
+      } else if (id.endsWith("vs")) {
         shader = this.gl.createShader(this.gl.VERTEX_SHADER);
       } else {
         return null;
       }
 
-      this.gl.shaderSource(shader, str);
+      this.gl.shaderSource(shader, shaderScript.value);
       this.gl.compileShader(shader);
 
       if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
@@ -361,6 +352,9 @@ tags : [gamedev, procedural, beginner]
   var data_channel = [];
   var renderer = new Renderer();
   renderer.init();
+
+  var refreshShaderButton = document.getElementById("refresh_shader");
+  refreshShaderButton.onclick = (function(rd) { return function(){rd.updateShaders();};}(renderer));
 
   var canalDefElts = document.getElementsByName("canal_def");
   for (var elt = 0 ; elt < canalDefElts.length ; elt++) {
