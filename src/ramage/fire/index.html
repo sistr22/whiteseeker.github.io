@@ -58,11 +58,11 @@ tags : [gamedev, procedural, beginner]
         <div class="algo_options">
           <div class="fract_3d_opts">
             Plain ellipse<br>
-            Minor<input id="plain_minor" type="number" step="0.05" min="0" max="1000" name="drop" value="256"><br>
-            Major<input id="plain_major" type="number" step="0.05" min="0" max="1000" name="drop" value="400"><br>
+            Minor<input id="plain_minor" type="number" step="0.05" min="0" max="1000" name="drop" value="70"><br>
+            Major<input id="plain_major" type="number" step="0.05" min="0" max="1000" name="drop" value="180"><br>
             Blur ellipse<br>
             Minor<input id="blur_minor" type="number" step="0.05" min="0" max="1000" name="drop" value="300"><br>
-            Major<input id="blur_major" type="number" step="0.05" min="0" max="1000" name="drop" value="500"><br>
+            Major<input id="blur_major" type="number" step="0.05" min="0" max="1000" name="drop" value="900"><br>
           </div>
         </div>
         <div><input id="b_generateMap" class="refresh_button" type="button" value="Refresh"/></div>
@@ -141,8 +141,8 @@ tags : [gamedev, procedural, beginner]
       vec4 color = texture2D(uSampler, finalNoise);
       color = vec4(color.x*2.0, color.y*0.9, /*(color.y/color.x)*0.2*/0, 1.0);
       finalNoise = clamp(finalNoise, 0.05, 1.0);
-      color.w = texture2D(uSampler, finalNoise).z*2.0;
-      color.w = color.w*texture2D(uSampler, uv).z;
+      color.w = texture2D(uSampler, uv).z/*2.0*/;
+      color.w = color.w*texture2D(uSampler, uv).w;
       gl_FragColor = color;
 
       //gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
@@ -204,9 +204,9 @@ tags : [gamedev, procedural, beginner]
       // View matrix
       this.V = mat4.create();
       mat4.lookAt(this.V,
-                [2,1,3], // Camera is at (4,3,3), in World Space
-                [0,0,0], // and looks at the origin
-                [0,1,0]);  // Head is up (set to 0,-1,0 to look upside-down));
+                [0,0,3], // Camera pos
+                [0,0,0], // looks at
+                [0,1,0]);  // Head
       this.MVP = mat4.create();
       mat4.multiply(this.MVP, this.P, this.V);
 
@@ -301,10 +301,10 @@ tags : [gamedev, procedural, beginner]
       this.squareVertexTextureCoordBuffer = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, this.squareVertexTextureCoordBuffer);
       var textureCoords = [
-        1, 1,
-        0, 1,
+        0, 0,
         1, 0,
-        0, 0
+        0, 1,
+        1, 1
       ];
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoords), gl.STATIC_DRAW);
       this.squareVertexTextureCoordBuffer.itemSize = 2;
@@ -320,7 +320,7 @@ tags : [gamedev, procedural, beginner]
       this.tex =  gl.createTexture();
 
       gl.bindTexture(gl.TEXTURE_2D, this.tex);
-      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+      //gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 512, 512, 0, gl.RGBA, gl.UNSIGNED_BYTE, imgdata);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -390,12 +390,43 @@ tags : [gamedev, procedural, beginner]
   var refreshButton = blueCanal.querySelector(".refresh_button");
   refreshButton.onclick = refreshBlueCanal;
 
-  function insideElipse(center, semi_axis, point) {
+  function valEqElipse(center, semi_axis, point) {
+    var val = Math.pow(point[0]-center[0], 2)/Math.pow(semi_axis[0], 2) + Math.pow(point[1]-center[1], 2)/Math.pow(semi_axis[1], 2);
+    return val;
+  }
+
+  function transparencyPoint(center, plain_semi_axis, blur_semi_axis, point) {
+    var valPlain = valEqElipse(center, plain_semi_axis, point);
+    if(valPlain <= 1)
+      return 255;
+    var valBlur = valEqElipse(center, blur_semi_axis, point);
+    if(valBlur == 1)
+      return 0;
+    if(valBlur < 1) {
+      // Find the point P on the edge of the blur ellipse that also belong to the line going from ellipse center to point (the parameter of this function)
+      //var M = Math.sqrt(valBlur);
+      var t = Math.sqrt((1/valBlur));
+      var Sblur = [center[0]+t*(point[0]-center[0]), center[1]+t*(point[1]-center[1])];
+      t = Math.sqrt((1/valPlain));
+      var Splain = [center[0]+t*(point[0]-center[0]), center[1]+t*(point[1]-center[1])];
+
+      return Math.floor(255*(1-Math.sqrt( (Math.pow(point[0]-Splain[0], 2)+Math.pow(point[1]-Splain[1], 2)) / (Math.pow(Sblur[0]-Splain[0], 2)+Math.pow(Sblur[1]-Splain[1], 2)) )));
+      //var valPBlur = valEqElipse(center, blur_semi_axis, S);
+      //if(valPBlur != 1)
+      //  console.log("valPBlur !! " + valPBlur);
+
+      //return Math.floor(255*(valPPlain-1)/(valPlain-1));
+      //return 100;
+    }
+    return 0;
+  }
+
+  /*function insideElipse(center, semi_axis, point) {
     var val = Math.pow(point[0]-center[0], 2)/Math.pow(semi_axis[0], 2) + Math.pow(point[1]-center[1], 2)/Math.pow(semi_axis[1], 2);
     if(val <= 1)
       return true;
     return false;
-  }
+  }*/
 
   function refreshBlueCanal() {
     console.log("refreshBlueCanal");
@@ -404,7 +435,9 @@ tags : [gamedev, procedural, beginner]
 
     var plain_semi_axis = [document.getElementById("plain_minor").value/2.0, document.getElementById("plain_major").value/2.0];
     console.log("plain semi-axis: [" + plain_semi_axis[0] + ", " +  plain_semi_axis[1] + "]");
-    var center_ellipse = [256, 256];
+    var blur_semi_axis = [document.getElementById("blur_minor").value/2.0, document.getElementById("blur_major").value/2.0];
+    console.log("blur semi-axis: [" + blur_semi_axis[0] + ", " +  blur_semi_axis[1] + "]");
+    var center_ellipse = [256, 0];
 
 
     var width = 512;
@@ -413,10 +446,9 @@ tags : [gamedev, procedural, beginner]
     var heightMap = [];
     for(var x = 0 ; x < width ; x++) {
       for(var y = 0 ; y < height ; y++) {
-        if(insideElipse(center_ellipse, plain_semi_axis, [x,y]))
-          heightMap[x+y*width] = 255;
-        else
-          heightMap[x+y*width] = 0;
+        heightMap[x+y*width] = transparencyPoint(center_ellipse, plain_semi_axis, blur_semi_axis, [x,y]);
+        if(heightMap[x+y*width] < 0 || heightMap[x+y*width] > 255)
+          console.log("WOW: " + heightMap[x+y*width]);
       }
     }
 
