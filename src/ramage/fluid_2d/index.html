@@ -9,88 +9,115 @@ tags : [gamedev, procedural, beginner]
 <html>
 <body>
   <div>
-    <canvas id="myCanvas" width="512" height="256" style="margin: auto; display: block; padding: 0px 0px 5px 0px;">Your browser does not support the HTML5 canvas tag.</canvas>
+    <canvas id="myCanvas" width="152" height="152" style="margin: auto; display: block; padding: 0px 0px 5px 0px;">Your browser does not support the HTML5 canvas tag.</canvas>
+    <canvas id="myCanvasGpu" width="152" height="152" style="margin: auto; display: block; padding: 0px 0px 5px 0px;">Your browser does not support the HTML5 canvas tag.</canvas>
   </div>
 	<input id="pausestart" type="button" value="Pause/Start" style="margin: 3px;"/>
+  <input id="step_spu" type="checkbox" value="Step CPU" style="margin: 3px;"/>
+  <script src="webgl-debug.js"></script>
   <script src="script.js"></script>
+  <script src="script_gpu.js"></script>
   <script type="text/javascript">
-    var dim = [150, 150];
-    var solver = new Solver(dim[0], dim[1]);
-    var playing = true;
+    var dim = [1024, 1024];
+    var diff = 0.000006;
+    var visc = 0.000006;
+    //var diff = 0.0;
+    var solver = new Solver(dim[0], dim[1], diff, visc);
+    var gpuCanvas = document.getElementById("myCanvasGpu");
+    gpuCanvas.width = dim[0]+2;
+    gpuCanvas.height = dim[1]+2;
+    var gpuSolver = new GpuSolver(dim[0], dim[1], diff, visc, gpuCanvas);
+    var playing = false;
     var nxt = document.getElementById("pausestart");
     nxt.onclick = function() {
       playing = !playing;
       if(playing)
         ite();
     };
+    step_cpu = false;
 
 
+    var ite_count = 0;
     function ite() {
       step();
+      ite_count++;
+      console.log("ite_count: " + ite_count);
 
-      if(playing)
-      window.setTimeout(ite, 1000 / 60);
+      if(playing && ite_count%100 != 0)
+        window.setTimeout(ite, 1000 / 60);
     }
-    ite();
 
     document.getElementById("myCanvas").addEventListener('click', function() {
 
     }, false);
 
     function step() {
-      //console.log("Next step");
-      solver.step(0.2);
-      var density_array = solver.get_density();
-      var vel_u_array = solver.get_velocity_u();
-      var vel_v_array = solver.get_velocity_v();
+      var delta = 0.2;
 
-      var c = document.getElementById("myCanvas");
-      c.width = dim[0];
-      c.height = dim[1];
-      var ctx = c.getContext("2d");
+      if(step_cpu) { 
+        var t0 = performance.now();
+        //console.log("Next step");
+        solver.step(delta);
+        var density_array = solver.get_density();
+        var vel_u_array = solver.get_velocity_u();
+        var vel_v_array = solver.get_velocity_v();
 
-      var imgData = ctx.createImageData(c.width, c.height);
+        var c = document.getElementById("myCanvas");
+        c.width = dim[0];
+        c.height = dim[1];
+        var ctx = c.getContext("2d");
 
-      var min = [Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE];
-      var max = [-1, -1, -1];
-      var total = 0;
-      for (var x = 1 ; x <= c.width ; x++) {
-        for (var y = 1 ; y <= c.height ; y++) {
-          var v = [density_array[x + y*(c.width+2)], vel_u_array[x + y*(c.width+2)], vel_v_array[x + y*(c.width+2)]];
-          max[0] = v[0]>max[0] ? v[0] : max[0];
-          min[0] = v[0]<min[0] ? v[0] : min[0];
-          total += v[0];
-          max[1] = v[1]>max[1] ? v[1] : max[1];
-          min[1] = v[1]<min[1] ? v[1] : min[1];
-          max[2] = v[2]>max[2] ? v[2] : max[2];
-          min[2] = v[2]<min[2] ? v[2] : min[2];
+        var imgData = ctx.createImageData(c.width, c.height);
+
+        var min = [Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE];
+        var max = [-1, -1, -1];
+        var total = 0;
+        for (var x = 1 ; x <= c.width ; x++) {
+          for (var y = 1 ; y <= c.height ; y++) {
+            var v = [density_array[x + y*(c.width+2)], vel_u_array[x + y*(c.width+2)], vel_v_array[x + y*(c.width+2)]];
+            max[0] = v[0]>max[0] ? v[0] : max[0];
+            min[0] = v[0]<min[0] ? v[0] : min[0];
+            total += v[0];
+            max[1] = v[1]>max[1] ? v[1] : max[1];
+            min[1] = v[1]<min[1] ? v[1] : min[1];
+            max[2] = v[2]>max[2] ? v[2] : max[2];
+            min[2] = v[2]<min[2] ? v[2] : min[2];
+          }
         }
+
+        //console.log("max: " + max[0]);
+        //console.log("min: " + min[1]);
+        max[0] = 0.1;
+        min[0] = 0.0;
+
+        for (var x = 1 ; x <= c.width ; x++) {
+          for (var y = 1 ; y <= c.height ; y++) {
+            var v = [density_array[x + y*(c.width+2)], vel_u_array[x + y*(c.width+2)], vel_v_array[x + y*(c.width+2)]];
+            if(max[0] > 0 )
+              v[0] = 255 * (v[0]-min[0])/(max[0]);
+            if(max[1] > 0 )
+              v[1] = 255 * (v[1]-min[1])/(max[1]-min[1]);
+            if(max[2] > 0 )
+              v[2] = 255 * (v[2]-min[2])/(max[2]-min[2]);
+            
+            var s = v[1] + v[2];
+            imgData.data[4*((x-1)+(y-1)*c.width)+0] = v[0]>255?255:v[0];
+            imgData.data[4*((x-1)+(y-1)*c.width)+1] = v[0]>255?255:v[0];
+            imgData.data[4*((x-1)+(y-1)*c.width)+2] = v[0]>255?255:v[0];
+            imgData.data[4*((x-1)+(y-1)*c.width)+3] = 255;
+            
+          }
+        }
+
+        ctx.putImageData(imgData, 0, 0);
+        var t1 = performance.now();
+        console.log("CPU execution time: " + (t1 - t0) + " milliseconds.");
       }
 
-      //console.log("max: " + max);
-      //console.log("min: " + min);
-      max[0] = 0.1;
-
-      for (var x = 1 ; x <= c.width ; x++) {
-        for (var y = 1 ; y <= c.height ; y++) {
-          var v = [density_array[x + y*(c.width+2)], vel_u_array[x + y*(c.width+2)], vel_v_array[x + y*(c.width+2)]];
-          if(max[0] > 0 )
-            v[0] = 255 * (v[0]-min[0])/(max[0]);
-          if(max[1] > 0 )
-            v[1] = 255 * (v[1]-min[1])/(max[1]-min[1]);
-          if(max[2] > 0 )
-            v[2] = 255 * (v[2]-min[2])/(max[2]-min[2]);
-          
-          var s = v[1] + v[2];
-          imgData.data[4*((x-1)+(y-1)*c.width)+0] = v[0]>255?255:v[0];
-          imgData.data[4*((x-1)+(y-1)*c.width)+1] = v[0]>255?255:v[0];
-          imgData.data[4*((x-1)+(y-1)*c.width)+2] = v[0]>255?255:v[0];
-          imgData.data[4*((x-1)+(y-1)*c.width)+3] = 255;
-          
-        }
-      }
-
-      ctx.putImageData(imgData, 0, 0);
+      var t2 = performance.now();
+      gpuSolver.step(delta);
+      var t3 = performance.now();
+      console.log("GPU execution time: " + (t3 - t2) + " milliseconds.")
     }
   </script>
 </body>

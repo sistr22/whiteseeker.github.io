@@ -1,7 +1,7 @@
 // 2D fluid solver based on Navier-Stokes equation and Jos Stam paper
 
 class Solver {
-  constructor(grid_width, grid_height) {
+  constructor(grid_width, grid_height, diff, visc) {
     this.grid_width = grid_width;
     this.grid_height = grid_height;
     this.width = grid_width+2;
@@ -28,8 +28,13 @@ class Solver {
     for (var i = 0 ; i < this.array_size ; i++)
       this.dens_prev[i] = 0;
 
-    this.diff = 0.00003;
-    this.visc = 0.00000;
+
+    this.tmp_array = new Array(this.array_size);
+    for (var i = 0 ; i < this.array_size ; i++)
+      this.tmp_array[i] = 0;
+
+    this.diff = diff;
+    this.visc = visc;
     this.counter = 0;
   }
 
@@ -42,13 +47,16 @@ class Solver {
 
     // Get input from ui
     if(this.counter<100) {
-      this.dens_prev[this.idx(30, 30)] += 15;
-      this.u_prev[this.idx(30, 30)] += 12;
-      this.v_prev[this.idx(30, 30)] += 4;
-      /*for(var x = 29 ; x < 32 ; x++) {
-        for(var y = 29 ; y < 32 ; y++) {
-          this.u_prev[this.idx(x, y)] += -10;
-          this.v_prev[this.idx(x, y)] = this.u_prev[this.idx(x, y)];
+      var pos = [50, 50];
+      this.dens_prev[this.idx(pos[0], pos[1])] += 9.0;
+      this.u_prev[this.idx(pos[0], pos[1])] += 12.0;
+      this.v_prev[this.idx(pos[0], pos[1])] += 4.0;
+      /*for(var i = 30 ; i < 70 ; i++) {
+        for(var j = 30 ; j < 70 ; j++) {
+          //this.u_prev[this.idx(i, j)] += 42;
+          //this.v_prev[this.idx(i, j)] += 4;
+          //this.u_prev[this.idx(i, j)] = 0.02*dt;
+          //this.v_prev[this.idx(i, j)] = 0.04*dt;
         }
       }*/
       this.counter++;
@@ -114,7 +122,7 @@ class Solver {
     this.dens_prev = tmp;
 
     this.diffuse(this.dens, this.dens_prev, 0, this.diff, dt);
-
+    
     // swap
     tmp = this.dens;
     this.dens = this.dens_prev;
@@ -140,15 +148,18 @@ class Solver {
       for (var j = 0 ; j <= this.grid_height ; j++) {
         div[this.idx(i, j)] = -0.5*hx*(u[this.idx(i+1, j)]-u[this.idx(i-1, j)]+v[this.idx(i, j+1)]-v[this.idx(i, j-1)]);
         p[this.idx(i, j)] = 0;
+        this.tmp_array[this.idx(i, j)] = 0;
       }
     }
     this.set_bnd(0, div);
     this.set_bnd(0, p);
 
+    var ping_pong = [this.tmp_array, p];
     for (var k = 0 ; k < 20 ; k++) {
       for (var i = 1 ; i <= this.grid_width ; i++) {
         for (var j = 1 ; j <= this.grid_height ; j++) {
-          p[this.idx(i, j)] = (div[this.idx(i, j)] + p[this.idx(i-1, j)]+p[this.idx(i+1, j)]+p[this.idx(i, j-1)]+p[this.idx(i, j+1)])/4;
+          var rd = ping_pong[(k+1)%2];
+          ping_pong[k%2][this.idx(i, j)] = (div[this.idx(i, j)] + rd[this.idx(i-1, j)]+rd[this.idx(i+1, j)]+rd[this.idx(i, j-1)]+rd[this.idx(i, j+1)])/4;
         }
       }
       this.set_bnd(0, p);
@@ -166,7 +177,7 @@ class Solver {
 
   add_source(x, s, dt) {
     for(var i = 0 ; i < this.array_size ; i++) {
-      x[i] += dt*s[i];
+      x[i] = x[i] + dt*s[i];
     }
   }
 
@@ -175,6 +186,7 @@ class Solver {
     var grid_width = this.grid_width;
     var dt0x = dt*grid_width;
     var dt0y = dt*grid_height;
+
     for (var i=1 ; i<=grid_width ; i++) {
       for (var j=1 ; j<=grid_height ; j++) {
         var x = i-dt0x*u[this.idx(i, j)];
@@ -198,6 +210,7 @@ class Solver {
         var t0 = 1-t1;
         d[this.idx(i, j)] = s0*(t0*d0[this.idx(i0, j0)] + t1*d0[this.idx(i0, j1)])+
                             s1*(t0*d0[this.idx(i1, j0)] + t1*d0[this.idx(i1, j1)]);
+        //d[this.idx(i, j)] = (s1/this.width+t1/this.height);
       }
     }
     this.set_bnd(b, d);
@@ -205,10 +218,13 @@ class Solver {
 
   diffuse(x, x0, b, diff, dt) {
     var a = dt*diff*this.exposed_size;
+
+    var ping_pong = [this.tmp_array, x];
     for(var k = 0 ; k < 20 ; k++) {
       for(var i = 1 ; i <= this.grid_width ; i++) {
         for(var j = 1 ; j <= this.grid_height ; j++) {
-          x[this.idx(i, j)] = (x0[this.idx(i, j)] + a*(x[this.idx(i-1, j)]+x[this.idx(i+1, j)]+x[this.idx(i, j-1)]+x[this.idx(i, j+1)]))/(1+4*a);
+          var rd = ping_pong[(k+1)%2];
+          ping_pong[k%2][this.idx(i, j)] = (x0[this.idx(i, j)] + a*(rd[this.idx(i-1, j)]+rd[this.idx(i+1, j)]+rd[this.idx(i, j-1)]+rd[this.idx(i, j+1)]))/(1+4*a);
         }
       }
       this.set_bnd(b, x);
@@ -219,16 +235,16 @@ class Solver {
     var grid_height = this.grid_height;
     var grid_width = this.grid_width;
     for(var x=1 ; x<=grid_width ; x++) {
-      ar[this.idx(x, 0)] = b==2 ? -ar[this.idx(x, 1)] : ar[this.idx(x, 1)];
-      ar[this.idx(x, grid_height+1)] = b==2 ? -ar[this.idx(x, grid_height)] : ar[this.idx(x, grid_height)];
+      ar[this.idx(x, 0)] = ar[this.idx(x, 1)];//b==2 ? -ar[this.idx(x, 1)] : ar[this.idx(x, 1)];
+      ar[this.idx(x, grid_height+1)] = ar[this.idx(x, grid_height)];//b==2 ? -ar[this.idx(x, grid_height)] : ar[this.idx(x, grid_height)];
     }
     for(var y=1 ; y<=grid_height ; y++) {
-      ar[this.idx(0, y)] = b==1 ? -ar[this.idx(1, y)] : ar[this.idx(1, y)];
-      ar[this.idx(grid_width+1, y)] = b==1 ? -ar[this.idx(grid_width, y)] : ar[this.idx(grid_width, y)];
+      ar[this.idx(0, y)] = ar[this.idx(1, y)];//b==1 ? -ar[this.idx(1, y)] : ar[this.idx(1, y)];
+      ar[this.idx(grid_width+1, y)] = ar[this.idx(grid_width, y)];//b==1 ? -ar[this.idx(grid_width, y)] : ar[this.idx(grid_width, y)];
     }
-    ar[this.idx(0, 0)]                        = 0.5 * (ar[this.idx(1, 0)]+ar[this.idx(0, 1)]);
-    ar[this.idx(0, grid_height+1)]            = 0.5 * (ar[this.idx(1, grid_height+1)] + ar[this.idx(0, grid_height)]);
-    ar[this.idx(grid_width+1, 0)]             = 0.5 * (ar[this.idx(grid_width, 0)] + ar[this.idx(grid_width+1, 1)]);
-    ar[this.idx(grid_width+1, grid_height+1)] = 0.5 * (ar[this.idx(grid_width, grid_height+1)] + ar[this.idx(grid_width+1, grid_height)]);
+    ar[this.idx(0, 0)]                        = 0;//0.5 * (ar[this.idx(1, 0)]+ar[this.idx(0, 1)]);
+    ar[this.idx(0, grid_height+1)]            = 0;//0.5 * (ar[this.idx(1, grid_height+1)] + ar[this.idx(0, grid_height)]);
+    ar[this.idx(grid_width+1, 0)]             = 0;//0.5 * (ar[this.idx(grid_width, 0)] + ar[this.idx(grid_width+1, 1)]);
+    ar[this.idx(grid_width+1, grid_height+1)] = 0;//0.5 * (ar[this.idx(grid_width, grid_height+1)] + ar[this.idx(grid_width+1, grid_height)]);
   }
 }
