@@ -1,0 +1,97 @@
+---
+layout: post
+title: Fluid 2D
+category : gamedev
+custom_css: ['ramage/map.css']
+tags : [gamedev, procedural, beginner]
+---
+<!DOCTYPE html>
+<html>
+<body>
+  <div>
+    <canvas id="myCanvas" width="512" height="256" style="margin: auto; display: block; padding: 0px 0px 5px 0px;">Your browser does not support the HTML5 canvas tag.</canvas>
+  </div>
+	<input id="pausestart" type="button" value="Pause/Start" style="margin: 3px;"/>
+  <script src="script.js"></script>
+  <script type="text/javascript">
+    var dim = [150, 150];
+    var solver = new Solver(dim[0], dim[1]);
+    var playing = true;
+    var nxt = document.getElementById("pausestart");
+    nxt.onclick = function() {
+      playing = !playing;
+      if(playing)
+        ite();
+    };
+
+
+    function ite() {
+      step();
+
+      if(playing)
+      window.setTimeout(ite, 1000 / 60);
+    }
+    ite();
+
+    document.getElementById("myCanvas").addEventListener('click', function() {
+
+    }, false);
+
+    function step() {
+      //console.log("Next step");
+      solver.step(0.2);
+      var density_array = solver.get_density();
+      var vel_u_array = solver.get_velocity_u();
+      var vel_v_array = solver.get_velocity_v();
+
+      var c = document.getElementById("myCanvas");
+      c.width = dim[0];
+      c.height = dim[1];
+      var ctx = c.getContext("2d");
+
+      var imgData = ctx.createImageData(c.width, c.height);
+
+      var min = [Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE];
+      var max = [-1, -1, -1];
+      var total = 0;
+      for (var x = 1 ; x <= c.width ; x++) {
+        for (var y = 1 ; y <= c.height ; y++) {
+          var v = [density_array[x + y*(c.width+2)], vel_u_array[x + y*(c.width+2)], vel_v_array[x + y*(c.width+2)]];
+          max[0] = v[0]>max[0] ? v[0] : max[0];
+          min[0] = v[0]<min[0] ? v[0] : min[0];
+          total += v[0];
+          max[1] = v[1]>max[1] ? v[1] : max[1];
+          min[1] = v[1]<min[1] ? v[1] : min[1];
+          max[2] = v[2]>max[2] ? v[2] : max[2];
+          min[2] = v[2]<min[2] ? v[2] : min[2];
+        }
+      }
+
+      //console.log("max: " + max);
+      //console.log("min: " + min);
+      max[0] = 0.1;
+
+      for (var x = 1 ; x <= c.width ; x++) {
+        for (var y = 1 ; y <= c.height ; y++) {
+          var v = [density_array[x + y*(c.width+2)], vel_u_array[x + y*(c.width+2)], vel_v_array[x + y*(c.width+2)]];
+          if(max[0] > 0 )
+            v[0] = 255 * (v[0]-min[0])/(max[0]);
+          if(max[1] > 0 )
+            v[1] = 255 * (v[1]-min[1])/(max[1]-min[1]);
+          if(max[2] > 0 )
+            v[2] = 255 * (v[2]-min[2])/(max[2]-min[2]);
+          
+          var s = v[1] + v[2];
+          imgData.data[4*((x-1)+(y-1)*c.width)+0] = v[0]>255?255:v[0];
+          imgData.data[4*((x-1)+(y-1)*c.width)+1] = v[0]>255?255:v[0];
+          imgData.data[4*((x-1)+(y-1)*c.width)+2] = v[0]>255?255:v[0];
+          imgData.data[4*((x-1)+(y-1)*c.width)+3] = 255;
+          
+        }
+      }
+
+      ctx.putImageData(imgData, 0, 0);
+    }
+  </script>
+</body>
+</html>
