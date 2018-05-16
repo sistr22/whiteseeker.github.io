@@ -35,14 +35,15 @@ void main(void) {
         </textarea><br>
         Vertex shader<br>
         <textarea rows="15" style="width:100%;" id="shader-vs">
-attribute vec3 aVertexPosition;
+attribute vec2 aVertexPosition;
 
 uniform mat4 MVP;
 
 void main(void) {
-  gl_Position = MVP * vec4(aVertexPosition, 1.0);
+  gl_Position = MVP * vec4(aVertexPosition, 0.0, 1.0);
 }
         </textarea>
+        <div><input id="refresh_shader" type="button" value="Refresh"/></div>
       </div>
     </main>
   </div>

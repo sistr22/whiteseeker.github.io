@@ -12,13 +12,13 @@ class BezierLine {
     BezierLine.point_vertex_pos_buffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, BezierLine.point_vertex_pos_buffer);
     var vertices = [
-      0.5, 0.5, 0.0,
-      -0.5, 0.5, 0.0,
-      0.5, -0.5, 0.0,
-      -0.5, -0.5, 0.0
+      0.5, 0.5,
+      -0.5, 0.5,
+      0.5, -0.5,
+      -0.5, -0.5,
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-    BezierLine.point_vertex_pos_buffer.itemSize = 3;
+    BezierLine.point_vertex_pos_buffer.itemSize = 2;
     BezierLine.point_vertex_pos_buffer.numItems = 4;
 
     // Create our shader
@@ -77,7 +77,7 @@ class BezierLine {
     vec2.add(ctrl_p1, this.points[1], this.control_points[1]);
     this.DrawPoint(gl, VP, ctrl_p1, [0.0, 0.0, 1.0, 1.0]);
 
-    this.Retesselate();
+    this.Retesselate(gl);
     for(var i = 0 ; i < this.tesselation_points.length ; i++) {
       this.DrawPoint(gl, VP, this.tesselation_points[i], [0.2, 0.2, 0.2, 1.0]);
     }
@@ -87,20 +87,22 @@ class BezierLine {
 
     this.DrawPoint(gl, VP, this.points[0], [0.0, 1.0, 1.0, 1.0]);
     this.DrawPoint(gl, VP, this.points[1], [0.0, 1.0, 1.0, 1.0]);
+
+    this.DrawLines(gl, VP, [1.0, 1.0, 1.0, 1.0]);
   }
 
   DrawPoint(gl, VP, pt, color) {
     gl.useProgram(BezierLine.program);
-
+    // Set MVP
     var M = mat4.create();
     mat4.translate(M, M, [pt[0], pt[1], 0.0]);
     mat4.scale(M, M, [0.02, 0.02, 1.0]);
-
     var MVP = mat4.create();
     mat4.multiply(MVP, VP, M);
     gl.uniformMatrix4fv(BezierLine.program.uniformMVP, false, MVP);
+    // Set color
     gl.uniform4fv(BezierLine.program.uniform_color, color);
-
+    // Set vertex attrib
     gl.enableVertexAttribArray(BezierLine.program.vertexPositionAttribute);
     gl.bindBuffer(gl.ARRAY_BUFFER, BezierLine.point_vertex_pos_buffer);
     gl.vertexAttribPointer(BezierLine.program.vertexPositionAttribute, BezierLine.point_vertex_pos_buffer.itemSize, gl.FLOAT, false, 0, 0);
@@ -110,16 +112,34 @@ class BezierLine {
     gl.disableVertexAttribArray(BezierLine.program.vertexPositionAttribute);
   }
 
-  Retesselate() {
+  DrawLines(gl, VP, color) {
+    gl.useProgram(BezierLine.program);
+    // Set MVP
+    var M = mat4.create();
+    var MVP = mat4.create();
+    mat4.multiply(MVP, VP, M);
+    gl.uniformMatrix4fv(BezierLine.program.uniformMVP, false, MVP);
+    // Set color
+    gl.uniform4fv(BezierLine.program.uniform_color, color);
+    // Set vertex attrib
+    gl.enableVertexAttribArray(BezierLine.program.vertexPositionAttribute);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.line_vertex_pos_buffer);
+    gl.vertexAttribPointer(BezierLine.program.vertexPositionAttribute, this.line_vertex_pos_buffer.itemSize, gl.FLOAT, false, 0, 0);
+    
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.line_vertex_pos_buffer.numItems);
+
+    gl.disableVertexAttribArray(BezierLine.program.vertexPositionAttribute);
+  }
+
+  Retesselate(gl) {
     this.tesselation_points = [];
 		this.perpendicular_vectors = [];
-		
 		for (var i = 0 ; i < this.subdivisions ; i++) { 
 			var t = i / (this.subdivisions - 1);
-			
 			this.tesselation_points.push(this.BezierAt(t));
 			this.perpendicular_vectors.push(this.BezierPerpAt(t));
-		}
+    }
+    this.GenerateStrip(gl);
   }
 
   BezierAt(t) {
@@ -135,12 +155,6 @@ class BezierLine {
                 , tmp1
                 , this.points[1]];
     var scalars = [nt*nt*nt, 3.0*nt*nt*t, 3.0*nt*t*t, t*t*t];
-    /*var res = vec2.create();
-    for(var i = 0 ; i < 4 ; i++) {
-      var tmp = vec2.create();
-      vec2.scale(tmp, pts[i], scalars[i])
-      vec2.add(res, res, tmp);
-    }*/
     var res = pts.reduce(function(prev, curr, i) {
       var tmp = vec2.create();
       vec2.scale(tmp, curr, scalars[i])
@@ -172,8 +186,42 @@ class BezierLine {
 		}, vec2.create());
   
     vec2.normalize(value, value);
-    vec2.scale(value, value, 0.1);
-		return vec2.fromValues(-value.y, value.x);
+    return vec2.fromValues(-value[1], value[0]);
+  }
+
+  GenerateStrip(gl) {
+    var vertices = [];
+    var thickness = 0.005;
+    for(var i = 0 ; i < this.tesselation_points.length ; i++) {
+      var pt_neg = vec2.create();
+      var vec_to_add = vec2.create();
+      vec2.scale(vec_to_add, this.perpendicular_vectors[i], thickness);
+      vec2.negate(vec_to_add, vec_to_add);
+      vec2.add(pt_neg, this.tesselation_points[i], vec_to_add);
+      vertices.push(pt_neg[0]);
+      vertices.push(pt_neg[1]);
+
+      var pt_pos = vec2.create();
+      vec2.scale(vec_to_add, this.perpendicular_vectors[i], thickness);
+      vec2.add(pt_pos, this.tesselation_points[i], vec_to_add);
+      vertices.push(pt_pos[0]);
+      vertices.push(pt_pos[1]);
+    }
+
+    if(!this.line_vertex_pos_buffer) {
+      // Create the buffer
+      this.line_vertex_pos_buffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.line_vertex_pos_buffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+      this.line_vertex_pos_buffer.itemSize = 2;
+      this.line_vertex_pos_buffer.numItems = vertices.length/2;
+    } else {
+      // Update the buffer
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.line_vertex_pos_buffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+      this.line_vertex_pos_buffer.itemSize = 2;
+      this.line_vertex_pos_buffer.numItems = vertices.length/2;
+    }
   }
 
   Collide(pt) {
@@ -240,6 +288,8 @@ class Renderer {
 
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+    gl.disable(gl.CULL_FACE);
 
     BezierLine.InitGl(gl);
 
