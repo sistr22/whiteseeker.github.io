@@ -20,7 +20,7 @@
             <a href="{{site.baseurl}}/assets/images/{{ page.image }}" onclick="screenshotOnClick(1);return false;" target="_blank"><img src="{{site.baseurl}}/assets/images/{{ page.image }}" alt="Gameplay gif" class="top_gif gameScreenshotSmall"></a>
             {% endif %}
 	          {{ content }}
-            {% if page.link_play AND page.link_apple %}
+            {% if page.link_play and page.link_apple %}
             <div class="store_badges">
             <a href="{{page.link_play}}" target="_blank"><img src="{{site.baseurl}}/assets/images/play_badge.png" alt="Get it on Google Play" class="play_badge"/></a>
             <a href="{{page.link_apple}}" target="_blank"><img src="{{site.baseurl}}/assets/images/apple_badge.svg" alt="Download on the App Store" class="apple_badge"/></a>
@@ -94,7 +94,7 @@
       </div>
     </div>
 
-    {% if page.screenshots AND page.screenshots_size %}
+    {% if page.screenshots and page.screenshots_size %}
     <script>
       var items = [];
 

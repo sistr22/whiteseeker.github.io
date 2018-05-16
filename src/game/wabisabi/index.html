@@ -1,0 +1,51 @@
+---
+layout: game
+custom_css: ['game/wabisabi/midi.css']
+---
+
+<!-- Always shows a header, even in smaller screens. -->
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+    <header class="mdl-layout__header">
+      <div class="mdl-layout__header-row">
+        <!-- Title -->
+        <span class="mdl-layout-title">Level editor</span>
+        <!-- Add spacer, to align navigation to the right -->
+        <div class="mdl-layout-spacer"></div>
+      </div>
+    </header>
+    <div class="mdl-layout__drawer">
+      <span class="mdl-layout-title">Midi editor</span>
+      <nav class="mdl-navigation">
+        <a class="mdl-navigation__link" href="">Save</a>
+      </nav>
+    </div>
+    <main class="mdl-layout__content">
+      <div class="page-content">
+        <canvas id="canva" width="512" height="512" style="margin: auto; display: block; padding: 0px 0px 5px 0px;" onmouseup="mouseUp(event)" onmousedown="mouseDown(event)" onmousemove="mouseMove(event)" >Your browser does not support the HTML5 canvas tag.</canvas>
+        
+        Fragment shader<br>
+        <textarea rows="15" style="width:100%;" id="shader-fs">
+precision mediump float;
+
+uniform vec4 color;
+
+void main(void) {
+  gl_FragColor = color;
+}
+        </textarea><br>
+        Vertex shader<br>
+        <textarea rows="15" style="width:100%;" id="shader-vs">
+attribute vec3 aVertexPosition;
+
+uniform mat4 MVP;
+
+void main(void) {
+  gl_Position = MVP * vec4(aVertexPosition, 1.0);
+}
+        </textarea>
+      </div>
+    </main>
+  </div>
+
+  <script type="text/javascript" src="/scripts/gl-matrix-2.4.0.min.js"></script>
+  <script src="script.js"></script>

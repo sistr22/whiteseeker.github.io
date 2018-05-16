@@ -9,12 +9,10 @@
     "uglify": "mkdir -p _site/css/photoswipe/ && mkdir -p _site/scripts && node uglify.js",
     "penthouse": "node penthouse.js",
     "postpenthouse": "cat '_site/css/critical.css' | cssmin > _site/css/critical.min.css",
-
     "buildev": "npm run jekyll && npm run cssmin && npm run webppngdev && npm run uglifydev && npm run penthouse",
     "buildev-no-image": "npm run jekyll && npm run cssmin && npm run uglifydev",
     "uglifydev": "mkdir -p _site/css/photoswipe/ && mkdir -p _site/scripts && node uglify.js dev",
     "webppngdev": "find ./_site/assets/images/ -type f -name '*.png' | while read file; do node webpconverter.js $file dev; done",
-    
     "clean": "rm -r _site/*",
     "serve": "firebase serve"
   },
