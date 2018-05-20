@@ -1,10 +1,16 @@
 class BezierLine {
   constructor(p0, p0_cp, p1, p1_cp) { // cp stand for control point
     this.points = [p0, p1];
-    this.control_points = [p0_cp, p1_cp];
-    this.subdivisions = 20;
+    this.control_points = [vec2.fromValues(0.0, 0.0), p0_cp, p1_cp, vec2.fromValues(0.0, 0.0)];
+    this.subdivisions = 200;
 
     this.M = mat4.create();
+  }
+
+  AddPoint(index, point, control_point_left, control_point_right) {
+    this.points.splice(index, 0, point);
+    this.control_points.splice(index*2, 0, control_point_left);
+    this.control_points.splice(index*2+1, 0, control_point_right);
   }
 
   static InitGl(gl) {
@@ -21,7 +27,10 @@ class BezierLine {
     BezierLine.point_vertex_pos_buffer.itemSize = 2;
     BezierLine.point_vertex_pos_buffer.numItems = 4;
 
-    // Create our shader
+    BezierLine.ReloadShader(gl);
+  }
+
+  static ReloadShader(gl) {
     if (BezierLine.program)
       gl.deleteProgram(BezierLine.program);
     var fragmentShader = BezierLine.getShader(gl, "shader-fs");
@@ -70,25 +79,25 @@ class BezierLine {
   }
 
   Draw(gl, VP) {
-    var ctrl_p0 = vec2.create();
-    vec2.add(ctrl_p0, this.points[0], this.control_points[0]);
-    this.DrawPoint(gl, VP, ctrl_p0, [0.0, 0.0, 1.0, 1.0]);
-    var ctrl_p1 = vec2.create();
-    vec2.add(ctrl_p1, this.points[1], this.control_points[1]);
-    this.DrawPoint(gl, VP, ctrl_p1, [0.0, 0.0, 1.0, 1.0]);
+    for(var i = 0 ; i < this.control_points.length ; i++){
+      if(this.control_points[i][0] == 0 && this.control_points[i][1] == 0)
+        continue;
+      var ctrl_p = vec2.create();
+      vec2.add(ctrl_p, this.points[Math.floor(i/2)], this.control_points[i]);
+      this.DrawPoint(gl, VP, ctrl_p, [0.0, 0.0, 1.0, 1.0]);
+    }
 
     this.Retesselate(gl);
     for(var i = 0 ; i < this.tesselation_points.length ; i++) {
       this.DrawPoint(gl, VP, this.tesselation_points[i], [0.2, 0.2, 0.2, 1.0]);
     }
-    for(var i = 0 ; i < this.perpendicular_vectors.length ; i++) {
-      this.DrawPoint(gl, VP, this.perpendicular_vectors[i], [0.8, 0.0, 0.0, 1.0]);
+
+    for(var i = 0 ; i < this.points.length ; i++){
+      var cl = this.points[i].color ? this.points[i].color : [0.0, 1.0, 1.0, 1.0];
+      this.DrawPoint(gl, VP, this.points[i], cl);
     }
 
-    this.DrawPoint(gl, VP, this.points[0], [0.0, 1.0, 1.0, 1.0]);
-    this.DrawPoint(gl, VP, this.points[1], [0.0, 1.0, 1.0, 1.0]);
-
-    this.DrawLines(gl, VP, [1.0, 1.0, 1.0, 1.0]);
+    //this.DrawLines(gl, VP, [1.0, 1.0, 1.0, 1.0]);
   }
 
   DrawPoint(gl, VP, pt, color) {
@@ -133,27 +142,34 @@ class BezierLine {
 
   Retesselate(gl) {
     this.tesselation_points = [];
-		this.perpendicular_vectors = [];
-		for (var i = 0 ; i < this.subdivisions ; i++) { 
-			var t = i / (this.subdivisions - 1);
-			this.tesselation_points.push(this.BezierAt(t));
-			this.perpendicular_vectors.push(this.BezierPerpAt(t));
+    this.perpendicular_vectors = [];
+    for(var p = 0 ; p < this.points.length-1 ; p++) {
+      for (var i = 0 ; i < this.subdivisions ; i++) { 
+        var t = i / (this.subdivisions - 1);
+        var p0 = this.points[p];
+        var p1 = this.points[p+1];
+        var cp0 = this.control_points[2*p+1];
+        var cp1 = this.control_points[2*(p+1)];
+        
+        this.tesselation_points.push(this.BezierAt(t, p0, p1, cp0, cp1));
+        this.perpendicular_vectors.push(this.BezierPerpAt(t, p0, p1, cp0, cp1));
+      }
     }
-    this.GenerateStrip(gl);
+    //this.GenerateStrip(gl);
   }
 
-  BezierAt(t) {
+  BezierAt(t, pt0, pt1, cpt0, cpt1) {
     var nt = 1.0 - t;
   
     var tmp0 = vec2.create();
-    vec2.add(tmp0, this.points[0], this.control_points[0]);
+    vec2.add(tmp0, pt0, cpt0);
     var tmp1 = vec2.create();
-    vec2.add(tmp1, this.points[1], this.control_points[1]);
+    vec2.add(tmp1, pt1, cpt1);
 
-    var pts = [this.points[0]
+    var pts = [pt0
                 , tmp0
                 , tmp1
-                , this.points[1]];
+                , pt1];
     var scalars = [nt*nt*nt, 3.0*nt*nt*t, 3.0*nt*t*t, t*t*t];
     var res = pts.reduce(function(prev, curr, i) {
       var tmp = vec2.create();
@@ -165,17 +181,17 @@ class BezierLine {
 		return res;
   }
 
-  BezierPerpAt(t) {
+  BezierPerpAt(t, pt0, pt1, cpt0, cpt1) {
     var nt = 1.0 - t;
 
     var tmp0 = vec2.create();
-    vec2.add(tmp0, this.points[0], this.control_points[0]);
+    vec2.add(tmp0, pt0, cpt0);
     var tmp1 = vec2.create();
-    vec2.add(tmp1, this.points[1], this.control_points[1]);
-    var pts = [this.points[0]
+    vec2.add(tmp1, pt1, cpt1);
+    var pts = [pt0
                 , tmp0
                 , tmp1
-                , this.points[1]];
+                , pt1];
     
 		var scalars = [-3.0*nt*nt, 3.0*(1.0 - 4.0*t + 3.0*t*t), 3.0*(2.0*t - 3.0*t*t), 3.0*t*t];
 		var value = pts.reduce(function(prev, curr, i) {
@@ -226,15 +242,51 @@ class BezierLine {
 
   Collide(pt) {
     var squared_delta = 0.0004;
-    for(var p = 0 ; p < 2 ; p++) {
+    for(var p = 0 ; p < this.points.length ; p++) {
       if(vec2.sqrDist(pt, this.points[p]) <= squared_delta)
         return this.points[p];
-      var ctrl_p = vec2.create();
-      vec2.add(ctrl_p, this.points[p], this.control_points[p]);
-      if(vec2.sqrDist(pt, ctrl_p) <= squared_delta)
-        return this.control_points[p];
+
+      for(var cp = 0 ; cp < 2 ; cp++) {
+        if(this.control_points[2*p+cp][0] == 0 && this.control_points[2*p+cp][1] == 0)
+          continue;
+        var ctrl_p = vec2.create();
+        vec2.add(ctrl_p, this.points[p], this.control_points[2*p+cp]);
+        if(vec2.sqrDist(pt, ctrl_p) <= squared_delta)
+          return this.control_points[2*p+cp];
+      }
     }
     return null;
+  }
+
+  MouseDown(pos) {
+    var new_selection = this.Collide(pos);
+
+    if(new_selection && new_selection != this.selected) {
+      new_selection.color = [1.0,1.0,0.0,1.0];
+      if(this.selected)
+        this.selected.color = this.selected.default_color;
+      this.selected = new_selection;
+    }
+    if(!new_selection) {
+      if(this.selected)
+        this.selected.color = null;
+      this.selected = null;
+    }
+
+    if(this.selected) {
+      this.mouse_down = true;
+      return this;
+    } else
+      return null;
+  }
+  MouseMove(delta_pos) {
+    if(this.selected && this.mouse_down)
+      vec2.add(this.selected, this.selected, delta_pos);
+    return this;
+  }
+  MouseUp(pos) {
+    this.mouse_down = false;
+    return this;
   }
 }
 
@@ -249,26 +301,14 @@ class Renderer {
       alert("WebGL error!");
     }
     this.bezier_lines = [];
-    this.bezier_lines.push(new BezierLine(vec2.fromValues(-0.1, -0.05), vec2.fromValues(0, 0.25), vec2.fromValues(0.25, 0), vec2.fromValues(0, -0.25)));
-    this.selected_point = null;
+    var bezier_line = new BezierLine(vec2.fromValues(-0.1, -0.05), vec2.fromValues(0, 0.25), vec2.fromValues(0.25, 0), vec2.fromValues(0, -0.25));
+    bezier_line.AddPoint(1, vec2.fromValues(0.0, 0.15), vec2.fromValues(0.1, -0.10),vec2.fromValues(-0.1, 0.10))
+    this.bezier_lines.push(bezier_line);
+    
   }
 
   Init() {
     var gl = this.gl;
-    /*
-    var imgData = new ImageData(512, 512);
-    for (var x = 0; x < 512; x++) {
-    for (var y = 0; y < 512; y++) {
-    for (var chan = 0 ; chan < 4 ; chan++) {
-    if (chan != 3) {
-    imgData.data[4*(x + y*512)+chan] = 10;
-    } else {
-    imgData.data[4*(x + y*512)+chan] = 255;
-    }
-    }
-    }
-    }
-    this.updateTexture(imgData);*/
 
     // Projection matrix
     this.P = mat4.create();
@@ -298,16 +338,19 @@ class Renderer {
   }
 
   MouseMove(delta) {
-    if(!this.selected_point)
+    if(!this.selection)
       return;
     vec2.div(delta, delta, vec2.fromValues(this.canva.width, this.canva.height));
     delta[1] *= -1;
-    this.selected_point[0] += delta[0];
-    this.selected_point[1] += delta[1];
+    this.selection = this.selection.MouseMove(delta);
   }
 
   MouseUp(pt) {
-    this.selected_point = null;
+    if(!this.selection)
+      return;
+    vec2.div(pt, pt, vec2.fromValues(this.canva.width, this.canva.height));
+    vec2.sub(pt, pt, [0.5, 0.5]);
+    this.selection = this.selection.MouseUp(pt);
   }
 
   MouseDown(pt) {
@@ -316,8 +359,8 @@ class Renderer {
     console.log("MouseDown: [" + pt[0] + ", " + pt[1] + "]");
 
     for (var i = 0; i < this.bezier_lines.length; i++) {
-      this.selected_point = this.bezier_lines[i].Collide(pt);
-      if(this.selected_point)
+      this.selection = this.bezier_lines[i].MouseDown(pt);
+      if(this.selection)
         break;
     }
   }
@@ -327,6 +370,10 @@ class Renderer {
       this.isDrawing = true;
       this.draw();
     }
+  }
+
+  ReloadShader() {
+    BezierLine.ReloadShader(this.gl);
   }
 
   updateTexture(imgdata) {
@@ -349,33 +396,9 @@ class Renderer {
     var gl = this.gl;
     var now = Date.now() / 1000.0 - this.startTime;
     gl.clear(gl.COLOR_BUFFER_BIT);
-
     for (var i = 0; i < this.bezier_lines.length; i++) {
       this.bezier_lines[i].Draw(gl, this.VP);
     }
-
-    /*gl.uniformMatrix4fv(this.shaderProgram.uniformMVP, false, this.MVP);
-
-    gl.uniform1f(this.shaderProgram.uniformTime, now);
-
-    gl.enableVertexAttribArray(this.shaderProgram.vertexPositionAttribute);
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.squareVertexPositionBuffer);
-    gl.vertexAttribPointer(this.shaderProgram.vertexPositionAttribute, this.squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-    gl.enableVertexAttribArray(this.shaderProgram.textureCoordAttribute);
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.squareVertexTextureCoordBuffer);
-    gl.vertexAttribPointer(this.shaderProgram.textureCoordAttribute, this.squareVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, this.tex);
-    gl.uniform1i(this.shaderProgram.samplerUniform, 0);
-
-
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.squareVertexPositionBuffer.numItems);
-
-    gl.disableVertexAttribArray(this.shaderProgram.textureCoordAttribute);
-    gl.disableVertexAttribArray(this.shaderProgram.vertexPositionAttribute);*/
-
     window.setTimeout(function (rend) { return function () { rend.draw(); }; }(this), 1000 / 60);
   }
 }
@@ -384,6 +407,9 @@ var data_channel = [];
 var renderer = new Renderer();
 renderer.Init();
 
+var refreshShaderButton = document.getElementById("refresh_shader");
+refreshShaderButton.onclick = (function(rd) { return function(){rd.ReloadShader();};}(renderer));
+
 function mouseMove(evt) {
   // Set the 0,0 to bottom left:
   var pt = vec2.fromValues(evt.movementX, evt.movementY);
@@ -391,8 +417,8 @@ function mouseMove(evt) {
 }
 
 function mouseUp(evt) {
-  if(evt.button != 0)
-    return;
+  //if(evt.button != 0)
+  //  return;
   // Set the 0,0 to bottom left:
   var pt = vec2.fromValues(evt.offsetX, 512-evt.offsetY);
   console.log("mouseUp: [" + pt[0] + ", " + pt[1] + "]");
@@ -407,7 +433,5 @@ function mouseDown(evt) {
   //console.log("mouseDown: [" + pt[0] + ", " + pt[1] + "]");
   renderer.MouseDown(pt);
 }
-
-
 
 renderer.startDrawing();
