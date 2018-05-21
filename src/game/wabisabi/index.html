@@ -21,7 +21,11 @@ custom_css: ['game/wabisabi/midi.css']
     </div>
     <main class="mdl-layout__content">
       <div class="page-content">
-        <canvas id="canva" width="512" height="512" style="margin: auto; display: block; padding: 0px 0px 5px 0px;" onmouseup="mouseUp(event)" onmousedown="mouseDown(event)" onmousemove="mouseMove(event)" >Your browser does not support the HTML5 canvas tag.</canvas>
+        <canvas id="canva" width="512" height="512" style="margin: auto; display: block; padding: 0px 0px 5px 0px;" tabIndex="0"
+                onmouseup="mouseUp(event)" 
+                onmousedown="mouseDown(event)" 
+                onmousemove="mouseMove(event)"
+                onkeypress="keyPress(event)">Your browser does not support the HTML5 canvas tag.</canvas>
         
         Fragment shader<br>
         <textarea rows="15" style="width:100%;" id="shader-fs">

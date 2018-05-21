@@ -7,10 +7,45 @@ class BezierLine {
     this.M = mat4.create();
   }
 
-  AddPoint(index, point, control_point_left, control_point_right) {
+  AddPointAtIndex(index, point, control_point_left, control_point_right) {
     this.points.splice(index, 0, point);
     this.control_points.splice(index*2, 0, control_point_left);
     this.control_points.splice(index*2+1, 0, control_point_right);
+  }
+
+  AddPoint(point, control_point_left, control_point_right) {
+    if(!this.selected)
+      return;
+    // Find index of the selected point
+    var idx = -1;
+    for(var i = 0 ; i < this.points.length ; i++) {
+      if(this.selected == this.points[i])
+        idx = i;
+    }
+    console.log("index found: " + idx);
+    if(idx == -1)
+      return;
+    this.AddPointAtIndex(idx+1, point, control_point_left, control_point_right);
+  }
+
+  DeletePointAtIndex(index) {
+    this.points.remove(index, index);
+    this.control_points.remove(index*2, index*2+1);
+  }
+
+  DeletePoint() { // Delete currently selected point
+    if(!this.selected)
+      return;
+    // Find index of the selected point
+    var idx = -1;
+    for(var i = 0 ; i < this.points.length ; i++) {
+      if(this.selected == this.points[i])
+        idx = i;
+    }
+    console.log("index found: " + idx);
+    if(idx == -1)
+      return;
+    this.DeletePointAtIndex(idx);
   }
 
   static InitGl(gl) {
@@ -79,10 +114,21 @@ class BezierLine {
   }
 
   Draw(gl, VP) {
+
+    this.Retesselate(gl);
+    /*for(var i = 0 ; i < this.tesselation_points.length ; i++) {
+      this.DrawPoint(gl, VP, this.tesselation_points[i], [0.2, 0.2, 0.2, 1.0]);
+    }*/
+
+    this.DrawLines(gl, VP, [1.0, 1.0, 1.0, 1.0]);
+
+    for(var i = 0 ; i < this.points.length ; i++){
+      var cl = this.points[i].color ? this.points[i].color : [0.0, 1.0, 1.0, 1.0];
+      this.DrawPoint(gl, VP, this.points[i], cl);
+    }
+
     var lines = [];
-    for(var i = 0 ; i < this.control_points.length ; i++){
-      if(this.control_points[i][0] == 0 && this.control_points[i][1] == 0)
-        continue;
+    for(var i = 1 ; i < this.control_points.length-1 ; i++){
       var ctrl_p = vec2.create();
       vec2.add(ctrl_p, this.points[Math.floor(i/2)], this.control_points[i]);
       this.DrawPoint(gl, VP, ctrl_p, [0.0, 0.0, 1.0, 1.0]);
@@ -90,18 +136,6 @@ class BezierLine {
       lines.push(ctrl_p[0], ctrl_p[1]);
     }
     this.DrawDebugLines(gl, VP, lines, [0.0, 0.0, 1.0, 1.0]);
-
-    this.Retesselate(gl);
-    /*for(var i = 0 ; i < this.tesselation_points.length ; i++) {
-      this.DrawPoint(gl, VP, this.tesselation_points[i], [0.2, 0.2, 0.2, 1.0]);
-    }*/
-
-    for(var i = 0 ; i < this.points.length ; i++){
-      var cl = this.points[i].color ? this.points[i].color : [0.0, 1.0, 1.0, 1.0];
-      this.DrawPoint(gl, VP, this.points[i], cl);
-    }
-
-    this.DrawLines(gl, VP, [1.0, 1.0, 1.0, 1.0]);
   }
 
   DrawPoint(gl, VP, pt, color) {
@@ -324,8 +358,8 @@ class BezierLine {
 }
 
 class Renderer {
-  constructor() {
-    this.canva = document.getElementById("canva");
+  constructor(canva) {
+    this.canva = canva;
     try {
       this.gl = this.canva.getContext("webgl2");
       this.gl.viewportWidth = this.canva.width;
@@ -334,10 +368,10 @@ class Renderer {
       alert("WebGL error!");
     }
     this.bezier_lines = [];
-    var bezier_line = new BezierLine(vec2.fromValues(-0.1, -0.05), vec2.fromValues(0.2, 0), vec2.fromValues(0.25, 0), vec2.fromValues(0, -0.25));
-    bezier_line.AddPoint(1, vec2.fromValues(0.0, 0.15), vec2.fromValues(-0.1, -0.10),vec2.fromValues(0.1, 0.10))
-    this.bezier_lines.push(bezier_line);
-    
+  }
+
+  AddBezierLine(line) {
+    this.bezier_lines.push(line);
   }
 
   Init() {
@@ -368,34 +402,6 @@ class Renderer {
 
     this.startTime = Date.now() / 1000.0;
     this.isDrawing = false;
-  }
-
-  MouseMove(delta) {
-    if(!this.selection)
-      return;
-    vec2.div(delta, delta, vec2.fromValues(this.canva.width, this.canva.height));
-    delta[1] *= -1;
-    this.selection = this.selection.MouseMove(delta);
-  }
-
-  MouseUp(pt) {
-    if(!this.selection)
-      return;
-    vec2.div(pt, pt, vec2.fromValues(this.canva.width, this.canva.height));
-    vec2.sub(pt, pt, [0.5, 0.5]);
-    this.selection = this.selection.MouseUp(pt);
-  }
-
-  MouseDown(pt) {
-    vec2.div(pt, pt, vec2.fromValues(this.canva.width, this.canva.height));
-    vec2.sub(pt, pt, [0.5, 0.5]);
-    console.log("MouseDown: [" + pt[0] + ", " + pt[1] + "]");
-
-    for (var i = 0; i < this.bezier_lines.length; i++) {
-      this.selection = this.bezier_lines[i].MouseDown(pt);
-      if(this.selection)
-        break;
-    }
   }
 
   startDrawing() {
@@ -436,26 +442,46 @@ class Renderer {
   }
 }
 
-var data_channel = [];
-var renderer = new Renderer();
+Array.prototype.remove = function(from, to) {
+  var rest = this.slice((to || from) + 1 || this.length);
+  this.length = from < 0 ? this.length + from : from;
+  return this.push.apply(this, rest);
+};
+
+canva = document.getElementById("canva");
+var renderer = new Renderer(canva);
 renderer.Init();
+var selection = null;
+
+var bezier_lines = [];
+var line = new BezierLine(vec2.fromValues(-0.1, -0.05), vec2.fromValues(0.2, 0), vec2.fromValues(0.25, 0), vec2.fromValues(0, -0.25));
+line.AddPointAtIndex(1, vec2.fromValues(0.0, 0.15), vec2.fromValues(-0.1, -0.10),vec2.fromValues(0.1, 0.10));
+bezier_lines.push(line);
+renderer.AddBezierLine(line);
 
 var refreshShaderButton = document.getElementById("refresh_shader");
 refreshShaderButton.onclick = (function(rd) { return function(){rd.ReloadShader();};}(renderer));
 
 function mouseMove(evt) {
   // Set the 0,0 to bottom left:
-  var pt = vec2.fromValues(evt.movementX, evt.movementY);
-  renderer.MouseMove(pt);
+  var delta = vec2.fromValues(evt.movementX, evt.movementY);
+
+  if(!selection)
+    return;
+  vec2.div(delta, delta, vec2.fromValues(canva.width, canva.height));
+  delta[1] *= -1;
+  selection = selection.MouseMove(delta);
 }
 
 function mouseUp(evt) {
-  //if(evt.button != 0)
-  //  return;
-  // Set the 0,0 to bottom left:
   var pt = vec2.fromValues(evt.offsetX, 512-evt.offsetY);
   console.log("mouseUp: [" + pt[0] + ", " + pt[1] + "]");
-  renderer.MouseUp(pt);
+
+  if(!selection)
+    return;
+  vec2.div(pt, pt, vec2.fromValues(canva.width, canva.height));
+  vec2.sub(pt, pt, [0.5, 0.5]);
+  selection = selection.MouseUp(pt);
 }
 
 function mouseDown(evt) {
@@ -463,8 +489,32 @@ function mouseDown(evt) {
     return;
   // Set the 0,0 to bottom left:
   var pt = vec2.fromValues(evt.offsetX, 512-evt.offsetY);
-  //console.log("mouseDown: [" + pt[0] + ", " + pt[1] + "]");
-  renderer.MouseDown(pt);
+
+  vec2.div(pt, pt, vec2.fromValues(canva.width, canva.height));
+  vec2.sub(pt, pt, [0.5, 0.5]);
+  console.log("MouseDown: [" + pt[0] + ", " + pt[1] + "]");
+
+  for (var i = 0; i < bezier_lines.length; i++) {
+    selection = bezier_lines[i].MouseDown(pt);
+    if(selection)
+      break;
+  }
+}
+
+function keyPress(evt) {
+  if(evt.key == "+") {
+    if(selection) {
+      console.log("Adding a point");
+      selection.AddPoint(vec2.fromValues(0.0, 0.0), vec2.fromValues(-0.1, 0.0),vec2.fromValues(0.1, 0.0));
+    }
+  } else if(evt.key == "-") {
+    if(selection) {
+      console.log("Deleting a point");
+      selection.DeletePoint();
+    }
+  } else {
+    console.log("Character not handled");
+  }
 }
 
 renderer.startDrawing();
