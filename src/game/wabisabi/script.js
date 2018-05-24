@@ -404,6 +404,22 @@ class Renderer {
     this.isDrawing = false;
   }
 
+  SetCameraCenter(pos) {
+    this.V = mat4.create();
+    mat4.lookAt(this.V,
+      [pos[0], pos[1], 3], // Camera pos
+      [pos[0], pos[1], 0], // looks at
+      [0, 1, 0]);  // Head
+    mat4.multiply(this.VP, this.P, this.V);
+  }
+
+  ToWorldCoordinate(pos) {
+    var input = vec3.fromValues(pos[0], pos[1], 0.0);
+    var viewport = vec4.fromValues(0.0, 0.0, this.gl.viewportWidth, this.gl.viewportHeight);
+    var res = vec3.unproject(input, this.V, this.P, viewport);
+    return vec2.fromValues(res[0], res[1]);
+  }
+
   startDrawing() {
     if (!this.isDrawing) {
       this.isDrawing = true;
@@ -451,6 +467,7 @@ Array.prototype.remove = function(from, to) {
 canva = document.getElementById("canva");
 var renderer = new Renderer(canva);
 renderer.Init();
+var camera_y = 0;
 var selection = null;
 
 var bezier_lines = [];
@@ -479,8 +496,9 @@ function mouseUp(evt) {
 
   if(!selection)
     return;
-  vec2.div(pt, pt, vec2.fromValues(canva.width, canva.height));
-  vec2.sub(pt, pt, [0.5, 0.5]);
+  pt = renderer.ToWorldCoordinate(pt);
+  //vec2.div(pt, pt, vec2.fromValues(canva.width, canva.height));
+  //vec2.sub(pt, pt, [0.5, 0.5]);
   selection = selection.MouseUp(pt);
 }
 
@@ -490,9 +508,13 @@ function mouseDown(evt) {
   // Set the 0,0 to bottom left:
   var pt = vec2.fromValues(evt.offsetX, 512-evt.offsetY);
 
-  vec2.div(pt, pt, vec2.fromValues(canva.width, canva.height));
-  vec2.sub(pt, pt, [0.5, 0.5]);
+  //vec2.div(pt, pt, vec2.fromValues(canva.width, canva.height));
+  //vec2.sub(pt, pt, [0.5, 0.5]);
   console.log("MouseDown: [" + pt[0] + ", " + pt[1] + "]");
+
+  // convert from screenspace to world coordinate
+  pt = renderer.ToWorldCoordinate(pt);
+  console.log("World coordinate: [" + pt[0] + ", " + pt[1] + "]");
 
   for (var i = 0; i < bezier_lines.length; i++) {
     selection = bezier_lines[i].MouseDown(pt);
@@ -501,20 +523,91 @@ function mouseDown(evt) {
   }
 }
 
+function mouseWheel(evt) {
+  console.log("mouseWheel(" + evt.deltaY);
+
+  var world_size = document.getElementById("world_size").value;
+  camera_y = Number(camera_y) + evt.deltaY/100.0;
+  if(camera_y < 0)
+    camera_y = 0;
+  if(camera_y > world_size)
+    camera_y = world_size;
+  var camera_center = [0.0, camera_y];
+  console.log("Camera position should be: " + camera_center);
+  renderer.SetCameraCenter(camera_center);
+
+  // Update the slider
+  
+  var pos_slider = camera_y/world_size;
+  document.getElementById("slider_world").value = pos_slider;
+
+  // Prevent the default behavior
+  if (!event) event = window.event;
+  event.returnValue = false;
+  if (event.preventDefault)event.preventDefault();
+  return false;
+}
+
 function keyPress(evt) {
   if(evt.key == "+") {
     if(selection) {
       console.log("Adding a point");
       selection.AddPoint(vec2.fromValues(0.0, 0.0), vec2.fromValues(-0.1, 0.0),vec2.fromValues(0.1, 0.0));
+    } else {
+      console.log("Creating new bezier line")
+      var line = new BezierLine(vec2.fromValues(-0.1, 0), vec2.fromValues(0, 0.2), vec2.fromValues(0.1, 0), vec2.fromValues(0, 0.2));
+      bezier_lines.push(line);
+      renderer.AddBezierLine(line);
     }
   } else if(evt.key == "-") {
     if(selection) {
       console.log("Deleting a point");
       selection.DeletePoint();
+      // TODO check if we need to delete the line if it's empty
     }
   } else {
     console.log("Character not handled");
   }
 }
 
+function onSliderChange(value) {
+  console.log("position in %: " + value);
+  var world_size = document.getElementById("world_size").value;
+  console.log("Size world: " + world_size);
+  camera_y = world_size*value;
+  var camera_center = [0.0, camera_y];
+  console.log("Camera position should be: " + camera_center);
+  renderer.SetCameraCenter(camera_center);
+}
+
 renderer.startDrawing();
+
+
+
+vec3.unproject = function (vec, view, proj, viewport) {
+
+  var dest = vec3.create();//output
+  var m = mat4.create();//view * proj
+  var im = mat4.create();//inverse view proj
+  var v = vec4.create();//vector
+  var tv = vec4.create();//transformed vector
+  
+  //apply viewport transform
+  v[0] = (vec[0] - viewport[0]) * 2.0 / viewport[2] - 1.0;
+  v[1] = (vec[1] - viewport[1]) * 2.0 / viewport[3] - 1.0;
+  v[2] = vec[2];
+  v[3] = 1.0;
+  
+  //build and invert viewproj matrix
+  mat4.multiply(m,proj,view);
+  if(!mat4.invert(im,m)) { return null; }
+  
+  vec4.transformMat4(tv,v,im);
+  if(v[3] === 0.0) { return null; }
+  
+  dest[0] = tv[0] / tv[3];
+  dest[1] = tv[1] / tv[3];
+  dest[2] = tv[2] / tv[3];
+  
+  return dest;
+};
