@@ -555,9 +555,13 @@ function keyPress(evt) {
       selection.AddPoint(vec2.fromValues(0.0, 0.0), vec2.fromValues(-0.1, 0.0),vec2.fromValues(0.1, 0.0));
     } else {
       console.log("Creating new bezier line")
-      var line = new BezierLine(vec2.fromValues(-0.1, 0), vec2.fromValues(0, 0.2), vec2.fromValues(0.1, 0), vec2.fromValues(0, 0.2));
-      bezier_lines.push(line);
+      var pt = vec2.fromValues(canva.width/2, canva.height/2);
+      pt = renderer.ToWorldCoordinate(pt);
+      var pt_left = vec2.fromValues(pt[0]-0.1, pt[1]);
+      var pt_right = vec2.fromValues(pt[0]+0.1, pt[1]);
+      var line = new BezierLine(pt_left, vec2.fromValues(0, 0.2), pt_right, vec2.fromValues(0, 0.2));
       renderer.AddBezierLine(line);
+      bezier_lines.push(line);
     }
   } else if(evt.key == "-") {
     if(selection) {
