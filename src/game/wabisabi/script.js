@@ -401,7 +401,6 @@ class Renderer {
     BezierLine.InitGl(gl);
 
     this.startTime = Date.now() / 1000.0;
-    this.isDrawing = false;
   }
 
   SetCameraCenter(pos) {
@@ -418,13 +417,6 @@ class Renderer {
     var viewport = vec4.fromValues(0.0, 0.0, this.gl.viewportWidth, this.gl.viewportHeight);
     var res = vec3.unproject(input, this.V, this.P, viewport);
     return vec2.fromValues(res[0], res[1]);
-  }
-
-  startDrawing() {
-    if (!this.isDrawing) {
-      this.isDrawing = true;
-      this.draw();
-    }
   }
 
   ReloadShader() {
@@ -454,7 +446,6 @@ class Renderer {
     for (var i = 0; i < this.bezier_lines.length; i++) {
       this.bezier_lines[i].Draw(gl, this.VP);
     }
-    window.setTimeout(function (rend) { return function () { rend.draw(); }; }(this), 1000 / 60);
   }
 }
 
@@ -469,6 +460,9 @@ var renderer = new Renderer(canva);
 renderer.Init();
 var camera_y = 0;
 var selection = null;
+var track_length_ms = 10000;
+var current_time_ms = 0;
+var is_playing = false;
 
 var bezier_lines = [];
 var line = new BezierLine(vec2.fromValues(-0.1, -0.05), vec2.fromValues(0.2, 0), vec2.fromValues(0.25, 0), vec2.fromValues(0, -0.25));
@@ -524,7 +518,6 @@ function mouseDown(evt) {
 }
 
 function mouseWheel(evt) {
-  console.log("mouseWheel(" + evt.deltaY);
 
   var world_size = document.getElementById("world_size").value;
   camera_y = Number(camera_y) + evt.deltaY/100.0;
@@ -533,11 +526,9 @@ function mouseWheel(evt) {
   if(camera_y > world_size)
     camera_y = world_size;
   var camera_center = [0.0, camera_y];
-  console.log("Camera position should be: " + camera_center);
   renderer.SetCameraCenter(camera_center);
 
   // Update the slider
-  
   var pos_slider = camera_y/world_size;
   document.getElementById("slider_world").value = pos_slider;
 
@@ -584,9 +575,41 @@ function onSliderChange(value) {
   renderer.SetCameraCenter(camera_center);
 }
 
-renderer.startDrawing();
+function onPlayClicked() {
+  console.log("Play button clicked");
+  // Start play from %age:
+  var start_percent = document.getElementById("slider_world").value;
+  console.log("Start position: " + start_percent);
+  current_time_ms = track_length_ms*start_percent;
+  is_playing = true;
+}
+
+// Start the main loop
+var last_time = Date.now();
+mainLoop();
 
 
+function mainLoop() {
+  var now = Date.now();
+  var delta_ms = now - last_time;
+  last_time = now;
+  if(is_playing) {
+    current_time_ms += delta_ms;
+    if(current_time_ms >= track_length_ms) {
+      current_time_ms = track_length_ms;
+      is_playing = false;
+    }
+    var percent = current_time_ms/track_length_ms;
+    var world_size = document.getElementById("world_size").value;
+    camera_y = world_size*percent;
+    var camera_center = [0.0, camera_y];
+    renderer.SetCameraCenter(camera_center);
+    // Update the slider
+    document.getElementById("slider_world").value = percent;
+  }
+  renderer.draw();
+  window.setTimeout(function (rend) { return function () { mainLoop(); }; }(this), 1000 / 60);
+}
 
 vec3.unproject = function (vec, view, proj, viewport) {
 
