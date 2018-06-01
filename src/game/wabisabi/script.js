@@ -1,8 +1,12 @@
 class BezierLine {
   constructor(p0, p0_cp, p1, p1_cp) { // cp stand for control point
     this.points = [p0, p1];
-    this.control_points = [vec2.fromValues(0.0, 0.0), p0_cp, p1_cp, vec2.fromValues(0.0, 0.0)];
-    this.subdivisions = 200;
+    var tmp0 = vec2.create();
+    vec2.add(tmp0, p0, p0_cp);
+    var tmp1 = vec2.create();
+    vec2.add(tmp1, p1, p1_cp);
+    this.control_points = [p0, tmp0, tmp1, p1];
+    this.subdivisions = 100;
 
     this.M = mat4.create();
   }
@@ -13,7 +17,7 @@ class BezierLine {
     this.control_points.splice(index*2+1, 0, control_point_right);
   }
 
-  AddPoint(point, control_point_left, control_point_right) {
+  /*AddPoint(point, control_point_left, control_point_right) {
     if(!this.selected)
       return;
     // Find index of the selected point
@@ -26,14 +30,14 @@ class BezierLine {
     if(idx == -1)
       return;
     this.AddPointAtIndex(idx+1, point, control_point_left, control_point_right);
-  }
+  }*/
 
   DeletePointAtIndex(index) {
     this.points.remove(index, index);
     this.control_points.remove(index*2, index*2+1);
   }
 
-  DeletePoint() { // Delete currently selected point
+  /*DeletePoint() { // Delete currently selected point
     if(!this.selected)
       return;
     // Find index of the selected point
@@ -46,7 +50,7 @@ class BezierLine {
     if(idx == -1)
       return;
     this.DeletePointAtIndex(idx);
-  }
+  }*/
 
   static InitGl(gl) {
     // Create our buffers
@@ -129,11 +133,11 @@ class BezierLine {
 
     var lines = [];
     for(var i = 1 ; i < this.control_points.length-1 ; i++){
-      var ctrl_p = vec2.create();
-      vec2.add(ctrl_p, this.points[Math.floor(i/2)], this.control_points[i]);
-      this.DrawPoint(gl, VP, ctrl_p, [0.0, 0.0, 1.0, 1.0]);
+      //var ctrl_p = vec2.create();
+      //vec2.add(ctrl_p, this.points[Math.floor(i/2)], this.control_points[i]);
+      this.DrawPoint(gl, VP, this.control_points[i], [0.0, 0.0, 1.0, 1.0]);
       lines.push(this.points[Math.floor(i/2)][0], this.points[Math.floor(i/2)][1]);
-      lines.push(ctrl_p[0], ctrl_p[1]);
+      lines.push(this.control_points[i][0], this.control_points[i][1]);
     }
     this.DrawDebugLines(gl, VP, lines, [0.0, 0.0, 1.0, 1.0]);
   }
@@ -228,10 +232,12 @@ class BezierLine {
   BezierAt(t, pt0, pt1, cpt0, cpt1) {
     var nt = 1.0 - t;
   
-    var tmp0 = vec2.create();
+    /*var tmp0 = vec2.create();
     vec2.add(tmp0, pt0, cpt0);
     var tmp1 = vec2.create();
-    vec2.add(tmp1, pt1, cpt1);
+    vec2.add(tmp1, pt1, cpt1);*/
+    var tmp0 = cpt0;
+    var tmp1 = cpt1;
 
     var pts = [pt0
                 , tmp0
@@ -251,10 +257,13 @@ class BezierLine {
   BezierPerpAt(t, pt0, pt1, cpt0, cpt1) {
     var nt = 1.0 - t;
 
-    var tmp0 = vec2.create();
+    /*var tmp0 = vec2.create();
     vec2.add(tmp0, pt0, cpt0);
     var tmp1 = vec2.create();
-    vec2.add(tmp1, pt1, cpt1);
+    vec2.add(tmp1, pt1, cpt1);*/
+    var tmp0 = cpt0;
+    var tmp1 = cpt1;
+
     var pts = [pt0
                 , tmp0
                 , tmp1
@@ -458,42 +467,36 @@ Array.prototype.remove = function(from, to) {
 canva = document.getElementById("canva");
 var renderer = new Renderer(canva);
 renderer.Init();
-var camera_y = 0;
-var selection = null;
 var track_length_ms = 10000;
 var current_time_ms = 0;
-var is_playing = false;
-
-var bezier_lines = [];
-var line = new BezierLine(vec2.fromValues(-0.1, -0.05), vec2.fromValues(0.2, 0), vec2.fromValues(0.25, 0), vec2.fromValues(0, -0.25));
-line.AddPointAtIndex(1, vec2.fromValues(0.0, 0.15), vec2.fromValues(-0.1, -0.10),vec2.fromValues(0.1, 0.10));
-bezier_lines.push(line);
-renderer.AddBezierLine(line);
+var editor = new Editor(renderer);
 
 var refreshShaderButton = document.getElementById("refresh_shader");
 refreshShaderButton.onclick = (function(rd) { return function(){rd.ReloadShader();};}(renderer));
 
 function mouseMove(evt) {
-  // Set the 0,0 to bottom left:
   var delta = vec2.fromValues(evt.movementX, evt.movementY);
-
+  editor.MouseMove(delta);
+  /*
   if(!selection)
     return;
   vec2.div(delta, delta, vec2.fromValues(canva.width, canva.height));
   delta[1] *= -1;
   selection = selection.MouseMove(delta);
+  */
 }
 
 function mouseUp(evt) {
   var pt = vec2.fromValues(evt.offsetX, 512-evt.offsetY);
-  console.log("mouseUp: [" + pt[0] + ", " + pt[1] + "]");
-
+  pt = renderer.ToWorldCoordinate(pt);
+  editor.MouseUp(pt);
+  /*
   if(!selection)
     return;
-  pt = renderer.ToWorldCoordinate(pt);
   //vec2.div(pt, pt, vec2.fromValues(canva.width, canva.height));
   //vec2.sub(pt, pt, [0.5, 0.5]);
   selection = selection.MouseUp(pt);
+  */
 }
 
 function mouseDown(evt) {
@@ -501,24 +504,20 @@ function mouseDown(evt) {
     return;
   // Set the 0,0 to bottom left:
   var pt = vec2.fromValues(evt.offsetX, 512-evt.offsetY);
-
-  //vec2.div(pt, pt, vec2.fromValues(canva.width, canva.height));
-  //vec2.sub(pt, pt, [0.5, 0.5]);
-  console.log("MouseDown: [" + pt[0] + ", " + pt[1] + "]");
-
   // convert from screenspace to world coordinate
   pt = renderer.ToWorldCoordinate(pt);
-  console.log("World coordinate: [" + pt[0] + ", " + pt[1] + "]");
-
+  editor.MouseDown(pt);
+  /*
   for (var i = 0; i < bezier_lines.length; i++) {
     selection = bezier_lines[i].MouseDown(pt);
     if(selection)
       break;
-  }
+  }*/
 }
 
 function mouseWheel(evt) {
-
+  editor.MouseWheel(evt.deltaY);
+  /*
   var world_size = document.getElementById("world_size").value;
   camera_y = Number(camera_y) + evt.deltaY/100.0;
   if(camera_y < 0)
@@ -531,7 +530,7 @@ function mouseWheel(evt) {
   // Update the slider
   var pos_slider = camera_y/world_size;
   document.getElementById("slider_world").value = pos_slider;
-
+  */
   // Prevent the default behavior
   if (!event) event = window.event;
   event.returnValue = false;
@@ -540,6 +539,8 @@ function mouseWheel(evt) {
 }
 
 function keyPress(evt) {
+  editor.KeyPress(evt);
+  /*
   if(evt.key == "+") {
     if(selection) {
       console.log("Adding a point");
@@ -563,6 +564,7 @@ function keyPress(evt) {
   } else {
     console.log("Character not handled");
   }
+  */
 }
 
 function onSliderChange(value) {
@@ -577,11 +579,56 @@ function onSliderChange(value) {
 
 function onPlayClicked() {
   console.log("Play button clicked");
-  // Start play from %age:
-  var start_percent = document.getElementById("slider_world").value;
-  console.log("Start position: " + start_percent);
-  current_time_ms = track_length_ms*start_percent;
-  is_playing = true;
+  /*if(!is_playing) {
+    // Start play from %age:
+    var start_percent = document.getElementById("slider_world").value;
+    console.log("Start position: " + start_percent);
+    current_time_ms = track_length_ms*start_percent;
+    is_playing = true;
+  } else {
+    is_playing = false;
+  }*/
+}
+
+function save() {
+  var builder = new flatbuffers.Builder(1024);
+  Wabisabi.Level.startLevel(builder);
+  Wabisabi.Level.addWorldSize(builder, document.getElementById("world_size").value);
+  var level = Wabisabi.Level.endLevel(builder);
+  builder.finish(level);
+  var buf = builder.asUint8Array();
+
+  if (typeof(Storage) !== "undefined") {
+    // Code for localStorage/sessionStorage.
+    localStorage.setItem("current_level", buf);
+  } else {
+    console.log("Sorry ! Can't save your data locally");
+  }
+}
+
+function loadLocal() {
+  if (typeof(Storage) !== "undefined") {
+    // Code for localStorage/sessionStorage.
+    var level = localStorage.getItem("current_level");
+    if(level != null) {
+      var enc = new TextEncoder();
+      level = enc.encode(level);
+      load(level);
+    }
+  } else {
+    console.log("Sorry ! Can't save your data locally");
+  }
+}
+
+function load(buffer) {
+  if(buffer != null && buffer instanceof Uint8Array) {
+    console.log("buffer is a Uint8Array");
+    var buf = new flatbuffers.ByteBuffer(buffer);
+    var level = Wabisabi.Level.getRootAsLevel(buf);
+    console.log("loaded world size: " + level.worldSize());
+  } else {
+    console.log("buffer is not a Uint8Array");
+  }
 }
 
 // Start the main loop
@@ -593,7 +640,7 @@ function mainLoop() {
   var now = Date.now();
   var delta_ms = now - last_time;
   last_time = now;
-  if(is_playing) {
+  /*if(is_playing) {
     current_time_ms += delta_ms;
     if(current_time_ms >= track_length_ms) {
       current_time_ms = track_length_ms;
@@ -606,7 +653,8 @@ function mainLoop() {
     renderer.SetCameraCenter(camera_center);
     // Update the slider
     document.getElementById("slider_world").value = percent;
-  }
+  }*/
+  editor.Tick(delta_ms);
   renderer.draw();
   window.setTimeout(function (rend) { return function () { mainLoop(); }; }(this), 1000 / 60);
 }
