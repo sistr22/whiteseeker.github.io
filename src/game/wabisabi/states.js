@@ -1,3 +1,15 @@
+Array.prototype.unique = function() {
+  var a = this.concat();
+  for(var i=0; i<a.length; ++i) {
+      for(var j=i+1; j<a.length; ++j) {
+          if(a[i] === a[j])
+              a.splice(j--, 1);
+      }
+  }
+
+  return a;
+};
+
 class State {
   Tick(editor, delta_ms) {
     console.log("Default state impl of Tick, should be overwriten");
@@ -15,12 +27,16 @@ class State {
     console.log("Default state impl of MouseMove, should be overwriten");
     return null;
   }
-  MouseWheel(editor, delta) {
-    console.log("Default state impl of MouseWheel, should be overwriten");
-    return null;
-  }
   KeyPress(editor, evt) {
     console.log("Default state impl of KeyPress, should be overwriten");
+    return null;
+  }
+  KeyUp(editor, evt) {
+    console.log("Default state impl of KeyUp, should be overwriten");
+    return null;
+  }
+  KeyDown(editor, evt) {
+    console.log("Default state impl of KeyDown, should be overwriten");
     return null;
   }
 }
@@ -28,49 +44,131 @@ class State {
 class StateIdle extends State {
   Tick(editor, delta_ms) {
   }
+
   MouseDown(editor, pos) {
     var state = new StateSelecting();
     state.MouseDown(editor, pos);
     return state;
-    /*for (var line in editor.bezier_lines) {
-      var squared_delta = 0.0004;
-      for(var p = 0 ; p < line.points.length ; p++) {
-        if(vec2.sqrDist(pt, line.points[p]) <= squared_delta) {
-          return new StateSelecting();
-        }
+  }
 
-        for(var cp = 0 ; cp < 2 ; cp++) {
-          if(line.control_points[2*p+cp][0] == 0 && line.control_points[2*p+cp][1] == 0)
-            continue;
-          var ctrl_p = vec2.create();
-          vec2.add(ctrl_p, line.points[p], line.control_points[2*p+cp]);
-          if(vec2.sqrDist(pt, ctrl_p) <= squared_delta) {
-            return new StateSelecting();
-            //return this.control_points[2*p+cp];
-          }
-        }
-      }
-    }*/
+  MouseMove(editor, delta_pos) {
+  }
+
+  KeyPress(editor, evt) {
+    if(evt.key == "+") {
+      var pt = vec2.fromValues(editor.renderer.canva.width/2, editor.renderer.canva.height/2);
+      pt = editor.renderer.ToWorldCoordinate(pt);
+      var pt_left = vec2.fromValues(pt[0]-0.1, pt[1]);
+      var pt_right = vec2.fromValues(pt[0]+0.1, pt[1]);
+      var line = new BezierLine(pt_left, vec2.fromValues(0, 0.2), pt_right, vec2.fromValues(0, 0.2));
+      editor.renderer.AddBezierLine(line);
+      editor.bezier_lines.push(line);
+    }
   }
 }
 
 class StateSelecting extends State {
-  constructor() {
+
+  constructor(selection) {
     super();
-    this.selection = [];
+    if(selection)
+      this.selection = selection;
+    else
+      this.selection = [];
   }
   
   Tick(editor, delta_ms) {
   }
 
   MouseDown(editor, pos) {
+    this.start_point = pos;
     return null;
   }
 
   MouseUp(editor, pos) {
-    if(this.selection.length == 0) {
+    var bottom_left_pt = vec2.create();
+    bottom_left_pt[0] = Math.min(this.start_point[0], pos[0]);
+    bottom_left_pt[1] = Math.min(this.start_point[1], pos[1]);
+
+    var top_right_pt = vec2.create();
+    top_right_pt[0] = Math.max(this.start_point[0], pos[0]);
+    top_right_pt[1] = Math.max(this.start_point[1], pos[1]);
+
+    var add_to_selection = [];
+    for (var l = 0 ; l < editor.bezier_lines.length ; l++) {
+      var line = editor.bezier_lines[l];
+      if(!line)
+        continue;
+      for(var p = 0 ; p < line.points.length ; p++) {
+        if(line.points[p][0] >= bottom_left_pt[0] && line.points[p][0] <= top_right_pt[0] &&
+          line.points[p][1] >= bottom_left_pt[1] && line.points[p][1] <= top_right_pt[1]) {
+          line.points[p].color = [1.0,1.0,0.0,1.0];
+          add_to_selection.push(line.points[p]);
+        }
+
+        for(var cp = 0 ; cp < 2 ; cp++) {
+          var pt = line.control_points[2*p+cp];
+          if(pt[0] >= bottom_left_pt[0] && pt[0] <= top_right_pt[0] &&
+            pt[1] >= bottom_left_pt[1] && pt[1] <= top_right_pt[1]) {
+            pt.color = [1.0,1.0,1.0,1.0];
+            add_to_selection.push(pt);
+          }
+        }
+      }
+    }
+
+    if(add_to_selection.length > 0) {
+      this.selection = this.selection.concat(add_to_selection);
+      this.selection = this.selection.unique();
+    } else {
+      this.selection.forEach(elt => {
+        elt.color = null;
+      });
+      this.selection = [];
+    }
+
+    if(this.selection.length == 0)
       return new StateIdle();
+    console.log("selected item count: " + this.selection.length);
+    return null;
+  }
+
+  MouseMove(editor, delta) {
+  }
+
+  KeyDown(editor, evt) {
+    if(evt.key == "t") {
+      return new StateTranslating(this.selection);
     }
     return null;
+  }
+}
+
+class StateTranslating extends State {
+  constructor(selection) {
+    super();
+    this.selection = selection;
+  }
+
+  Tick(editor, delta_ms) {
+  }
+  
+  MouseMove(editor, delta_pos) {
+    for(var i = 0 ; i < this.selection.length ; i++) {
+      vec2.add(this.selection[i], this.selection[i], delta_pos);
+    }
+  }
+
+  KeyUp(editor, evt) {
+    if(evt.key == "t") {
+      return new StateSelecting(this.selection);
+    }
+    return null;
+  }
+
+  KeyDown(editor, evt) {
+  }
+
+  KeyPress(editor, evt) {
   }
 }

@@ -35,10 +35,30 @@ class Editor {
   }
 
   MouseWheel(delta) {
-    this.SetState(this.state.MouseWheel(this, delta));
+
+    var world_size = document.getElementById("world_size").value;
+    var camera_y = this.renderer.GetCameraCenter()[1] + delta/100.0;
+    if(camera_y < 0)
+      camera_y = 0;
+    if(camera_y > world_size)
+      camera_y = world_size;
+    var camera_center = [0.0, camera_y];
+    this.renderer.SetCameraCenter(camera_center);
+
+    // Update the slider
+    var pos_slider = camera_y/world_size;
+    document.getElementById("slider_world").value = pos_slider;
   }
 
   KeyPress(evt) {
     this.SetState(this.state.KeyPress(this, evt));
+  }
+
+  KeyUp(evt) {
+    this.SetState(this.state.KeyUp(this, evt));
+  }
+
+  KeyDown(evt) {
+    this.SetState(this.state.KeyDown(this, evt));
   }
 }

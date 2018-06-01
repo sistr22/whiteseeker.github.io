@@ -5,7 +5,7 @@ class BezierLine {
     vec2.add(tmp0, p0, p0_cp);
     var tmp1 = vec2.create();
     vec2.add(tmp1, p1, p1_cp);
-    this.control_points = [p0, tmp0, tmp1, p1];
+    this.control_points = [vec2.clone(p0), tmp0, tmp1, vec2.clone(p1)];
     this.subdivisions = 100;
 
     this.M = mat4.create();
@@ -135,7 +135,8 @@ class BezierLine {
     for(var i = 1 ; i < this.control_points.length-1 ; i++){
       //var ctrl_p = vec2.create();
       //vec2.add(ctrl_p, this.points[Math.floor(i/2)], this.control_points[i]);
-      this.DrawPoint(gl, VP, this.control_points[i], [0.0, 0.0, 1.0, 1.0]);
+      var cl = this.control_points[i].color ? this.control_points[i].color : [0.0, 0.0, 1.0, 1.0];
+      this.DrawPoint(gl, VP, this.control_points[i], cl);
       lines.push(this.points[Math.floor(i/2)][0], this.points[Math.floor(i/2)][1]);
       lines.push(this.control_points[i][0], this.control_points[i][1]);
     }
@@ -230,19 +231,11 @@ class BezierLine {
   }
 
   BezierAt(t, pt0, pt1, cpt0, cpt1) {
-    var nt = 1.0 - t;
-  
-    /*var tmp0 = vec2.create();
-    vec2.add(tmp0, pt0, cpt0);
-    var tmp1 = vec2.create();
-    vec2.add(tmp1, pt1, cpt1);*/
-    var tmp0 = cpt0;
-    var tmp1 = cpt1;
-
     var pts = [pt0
-                , tmp0
-                , tmp1
+                , cpt0
+                , cpt1
                 , pt1];
+    var nt = 1.0 - t;
     var scalars = [nt*nt*nt, 3.0*nt*nt*t, 3.0*nt*t*t, t*t*t];
     var res = pts.reduce(function(prev, curr, i) {
       var tmp = vec2.create();
@@ -255,20 +248,12 @@ class BezierLine {
   }
 
   BezierPerpAt(t, pt0, pt1, cpt0, cpt1) {
-    var nt = 1.0 - t;
-
-    /*var tmp0 = vec2.create();
-    vec2.add(tmp0, pt0, cpt0);
-    var tmp1 = vec2.create();
-    vec2.add(tmp1, pt1, cpt1);*/
-    var tmp0 = cpt0;
-    var tmp1 = cpt1;
 
     var pts = [pt0
-                , tmp0
-                , tmp1
+                , cpt0
+                , cpt1
                 , pt1];
-    
+    var nt = 1.0 - t;
 		var scalars = [-3.0*nt*nt, 3.0*(1.0 - 4.0*t + 3.0*t*t), 3.0*(2.0*t - 3.0*t*t), 3.0*t*t];
 		var value = pts.reduce(function(prev, curr, i) {
       var tmp = vec2.create();
@@ -315,55 +300,6 @@ class BezierLine {
       this.line_vertex_pos_buffer.numItems = vertices.length/2;
     }
   }
-
-  Collide(pt) {
-    var squared_delta = 0.0004;
-    for(var p = 0 ; p < this.points.length ; p++) {
-      if(vec2.sqrDist(pt, this.points[p]) <= squared_delta)
-        return this.points[p];
-
-      for(var cp = 0 ; cp < 2 ; cp++) {
-        if(this.control_points[2*p+cp][0] == 0 && this.control_points[2*p+cp][1] == 0)
-          continue;
-        var ctrl_p = vec2.create();
-        vec2.add(ctrl_p, this.points[p], this.control_points[2*p+cp]);
-        if(vec2.sqrDist(pt, ctrl_p) <= squared_delta)
-          return this.control_points[2*p+cp];
-      }
-    }
-    return null;
-  }
-
-  MouseDown(pos) {
-    var new_selection = this.Collide(pos);
-
-    if(new_selection && new_selection != this.selected) {
-      new_selection.color = [1.0,1.0,0.0,1.0];
-      if(this.selected)
-        this.selected.color = this.selected.default_color;
-      this.selected = new_selection;
-    }
-    if(!new_selection) {
-      if(this.selected)
-        this.selected.color = null;
-      this.selected = null;
-    }
-
-    if(this.selected) {
-      this.mouse_down = true;
-      return this;
-    } else
-      return null;
-  }
-  MouseMove(delta_pos) {
-    if(this.selected && this.mouse_down)
-      vec2.add(this.selected, this.selected, delta_pos);
-    return this;
-  }
-  MouseUp(pos) {
-    this.mouse_down = false;
-    return this;
-  }
 }
 
 class Renderer {
@@ -376,6 +312,7 @@ class Renderer {
     } catch (e) {
       alert("WebGL error!");
     }
+    this.camera_center = vec2.fromValues(0, 0);
     this.bezier_lines = [];
   }
 
@@ -413,12 +350,17 @@ class Renderer {
   }
 
   SetCameraCenter(pos) {
+    this.camera_center = pos;
     this.V = mat4.create();
     mat4.lookAt(this.V,
       [pos[0], pos[1], 3], // Camera pos
       [pos[0], pos[1], 0], // looks at
       [0, 1, 0]);  // Head
     mat4.multiply(this.VP, this.P, this.V);
+  }
+
+  GetCameraCenter() {
+    return this.camera_center;
   }
 
   ToWorldCoordinate(pos) {
@@ -476,12 +418,12 @@ refreshShaderButton.onclick = (function(rd) { return function(){rd.ReloadShader(
 
 function mouseMove(evt) {
   var delta = vec2.fromValues(evt.movementX, evt.movementY);
+  vec2.div(delta, delta, vec2.fromValues(canva.width, canva.height));
+  delta[1] *= -1;
   editor.MouseMove(delta);
   /*
   if(!selection)
     return;
-  vec2.div(delta, delta, vec2.fromValues(canva.width, canva.height));
-  delta[1] *= -1;
   selection = selection.MouseMove(delta);
   */
 }
@@ -516,21 +458,7 @@ function mouseDown(evt) {
 }
 
 function mouseWheel(evt) {
-  editor.MouseWheel(evt.deltaY);
-  /*
-  var world_size = document.getElementById("world_size").value;
-  camera_y = Number(camera_y) + evt.deltaY/100.0;
-  if(camera_y < 0)
-    camera_y = 0;
-  if(camera_y > world_size)
-    camera_y = world_size;
-  var camera_center = [0.0, camera_y];
-  renderer.SetCameraCenter(camera_center);
-
-  // Update the slider
-  var pos_slider = camera_y/world_size;
-  document.getElementById("slider_world").value = pos_slider;
-  */
+  editor.MouseWheel(-evt.deltaY);
   // Prevent the default behavior
   if (!event) event = window.event;
   event.returnValue = false;

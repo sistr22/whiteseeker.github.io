@@ -27,7 +27,9 @@ custom_css: ['game/wabisabi/midi.css']
                 onmousedown="mouseDown(event)" 
                 onmousemove="mouseMove(event)"
                 onmousewheel="mouseWheel(event)"
-                onkeypress="keyPress(event)">Your browser does not support the HTML5 canvas tag.</canvas>
+                onkeypress="editor.KeyPress(event)"
+                onkeyup="editor.KeyUp(event)"
+                onkeydown="editor.KeyDown(event)">Your browser does not support the HTML5 canvas tag.</canvas>
           <div class="slider-wrapper">
             <input id="slider_world" type="range" min="0" max="1" value="0" step="0.01" oninput="onSliderChange(value)">
           </div>
