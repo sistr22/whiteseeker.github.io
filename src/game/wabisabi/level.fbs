@@ -1,8 +1,18 @@
-// Example IDL file for our monster's schema.
 namespace Wabisabi;
 
+table Vec2 {
+  x:float;
+  y:float;
+}
+
+table Bezier {
+  points:[Vec2];
+  control_points:[Vec2];
+}
+
 table Level {
-  world_size:float; // Struct.
+  world_size:float;
+  obstacles:[Bezier];
 }
 
 root_type Level;

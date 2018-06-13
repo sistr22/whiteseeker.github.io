@@ -10,6 +10,30 @@ Array.prototype.unique = function() {
   return a;
 };
 
+class Selection {
+  constructor() {
+    this.points = new Map();
+    this.ctrl_points = new Map();
+  }
+
+  AddPoint(point, bezier_line) {
+    this.points.set(point, bezier_line);
+  }
+
+  AddCtrlPoint(ctrl_point, bezier_line) {
+    this.ctrl_points.set(ctrl_point, bezier_line);
+  }
+
+  Length() {
+    return this.ctrl_points.size + this.points.size;
+  }
+
+  Clear() {
+    this.ctrl_points.clear();
+    this.points.clear();
+  }
+}
+
 class State {
   Tick(editor, delta_ms) {
     console.log("Default state impl of Tick, should be overwriten");
@@ -60,7 +84,7 @@ class StateIdle extends State {
       pt = editor.renderer.ToWorldCoordinate(pt);
       var pt_left = vec2.fromValues(pt[0]-0.1, pt[1]);
       var pt_right = vec2.fromValues(pt[0]+0.1, pt[1]);
-      var line = new BezierLine(pt_left, vec2.fromValues(0, 0.2), pt_right, vec2.fromValues(0, 0.2));
+      var line = new BezierLine([pt_left, pt_right], [vec2.clone(pt_left), vec2.fromValues(pt_left[0], pt_left[1]+0.2), vec2.fromValues(pt_right[0], pt_right[1]+0.2), vec2.clone(pt_right)]);
       editor.renderer.AddBezierLine(line);
       editor.bezier_lines.push(line);
     }
@@ -74,7 +98,7 @@ class StateSelecting extends State {
     if(selection)
       this.selection = selection;
     else
-      this.selection = [];
+      this.selection = new Selection();
   }
   
   Tick(editor, delta_ms) {
@@ -94,7 +118,7 @@ class StateSelecting extends State {
     top_right_pt[0] = Math.max(this.start_point[0], pos[0]);
     top_right_pt[1] = Math.max(this.start_point[1], pos[1]);
 
-    var add_to_selection = [];
+    var something_added = false;
     for (var l = 0 ; l < editor.bezier_lines.length ; l++) {
       var line = editor.bezier_lines[l];
       if(!line)
@@ -103,7 +127,8 @@ class StateSelecting extends State {
         if(line.points[p][0] >= bottom_left_pt[0] && line.points[p][0] <= top_right_pt[0] &&
           line.points[p][1] >= bottom_left_pt[1] && line.points[p][1] <= top_right_pt[1]) {
           line.points[p].color = [1.0,1.0,0.0,1.0];
-          add_to_selection.push(line.points[p]);
+          this.selection.AddPoint(line.points[p], line);
+          something_added = true;
         }
 
         for(var cp = 0 ; cp < 2 ; cp++) {
@@ -111,25 +136,26 @@ class StateSelecting extends State {
           if(pt[0] >= bottom_left_pt[0] && pt[0] <= top_right_pt[0] &&
             pt[1] >= bottom_left_pt[1] && pt[1] <= top_right_pt[1]) {
             pt.color = [1.0,1.0,1.0,1.0];
-            add_to_selection.push(pt);
+            this.selection.AddCtrlPoint(pt, line);
+            something_added = true;
           }
         }
       }
     }
 
-    if(add_to_selection.length > 0) {
-      this.selection = this.selection.concat(add_to_selection);
-      this.selection = this.selection.unique();
-    } else {
-      this.selection.forEach(elt => {
+    if(!something_added) {
+      this.selection.points.forEach((key, elt) => {
         elt.color = null;
       });
-      this.selection = [];
+      this.selection.ctrl_points.forEach((key, elt) => {
+        elt.color = null;
+      });
+      this.selection.Clear();
     }
 
-    if(this.selection.length == 0)
+    if(this.selection.Length() == 0)
       return new StateIdle();
-    console.log("selected item count: " + this.selection.length);
+    console.log("selected item count: " + this.selection.Length());
     return null;
   }
 
@@ -139,8 +165,27 @@ class StateSelecting extends State {
   KeyDown(editor, evt) {
     if(evt.key == "t") {
       return new StateTranslating(this.selection);
+    } else if(evt.which == 8 /*backspace*/) {
+      this.Delete(editor);
+      this.selection.points.forEach((key, elt) => {
+        elt.color = null;
+      });
+      this.selection.ctrl_points.forEach((key, elt) => {
+        elt.color = null;
+      });
+      return new StateIdle();
     }
     return null;
+  }
+
+  Delete(editor) {
+    console.log("Deleting selection");
+    this.selection.points.forEach((key, elt) => {
+      console.log(key);
+      key.DeletePoint(elt);
+      if(key.points.length == 0)
+        editor.RemoveBezierLine(key);
+    });
   }
 }
 
@@ -154,9 +199,12 @@ class StateTranslating extends State {
   }
   
   MouseMove(editor, delta_pos) {
-    for(var i = 0 ; i < this.selection.length ; i++) {
-      vec2.add(this.selection[i], this.selection[i], delta_pos);
-    }
+    this.selection.points.forEach((key, elt) => {
+      vec2.add(elt, elt, delta_pos);
+    });
+    this.selection.ctrl_points.forEach((key, elt) => {
+      vec2.add(elt, elt, delta_pos);
+    });
   }
 
   KeyUp(editor, evt) {

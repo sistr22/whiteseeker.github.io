@@ -1,11 +1,8 @@
 class BezierLine {
-  constructor(p0, p0_cp, p1, p1_cp) { // cp stand for control point
-    this.points = [p0, p1];
-    var tmp0 = vec2.create();
-    vec2.add(tmp0, p0, p0_cp);
-    var tmp1 = vec2.create();
-    vec2.add(tmp1, p1, p1_cp);
-    this.control_points = [vec2.clone(p0), tmp0, tmp1, vec2.clone(p1)];
+  constructor(pts, ctrl_pts) { // cp stand for control point
+    console.assert(2*pts.length == ctrl_pts.length, "pts length: %d ; ctrl pts length: %d", pts.length, ctrl_pts.length);
+    this.points = pts;
+    this.control_points = ctrl_pts;
     this.subdivisions = 100;
 
     this.M = mat4.create();
@@ -35,6 +32,18 @@ class BezierLine {
   DeletePointAtIndex(index) {
     this.points.remove(index, index);
     this.control_points.remove(index*2, index*2+1);
+  }
+
+  DeletePoint(pt) {
+    // Find index of the selected point
+    var idx = -1;
+    for(var i = 0 ; i < this.points.length ; i++) {
+      if(pt == this.points[i])
+        idx = i;
+    }
+    if(idx == -1)
+      return;
+    this.DeletePointAtIndex(idx);
   }
 
   /*DeletePoint() { // Delete currently selected point
@@ -118,11 +127,7 @@ class BezierLine {
   }
 
   Draw(gl, VP) {
-
     this.Retesselate(gl);
-    /*for(var i = 0 ; i < this.tesselation_points.length ; i++) {
-      this.DrawPoint(gl, VP, this.tesselation_points[i], [0.2, 0.2, 0.2, 1.0]);
-    }*/
 
     this.DrawLines(gl, VP, [1.0, 1.0, 1.0, 1.0]);
 
@@ -133,8 +138,6 @@ class BezierLine {
 
     var lines = [];
     for(var i = 1 ; i < this.control_points.length-1 ; i++){
-      //var ctrl_p = vec2.create();
-      //vec2.add(ctrl_p, this.points[Math.floor(i/2)], this.control_points[i]);
       var cl = this.control_points[i].color ? this.control_points[i].color : [0.0, 0.0, 1.0, 1.0];
       this.DrawPoint(gl, VP, this.control_points[i], cl);
       lines.push(this.points[Math.floor(i/2)][0], this.points[Math.floor(i/2)][1]);
@@ -304,20 +307,25 @@ class BezierLine {
 
 class Renderer {
   constructor(canva) {
+    console.log(canva);
     this.canva = canva;
-    try {
-      this.gl = this.canva.getContext("webgl2");
-      this.gl.viewportWidth = this.canva.width;
-      this.gl.viewportHeight = this.canva.height;
-    } catch (e) {
-      alert("WebGL error!");
-    }
+    this.gl = this.canva.getContext("webgl2");
+    this.gl.viewportWidth = this.canva.width;
+    this.gl.viewportHeight = this.canva.height;
+    console.log("Viewport width in px = " + this.gl.viewportWidth);
     this.camera_center = vec2.fromValues(0, 0);
     this.bezier_lines = [];
   }
 
   AddBezierLine(line) {
     this.bezier_lines.push(line);
+  }
+
+  RemoveBezierLine(bezier_line) {
+    var index = this.bezier_lines.indexOf(bezier_line);
+    if(index == -1)
+      return;
+    this.bezier_lines.splice(index, 1);
   }
 
   Init() {
@@ -406,39 +414,38 @@ Array.prototype.remove = function(from, to) {
   return this.push.apply(this, rest);
 };
 
-canva = document.getElementById("canva");
-var renderer = new Renderer(canva);
-renderer.Init();
+var canva = null;
+var renderer = null;
 var track_length_ms = 10000;
 var current_time_ms = 0;
-var editor = new Editor(renderer);
+var last_time = -1;
+var editor = null;
 
-var refreshShaderButton = document.getElementById("refresh_shader");
-refreshShaderButton.onclick = (function(rd) { return function(){rd.ReloadShader();};}(renderer));
+document.addEventListener('DOMContentLoaded', function() {
+  canva = document.getElementById("canva"); 
+  renderer = new Renderer(canva);
+  renderer.Init();
+  editor = new Editor(renderer);
+
+  var refreshShaderButton = document.getElementById("refresh_shader");
+  refreshShaderButton.onclick = (function(rd) { return function(){rd.ReloadShader();};}(renderer));
+
+  // Start the main loop
+  last_time = Date.now();
+  mainLoop();
+}, false);
 
 function mouseMove(evt) {
   var delta = vec2.fromValues(evt.movementX, evt.movementY);
   vec2.div(delta, delta, vec2.fromValues(canva.width, canva.height));
   delta[1] *= -1;
   editor.MouseMove(delta);
-  /*
-  if(!selection)
-    return;
-  selection = selection.MouseMove(delta);
-  */
 }
 
 function mouseUp(evt) {
   var pt = vec2.fromValues(evt.offsetX, 512-evt.offsetY);
   pt = renderer.ToWorldCoordinate(pt);
   editor.MouseUp(pt);
-  /*
-  if(!selection)
-    return;
-  //vec2.div(pt, pt, vec2.fromValues(canva.width, canva.height));
-  //vec2.sub(pt, pt, [0.5, 0.5]);
-  selection = selection.MouseUp(pt);
-  */
 }
 
 function mouseDown(evt) {
@@ -449,12 +456,6 @@ function mouseDown(evt) {
   // convert from screenspace to world coordinate
   pt = renderer.ToWorldCoordinate(pt);
   editor.MouseDown(pt);
-  /*
-  for (var i = 0; i < bezier_lines.length; i++) {
-    selection = bezier_lines[i].MouseDown(pt);
-    if(selection)
-      break;
-  }*/
 }
 
 function mouseWheel(evt) {
@@ -483,14 +484,6 @@ function keyPress(evt) {
       renderer.AddBezierLine(line);
       bezier_lines.push(line);
     }
-  } else if(evt.key == "-") {
-    if(selection) {
-      console.log("Deleting a point");
-      selection.DeletePoint();
-      // TODO check if we need to delete the line if it's empty
-    }
-  } else {
-    console.log("Character not handled");
   }
   */
 }
@@ -517,52 +510,6 @@ function onPlayClicked() {
     is_playing = false;
   }*/
 }
-
-function save() {
-  var builder = new flatbuffers.Builder(1024);
-  Wabisabi.Level.startLevel(builder);
-  Wabisabi.Level.addWorldSize(builder, document.getElementById("world_size").value);
-  var level = Wabisabi.Level.endLevel(builder);
-  builder.finish(level);
-  var buf = builder.asUint8Array();
-
-  if (typeof(Storage) !== "undefined") {
-    // Code for localStorage/sessionStorage.
-    localStorage.setItem("current_level", buf);
-  } else {
-    console.log("Sorry ! Can't save your data locally");
-  }
-}
-
-function loadLocal() {
-  if (typeof(Storage) !== "undefined") {
-    // Code for localStorage/sessionStorage.
-    var level = localStorage.getItem("current_level");
-    if(level != null) {
-      var enc = new TextEncoder();
-      level = enc.encode(level);
-      load(level);
-    }
-  } else {
-    console.log("Sorry ! Can't save your data locally");
-  }
-}
-
-function load(buffer) {
-  if(buffer != null && buffer instanceof Uint8Array) {
-    console.log("buffer is a Uint8Array");
-    var buf = new flatbuffers.ByteBuffer(buffer);
-    var level = Wabisabi.Level.getRootAsLevel(buf);
-    console.log("loaded world size: " + level.worldSize());
-  } else {
-    console.log("buffer is not a Uint8Array");
-  }
-}
-
-// Start the main loop
-var last_time = Date.now();
-mainLoop();
-
 
 function mainLoop() {
   var now = Date.now();

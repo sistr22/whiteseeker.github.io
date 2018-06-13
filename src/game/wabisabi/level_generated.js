@@ -9,6 +9,234 @@ var Wabisabi = Wabisabi || {};
 /**
  * @constructor
  */
+Wabisabi.Vec2 = function() {
+  /**
+   * @type {flatbuffers.ByteBuffer}
+   */
+  this.bb = null;
+
+  /**
+   * @type {number}
+   */
+  this.bb_pos = 0;
+};
+
+/**
+ * @param {number} i
+ * @param {flatbuffers.ByteBuffer} bb
+ * @returns {Wabisabi.Vec2}
+ */
+Wabisabi.Vec2.prototype.__init = function(i, bb) {
+  this.bb_pos = i;
+  this.bb = bb;
+  return this;
+};
+
+/**
+ * @param {flatbuffers.ByteBuffer} bb
+ * @param {Wabisabi.Vec2=} obj
+ * @returns {Wabisabi.Vec2}
+ */
+Wabisabi.Vec2.getRootAsVec2 = function(bb, obj) {
+  return (obj || new Wabisabi.Vec2).__init(bb.readInt32(bb.position()) + bb.position(), bb);
+};
+
+/**
+ * @returns {number}
+ */
+Wabisabi.Vec2.prototype.x = function() {
+  var offset = this.bb.__offset(this.bb_pos, 4);
+  return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
+};
+
+/**
+ * @returns {number}
+ */
+Wabisabi.Vec2.prototype.y = function() {
+  var offset = this.bb.__offset(this.bb_pos, 6);
+  return offset ? this.bb.readFloat32(this.bb_pos + offset) : 0.0;
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ */
+Wabisabi.Vec2.startVec2 = function(builder) {
+  builder.startObject(2);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {number} x
+ */
+Wabisabi.Vec2.addX = function(builder, x) {
+  builder.addFieldFloat32(0, x, 0.0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {number} y
+ */
+Wabisabi.Vec2.addY = function(builder, y) {
+  builder.addFieldFloat32(1, y, 0.0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @returns {flatbuffers.Offset}
+ */
+Wabisabi.Vec2.endVec2 = function(builder) {
+  var offset = builder.endObject();
+  return offset;
+};
+
+/**
+ * @constructor
+ */
+Wabisabi.Bezier = function() {
+  /**
+   * @type {flatbuffers.ByteBuffer}
+   */
+  this.bb = null;
+
+  /**
+   * @type {number}
+   */
+  this.bb_pos = 0;
+};
+
+/**
+ * @param {number} i
+ * @param {flatbuffers.ByteBuffer} bb
+ * @returns {Wabisabi.Bezier}
+ */
+Wabisabi.Bezier.prototype.__init = function(i, bb) {
+  this.bb_pos = i;
+  this.bb = bb;
+  return this;
+};
+
+/**
+ * @param {flatbuffers.ByteBuffer} bb
+ * @param {Wabisabi.Bezier=} obj
+ * @returns {Wabisabi.Bezier}
+ */
+Wabisabi.Bezier.getRootAsBezier = function(bb, obj) {
+  return (obj || new Wabisabi.Bezier).__init(bb.readInt32(bb.position()) + bb.position(), bb);
+};
+
+/**
+ * @param {number} index
+ * @param {Wabisabi.Vec2=} obj
+ * @returns {Wabisabi.Vec2}
+ */
+Wabisabi.Bezier.prototype.points = function(index, obj) {
+  var offset = this.bb.__offset(this.bb_pos, 4);
+  return offset ? (obj || new Wabisabi.Vec2).__init(this.bb.__indirect(this.bb.__vector(this.bb_pos + offset) + index * 4), this.bb) : null;
+};
+
+/**
+ * @returns {number}
+ */
+Wabisabi.Bezier.prototype.pointsLength = function() {
+  var offset = this.bb.__offset(this.bb_pos, 4);
+  return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
+};
+
+/**
+ * @param {number} index
+ * @param {Wabisabi.Vec2=} obj
+ * @returns {Wabisabi.Vec2}
+ */
+Wabisabi.Bezier.prototype.controlPoints = function(index, obj) {
+  var offset = this.bb.__offset(this.bb_pos, 6);
+  return offset ? (obj || new Wabisabi.Vec2).__init(this.bb.__indirect(this.bb.__vector(this.bb_pos + offset) + index * 4), this.bb) : null;
+};
+
+/**
+ * @returns {number}
+ */
+Wabisabi.Bezier.prototype.controlPointsLength = function() {
+  var offset = this.bb.__offset(this.bb_pos, 6);
+  return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ */
+Wabisabi.Bezier.startBezier = function(builder) {
+  builder.startObject(2);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {flatbuffers.Offset} pointsOffset
+ */
+Wabisabi.Bezier.addPoints = function(builder, pointsOffset) {
+  builder.addFieldOffset(0, pointsOffset, 0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {Array.<flatbuffers.Offset>} data
+ * @returns {flatbuffers.Offset}
+ */
+Wabisabi.Bezier.createPointsVector = function(builder, data) {
+  builder.startVector(4, data.length, 4);
+  for (var i = data.length - 1; i >= 0; i--) {
+    builder.addOffset(data[i]);
+  }
+  return builder.endVector();
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {number} numElems
+ */
+Wabisabi.Bezier.startPointsVector = function(builder, numElems) {
+  builder.startVector(4, numElems, 4);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {flatbuffers.Offset} controlPointsOffset
+ */
+Wabisabi.Bezier.addControlPoints = function(builder, controlPointsOffset) {
+  builder.addFieldOffset(1, controlPointsOffset, 0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {Array.<flatbuffers.Offset>} data
+ * @returns {flatbuffers.Offset}
+ */
+Wabisabi.Bezier.createControlPointsVector = function(builder, data) {
+  builder.startVector(4, data.length, 4);
+  for (var i = data.length - 1; i >= 0; i--) {
+    builder.addOffset(data[i]);
+  }
+  return builder.endVector();
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {number} numElems
+ */
+Wabisabi.Bezier.startControlPointsVector = function(builder, numElems) {
+  builder.startVector(4, numElems, 4);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @returns {flatbuffers.Offset}
+ */
+Wabisabi.Bezier.endBezier = function(builder) {
+  var offset = builder.endObject();
+  return offset;
+};
+
+/**
+ * @constructor
+ */
 Wabisabi.Level = function() {
   /**
    * @type {flatbuffers.ByteBuffer}
@@ -50,10 +278,28 @@ Wabisabi.Level.prototype.worldSize = function() {
 };
 
 /**
+ * @param {number} index
+ * @param {Wabisabi.Bezier=} obj
+ * @returns {Wabisabi.Bezier}
+ */
+Wabisabi.Level.prototype.obstacles = function(index, obj) {
+  var offset = this.bb.__offset(this.bb_pos, 6);
+  return offset ? (obj || new Wabisabi.Bezier).__init(this.bb.__indirect(this.bb.__vector(this.bb_pos + offset) + index * 4), this.bb) : null;
+};
+
+/**
+ * @returns {number}
+ */
+Wabisabi.Level.prototype.obstaclesLength = function() {
+  var offset = this.bb.__offset(this.bb_pos, 6);
+  return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
+};
+
+/**
  * @param {flatbuffers.Builder} builder
  */
 Wabisabi.Level.startLevel = function(builder) {
-  builder.startObject(1);
+  builder.startObject(2);
 };
 
 /**
@@ -62,6 +308,35 @@ Wabisabi.Level.startLevel = function(builder) {
  */
 Wabisabi.Level.addWorldSize = function(builder, worldSize) {
   builder.addFieldFloat32(0, worldSize, 0.0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {flatbuffers.Offset} obstaclesOffset
+ */
+Wabisabi.Level.addObstacles = function(builder, obstaclesOffset) {
+  builder.addFieldOffset(1, obstaclesOffset, 0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {Array.<flatbuffers.Offset>} data
+ * @returns {flatbuffers.Offset}
+ */
+Wabisabi.Level.createObstaclesVector = function(builder, data) {
+  builder.startVector(4, data.length, 4);
+  for (var i = data.length - 1; i >= 0; i--) {
+    builder.addOffset(data[i]);
+  }
+  return builder.endVector();
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {number} numElems
+ */
+Wabisabi.Level.startObstaclesVector = function(builder, numElems) {
+  builder.startVector(4, numElems, 4);
 };
 
 /**
