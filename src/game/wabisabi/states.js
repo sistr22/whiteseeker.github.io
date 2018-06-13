@@ -178,6 +178,16 @@ class StateSelecting extends State {
     return null;
   }
 
+  KeyPress(editor, evt) {
+    if(evt.key == "+") {
+      if(this.selection.points.size == 1) {
+        console.log("Add point");
+        var key_value = this.selection.points.entries().next().value;
+        key_value[1].AddPoint(key_value[0], vec2.fromValues(0.0, 0.15), vec2.fromValues(-0.1, 0.15), vec2.fromValues(0.1, 0.15));
+      }
+    }
+  }
+
   Delete(editor) {
     console.log("Deleting selection");
     this.selection.points.forEach((key, elt) => {

@@ -14,20 +14,20 @@ class BezierLine {
     this.control_points.splice(index*2+1, 0, control_point_right);
   }
 
-  /*AddPoint(point, control_point_left, control_point_right) {
-    if(!this.selected)
+  AddPoint(previous_point, point, control_point_left, control_point_right) {
+    if(!previous_point)
       return;
     // Find index of the selected point
     var idx = -1;
     for(var i = 0 ; i < this.points.length ; i++) {
-      if(this.selected == this.points[i])
+      if(previous_point == this.points[i])
         idx = i;
     }
     console.log("index found: " + idx);
     if(idx == -1)
       return;
     this.AddPointAtIndex(idx+1, point, control_point_left, control_point_right);
-  }*/
+  }
 
   DeletePointAtIndex(index) {
     this.points.remove(index, index);
