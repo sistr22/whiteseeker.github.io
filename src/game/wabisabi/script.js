@@ -1,3 +1,7 @@
+const UiActions = Object.freeze({
+  PLAY:   Symbol("play")
+});
+
 class BezierLine {
   constructor(pts, ctrl_pts) { // cp stand for control point
     console.assert(2*pts.length == ctrl_pts.length, "pts length: %d ; ctrl pts length: %d", pts.length, ctrl_pts.length);
@@ -45,21 +49,6 @@ class BezierLine {
       return;
     this.DeletePointAtIndex(idx);
   }
-
-  /*DeletePoint() { // Delete currently selected point
-    if(!this.selected)
-      return;
-    // Find index of the selected point
-    var idx = -1;
-    for(var i = 0 ; i < this.points.length ; i++) {
-      if(this.selected == this.points[i])
-        idx = i;
-    }
-    console.log("index found: " + idx);
-    if(idx == -1)
-      return;
-    this.DeletePointAtIndex(idx);
-  }*/
 
   static InitGl(gl) {
     // Create our buffers
@@ -416,8 +405,6 @@ Array.prototype.remove = function(from, to) {
 
 var canva = null;
 var renderer = null;
-var track_length_ms = 10000;
-var current_time_ms = 0;
 var last_time = -1;
 var editor = null;
 
@@ -469,23 +456,6 @@ function mouseWheel(evt) {
 
 function keyPress(evt) {
   editor.KeyPress(evt);
-  /*
-  if(evt.key == "+") {
-    if(selection) {
-      console.log("Adding a point");
-      selection.AddPoint(vec2.fromValues(0.0, 0.0), vec2.fromValues(-0.1, 0.0),vec2.fromValues(0.1, 0.0));
-    } else {
-      console.log("Creating new bezier line")
-      var pt = vec2.fromValues(canva.width/2, canva.height/2);
-      pt = renderer.ToWorldCoordinate(pt);
-      var pt_left = vec2.fromValues(pt[0]-0.1, pt[1]);
-      var pt_right = vec2.fromValues(pt[0]+0.1, pt[1]);
-      var line = new BezierLine(pt_left, vec2.fromValues(0, 0.2), pt_right, vec2.fromValues(0, 0.2));
-      renderer.AddBezierLine(line);
-      bezier_lines.push(line);
-    }
-  }
-  */
 }
 
 function onSliderChange(value) {
@@ -500,37 +470,14 @@ function onSliderChange(value) {
 
 function onPlayClicked() {
   console.log("Play button clicked");
-  /*if(!is_playing) {
-    // Start play from %age:
-    var start_percent = document.getElementById("slider_world").value;
-    console.log("Start position: " + start_percent);
-    current_time_ms = track_length_ms*start_percent;
-    is_playing = true;
-  } else {
-    is_playing = false;
-  }*/
+  editor.UiEvent(UiActions.PLAY);
 }
 
 function mainLoop() {
   var now = Date.now();
   var delta_ms = now - last_time;
   last_time = now;
-  /*if(is_playing) {
-    current_time_ms += delta_ms;
-    if(current_time_ms >= track_length_ms) {
-      current_time_ms = track_length_ms;
-      is_playing = false;
-    }
-    var percent = current_time_ms/track_length_ms;
-    var world_size = document.getElementById("world_size").value;
-    camera_y = world_size*percent;
-    var camera_center = [0.0, camera_y];
-    renderer.SetCameraCenter(camera_center);
-    // Update the slider
-    document.getElementById("slider_world").value = percent;
-  }*/
   editor.Tick(delta_ms);
-  renderer.draw();
   window.setTimeout(function (rend) { return function () { mainLoop(); }; }(this), 1000 / 60);
 }
 

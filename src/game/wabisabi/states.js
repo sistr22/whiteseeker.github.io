@@ -230,3 +230,47 @@ class StateTranslating extends State {
   KeyPress(editor, evt) {
   }
 }
+
+class StatePlay extends State {
+  constructor(editor) {
+    super();
+    // Start play from %age:
+    var start_percent = document.getElementById("slider_world").value;
+    this.elapsed_ms = editor.track_length_ms*start_percent;
+  }
+  Tick(editor, delta_ms) {
+    this.elapsed_ms += delta_ms;
+
+    if(this.elapsed_ms >= editor.track_length_ms)
+      this.elapsed_ms = editor.track_length_ms;
+    var percent = this.elapsed_ms/editor.track_length_ms;
+    var world_size = document.getElementById("world_size").value;
+    var camera_center = editor.renderer.GetCameraCenter();
+    camera_center[1] = world_size*percent;
+    renderer.SetCameraCenter(camera_center);
+    // Update the slider
+    document.getElementById("slider_world").value = percent;
+
+    if(this.elapsed_ms >= editor.track_length_ms)
+      return new StateIdle();
+    return null;
+  }
+  MouseDown(editor, pos) {
+    return null;
+  }
+  MouseUp(editor, pos) {
+    return null;
+  }
+  MouseMove(editor, delta_pos) {
+    return null;
+  }
+  KeyPress(editor, evt) {
+    return null;
+  }
+  KeyUp(editor, evt) {
+    return null;
+  }
+  KeyDown(editor, evt) {
+    return null;
+  }
+}

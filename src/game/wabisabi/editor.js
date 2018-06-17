@@ -9,6 +9,7 @@ class Editor {
     this.state = new StateIdle();
     this.bezier_lines = [];
     this.renderer = renderer;
+    this.track_length_ms = 5000;
 
     var request = indexedDB.open("saveFiles", dbVersion);
     this.db = null;
@@ -28,12 +29,6 @@ class Editor {
       // Create an objectStore for this database
       var objectStore = thiz.db.createObjectStore("level");
     };
-
-    // Init
-    //var line = new BezierLine(vec2.fromValues(-0.1, -0.05), vec2.fromValues(0.2, 0), vec2.fromValues(0.25, 0), vec2.fromValues(0, -0.25));
-    //line.AddPointAtIndex(1, vec2.fromValues(0.0, 0.15), vec2.fromValues(-0.1, 0.15), vec2.fromValues(0.1, 0.15));
-    //this.bezier_lines.push(line);
-    //this.renderer.AddBezierLine(line);
   }
 
   RemoveBezierLine(bezier_line) {
@@ -54,6 +49,7 @@ class Editor {
 
   Tick(delta_ms) {
     this.SetState(this.state.Tick(this, delta_ms));
+    this.renderer.draw();
   }
 
   MouseDown(pos) {
@@ -93,6 +89,12 @@ class Editor {
 
   KeyDown(evt) {
     this.SetState(this.state.KeyDown(this, evt));
+  }
+
+  UiEvent(evt) {
+    if(evt == UiActions.PLAY) {
+      this.SetState(new StatePlay(this));
+    }
   }
 
   Save() {
