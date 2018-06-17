@@ -1,6 +1,8 @@
 const UiActions = Object.freeze({
   PLAY:   Symbol("play"),
-  PAUSE:   Symbol("pause")
+  PAUSE:   Symbol("pause"),
+  HIDE_DEBUG: Symbol("hide_debug"),
+  SHOW_DEBUG: Symbol("show_debug"),
 });
 
 class BezierLine {
@@ -148,6 +150,11 @@ class BezierLine {
   }
 
   Draw(gl, VP) {
+    this.Retesselate(gl);
+    this.DrawLines(gl, VP, [1.0, 1.0, 1.0, 1.0]);
+  }
+
+  DrawDebug(gl, VP) {
     this.Retesselate(gl);
 
     this.DrawLines(gl, VP, [1.0, 1.0, 1.0, 1.0]);
@@ -427,6 +434,15 @@ class Renderer {
     }
   }
 
+  drawDebug() {
+    var gl = this.gl;
+    var now = Date.now() / 1000.0 - this.startTime;
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    for (var i = 0; i < this.bezier_lines.length; i++) {
+      this.bezier_lines[i].DrawDebug(gl, this.VP);
+    }
+  }
+
   DrawDebugLines(lines, color) {
     var gl = this.gl;
     var VP = this.VP;
@@ -570,6 +586,10 @@ function trackSeeked() {
   var percent = audio_controls.currentTime/audio_controls.duration;
   document.getElementById("slider_world").value = percent;
   onSliderChange(percent);
+}
+
+function debugDrawToggled(checkbox) {
+  editor.UiEvent(checkbox.checked?UiActions.SHOW_DEBUG:UiActions.HIDE_DEBUG);
 }
 
 function dropHandler(ev) {

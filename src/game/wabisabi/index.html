@@ -45,6 +45,7 @@ custom_css: ['game/wabisabi/midi.css']
             </button-->
             <input type="file" onchange="onTrackSelected(event)"></br>
             <audio controls id="audio-track-controls" onplay="playClicked()" onpause="pauseClicked()" ondurationchange="trackDurationChanged()" onseeked="trackSeeked()"></audio>
+            <div>Debug draw<input type="checkbox" onchange="debugDrawToggled(this);" checked></div>
           </div>
         </div>
         Fragment shader<br>

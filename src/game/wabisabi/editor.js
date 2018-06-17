@@ -11,6 +11,7 @@ class Editor {
     this.renderer = renderer;
     this.track_length_ms = 5000;
     this.copy_slot = null;
+    this.debug = true;
 
     var request = indexedDB.open("saveFiles", dbVersion);
     this.db = null;
@@ -57,7 +58,10 @@ class Editor {
     var world_size = document.getElementById("world_size").value;
     lines.push(-0.5, world_size*percent);
     lines.push(0.5, world_size*percent);
-    this.renderer.draw();
+    if(this.debug)
+      this.renderer.drawDebug();
+    else
+      this.renderer.draw();
     this.renderer.DrawDebugLines(lines, [0.4, 0.4, 0.4, 1.0]);
   }
 
@@ -101,7 +105,12 @@ class Editor {
   }
 
   UiEvent(evt) {
-    this.SetState(this.state.UiEvent(this, evt));
+    if(evt == UiActions.SHOW_DEBUG) {
+      this.debug = true;
+    } else if(evt == UiActions.HIDE_DEBUG) {
+      this.debug = false;
+    } else
+      this.SetState(this.state.UiEvent(this, evt));
   }
 
   Clear() {

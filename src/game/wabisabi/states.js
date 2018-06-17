@@ -319,6 +319,11 @@ class StateTranslating extends State {
 }
 
 class StatePlay extends State {
+  constructor(editor) {
+    super();
+    this.previousDebugState = editor.debug?true:false;
+    editor.debug = false;
+  }
   Tick(editor, delta_ms) {
     var percent = audio_controls.currentTime/audio_controls.duration;
     var world_size = document.getElementById("world_size").value;
@@ -328,8 +333,10 @@ class StatePlay extends State {
     // Update the slider
     document.getElementById("slider_world").value = percent;
 
-    if(audio_controls.currentTime >= audio_controls.duration)
+    if(audio_controls.currentTime >= audio_controls.duration) {
+      editor.debug = this.previousDebugState;
       return new StateIdle();
+    }
     return null;
   }
   MouseDown(editor, pos) {
@@ -351,8 +358,10 @@ class StatePlay extends State {
     return null;
   }
   UiEvent(editor, evt) {
-    if(evt == UiActions.PAUSE)
+    if(evt == UiActions.PAUSE) {
+      editor.debug = this.previousDebugState?true:false;
       return new StateIdle();
+    }
     return null;
   }
 }
