@@ -241,7 +241,8 @@ class StateSelecting extends State {
       if(this.selection.points.size == 1) {
         console.log("Add point");
         var key_value = this.selection.points.entries().next().value;
-        key_value[1].AddPoint(key_value[0], vec2.fromValues(0.0, 0.15), vec2.fromValues(-0.1, 0.15), vec2.fromValues(0.1, 0.15));
+        var y = key_value[0][1];
+        key_value[1].AddPoint(key_value[0], vec2.fromValues(0.0, y), vec2.fromValues(-0.1, y), vec2.fromValues(0.1, y));
       }
     }
   }
