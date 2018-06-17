@@ -16,7 +16,8 @@ custom_css: ['game/wabisabi/midi.css']
     <div class="mdl-layout__drawer">
       <span class="mdl-layout-title">Midi editor</span>
       <nav class="mdl-navigation">
-        <a class="mdl-navigation__link" href="">Save</a>
+        <a class="mdl-navigation__link" onclick="editor.DownloadSave()">Save</a>
+        <a class="mdl-navigation__link" onclick="editor.Clear()">Clear</a>
       </nav>
     </div>
     <main class="mdl-layout__content">
@@ -29,7 +30,9 @@ custom_css: ['game/wabisabi/midi.css']
                 onmousewheel="mouseWheel(event)"
                 onkeypress="editor.KeyPress(event)"
                 onkeyup="editor.KeyUp(event)"
-                onkeydown="editor.KeyDown(event)">Your browser does not support the HTML5 canvas tag.</canvas>
+                onkeydown="editor.KeyDown(event)"
+                ondrop="dropHandler(event);"
+                ondragover="dragOverHandler(event);">Your browser does not support the HTML5 canvas tag.</canvas>
           <div class="slider-wrapper">
             <input id="slider_world" type="range" min="0" max="1" value="0" step="0.01" oninput="onSliderChange(value)">
           </div>

@@ -305,6 +305,10 @@ class Renderer {
     this.bezier_lines = [];
   }
 
+  Clear() {
+    this.bezier_lines = [];
+  }
+
   AddBezierLine(line) {
     this.bezier_lines.push(line);
   }
@@ -531,6 +535,63 @@ function trackSeeked() {
   var percent = audio_controls.currentTime/audio_controls.duration;
   document.getElementById("slider_world").value = percent;
   onSliderChange(percent);
+}
+
+function dropHandler(ev) {
+  console.log('File(s) dropped');
+  // Prevent default behavior (Prevent file from being opened)
+  ev.preventDefault();
+  if (ev.dataTransfer.items) {
+    // Use DataTransferItemList interface to access the file(s)
+    for (var i = 0; i < ev.dataTransfer.items.length; i++) {
+      // If dropped items aren't files, reject them
+      if (ev.dataTransfer.items[i].kind === 'file') {
+        var file = ev.dataTransfer.items[i].getAsFile();
+        console.log('... file[' + i + '].name = ' + file.name);
+        this.DroppedFile(file);
+      }
+    }
+  } else {
+    // Use DataTransfer interface to access the file(s)
+    for (var i = 0; i < ev.dataTransfer.files.length; i++) {
+      var file = ev.dataTransfer.files[i];
+      console.log('... file[' + i + '].name = ' + file.name);
+      this.DroppedFile(file);
+    }
+  } 
+  
+  // Pass event to removeDragData for cleanup
+  removeDragData(ev)
+}
+
+function DroppedFile(file) {
+  if(file.name.slice((file.name.lastIndexOf(".") - 1 >>> 0) + 2) == "bin") {
+    console.log("Dropped .bin file of size: " + file.size);
+    editor.Clear();
+    var read = new FileReader();
+    read.onloadend = function(){
+      console.log("Content size in bytes: " + read.result.byteLength);
+      editor.Load(new Uint8Array(read.result));
+    }
+    read.readAsArrayBuffer(file);
+  }
+}
+
+function removeDragData(ev) {
+  console.log('Removing drag data')
+  if (ev.dataTransfer.items) {
+    // Use DataTransferItemList interface to remove the drag data
+    ev.dataTransfer.items.clear();
+  } else {
+    // Use DataTransfer interface to remove the drag data
+    ev.dataTransfer.clearData();
+  }
+}
+
+function dragOverHandler(ev) {
+  console.log('File(s) in drop zone'); 
+  // Prevent default behavior (Prevent file from being opened)
+  ev.preventDefault();
 }
 
 function mainLoop() {

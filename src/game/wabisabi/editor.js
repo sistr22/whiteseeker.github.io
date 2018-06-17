@@ -41,7 +41,7 @@ class Editor {
 
   SetState(new_state) {
     if (new_state != null) {
-      this.Save();
+      this.SaveLocally();
       console.log("New state: " + new_state.constructor.name);
       this.state = new_state;
     }
@@ -103,6 +103,34 @@ class Editor {
     this.SetState(this.state.UiEvent(this, evt));
   }
 
+  Clear() {
+    this.bezier_lines = [];
+    this.renderer.Clear();
+  }
+
+  DownloadSave() {
+    var buf = this.Save();
+    console.log("Size save: " + buf.byteLength);
+    var blob = new Blob([buf], {type: 'octet/stream'});
+    if(window.navigator.msSaveOrOpenBlob) {
+        window.navigator.msSaveBlob(blob, "level.bin");
+    }
+    else{
+        var elem = window.document.createElement('a');
+        elem.href = window.URL.createObjectURL(blob);
+        elem.download = "level.bin";        
+        document.body.appendChild(elem);
+        elem.click();        
+        document.body.removeChild(elem);
+    }
+  }
+  SaveLocally() {
+    var buf = this.Save();
+    // Open a transaction to the database
+    var transaction = this.db.transaction("level", "readwrite");
+    // Put the blob into the dabase
+    var put = transaction.objectStore("level").put(buf, "current_level");
+  }
   Save() {
     var builder = new flatbuffers.Builder(1024);
 
@@ -140,12 +168,7 @@ class Editor {
     Wabisabi.Level.addObstacles(builder, flat_obstacles);
     var level = Wabisabi.Level.endLevel(builder);
     builder.finish(level);
-    var buf = builder.asUint8Array();
-
-    // Open a transaction to the database
-    var transaction = this.db.transaction("level", "readwrite");
-    // Put the blob into the dabase
-    var put = transaction.objectStore("level").put(buf, "current_level");
+    return builder.asUint8Array();
   }
   
   LoadLocal() {
@@ -160,7 +183,8 @@ class Editor {
   
   Load(buffer) {
     if(buffer != null && buffer instanceof Uint8Array) {
-      console.log("buffer is a Uint8Array");
+      console.log("buffer is a Uint8Array of length (in bytes): " + buffer.byteLength);
+      console.log(buffer);
       var buf = new flatbuffers.ByteBuffer(buffer);
       var level = Wabisabi.Level.getRootAsLevel(buf);
       console.log("loaded world size: " + level.worldSize());
