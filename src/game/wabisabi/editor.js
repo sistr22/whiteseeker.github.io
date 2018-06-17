@@ -10,6 +10,7 @@ class Editor {
     this.bezier_lines = [];
     this.renderer = renderer;
     this.track_length_ms = 5000;
+    this.copy_slot = null;
 
     var request = indexedDB.open("saveFiles", dbVersion);
     this.db = null;
@@ -68,8 +69,8 @@ class Editor {
     this.SetState(this.state.MouseUp(this, pos));
   }
 
-  MouseMove(delta_pos) {
-    this.SetState(this.state.MouseMove(this, delta_pos));
+  MouseMove(data) {
+    this.SetState(this.state.MouseMove(this, data));
   }
 
   MouseWheel(delta) {

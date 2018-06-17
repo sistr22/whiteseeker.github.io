@@ -47,7 +47,7 @@ class State {
     console.log("Default state impl of MouseUp, should be overwriten");
     return null;
   }
-  MouseMove(editor, delta_pos) {
+  MouseMove(editor, data) {
     console.log("Default state impl of MouseMove, should be overwriten");
     return null;
   }
@@ -72,14 +72,29 @@ class State {
 class StateIdle extends State {
   Tick(editor, delta_ms) {
   }
-
+  MouseUp(editor, pos) {
+    this.last_pos_mouse = pos;
+  }
   MouseDown(editor, pos) {
     var state = new StateSelecting();
     state.MouseDown(editor, pos);
     return state;
   }
-
-  MouseMove(editor, delta_pos) {
+  MouseMove(editor, data) {
+    this.last_pos_mouse = data.absolute;
+  }
+  KeyDown(editor, evt) {
+    if(evt.ctrlKey && evt.which == 86 /*v*/ && editor.copy_slot != null) {
+      console.log("Pasting a bezier line at: " + this.last_pos_mouse);
+      var bezier_line = editor.copy_slot.Clone();
+      var barycenter = bezier_line.Barycenter();
+      var translate_vector = vec2.fromValues(0, 0);
+      vec2.sub(translate_vector, this.last_pos_mouse, barycenter);
+      bezier_line.Translate(translate_vector);
+      editor.renderer.AddBezierLine(bezier_line);
+      editor.bezier_lines.push(bezier_line);
+    }
+    return null;
   }
 
   KeyPress(editor, evt) {
@@ -136,11 +151,27 @@ class StateSelecting extends State {
   }
 
   MouseUp(editor, pos) {
+    var something_added = false;
     if(vec2.sqrDist(this.start_point, pos) < 0.0002) {
-      return this.ClickSelect(editor, pos);
+      something_added = this.ClickSelect(editor, pos);
     } else {
-      return this.RectangleSelect(editor, pos);
+      something_added = this.RectangleSelect(editor, pos);
     }
+
+    if(!something_added) {
+      this.selection.points.forEach((key, elt) => {
+        elt.color = null;
+      });
+      this.selection.ctrl_points.forEach((key, elt) => {
+        elt.color = null;
+      });
+      this.selection.Clear();
+    }
+
+    if(this.selection.Length() == 0)
+      return new StateIdle();
+    console.log("selected item count: " + this.selection.Length());
+    return null;
   }
 
   ClickSelect(editor, pos) {
@@ -166,21 +197,7 @@ class StateSelecting extends State {
         }
       }
     }
-
-    if(!something_added) {
-      this.selection.points.forEach((key, elt) => {
-        elt.color = null;
-      });
-      this.selection.ctrl_points.forEach((key, elt) => {
-        elt.color = null;
-      });
-      this.selection.Clear();
-    }
-
-    if(this.selection.Length() == 0)
-      return new StateIdle();
-    console.log("selected item count: " + this.selection.Length());
-    return null;
+    return something_added;
   }
 
   RectangleSelect(editor, pos) {
@@ -216,24 +233,10 @@ class StateSelecting extends State {
         }
       }
     }
-
-    if(!something_added) {
-      this.selection.points.forEach((key, elt) => {
-        elt.color = null;
-      });
-      this.selection.ctrl_points.forEach((key, elt) => {
-        elt.color = null;
-      });
-      this.selection.Clear();
-    }
-
-    if(this.selection.Length() == 0)
-      return new StateIdle();
-    console.log("selected item count: " + this.selection.Length());
-    return null;
+    return something_added;
   }
 
-  MouseMove(editor, delta) {
+  MouseMove(editor, data) {
   }
 
   KeyDown(editor, evt) {
@@ -248,6 +251,12 @@ class StateSelecting extends State {
         elt.color = null;
       });
       return new StateIdle();
+    } else if(evt.ctrlKey && evt.which == 67 /*c*/) {
+      if(this.selection.points.size == 1) {
+        console.log("Copying the bezier line");
+        var key_value = this.selection.points.entries().next().value;
+        editor.copy_slot = key_value[1].Clone();
+      }
     }
     return null;
   }
@@ -287,12 +296,12 @@ class StateTranslating extends State {
     return new StateSelecting(this.selection);
   }
   
-  MouseMove(editor, delta_pos) {
+  MouseMove(editor, data) {
     this.selection.points.forEach((key, elt) => {
-      vec2.add(elt, elt, delta_pos);
+      vec2.add(elt, elt, data.delta);
     });
     this.selection.ctrl_points.forEach((key, elt) => {
-      vec2.add(elt, elt, delta_pos);
+      vec2.add(elt, elt, data.delta);
     });
   }
 
@@ -329,7 +338,7 @@ class StatePlay extends State {
   MouseUp(editor, pos) {
     return null;
   }
-  MouseMove(editor, delta_pos) {
+  MouseMove(editor, data) {
     return null;
   }
   KeyPress(editor, evt) {

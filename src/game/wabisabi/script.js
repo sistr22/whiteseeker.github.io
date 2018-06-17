@@ -13,6 +13,37 @@ class BezierLine {
     this.M = mat4.create();
   }
 
+  Clone() {
+    var pts = [];
+    for(var i = 0 ; i < this.points.length ; i++) {
+      pts.push(vec2.clone(this.points[i]));
+    }
+    var ctrl_pts = [];
+    for(var i = 0 ; i < this.control_points.length ; i++) {
+      ctrl_pts.push(vec2.clone(this.control_points[i]));
+    }
+    var result = new BezierLine(pts, ctrl_pts);
+    return result;
+  }
+
+  Barycenter() {
+    var barycenter = vec2.fromValues(0, 0);
+    for(var i = 0 ; i < this.points.length ; i++) {
+      vec2.add(barycenter, barycenter, this.points[i]);
+    }
+    vec2.div(barycenter, barycenter, vec2.fromValues(this.points.length, this.points.length));
+    return barycenter;
+  }
+
+  Translate(val) {
+    for(var i = 0 ; i < this.points.length ; i++) {
+      vec2.add(this.points[i], this.points[i], val);
+    }
+    for(var i = 0 ; i < this.control_points.length ; i++) {
+      vec2.add(this.control_points[i], this.control_points[i], val);
+    }
+  }
+
   AddPointAtIndex(index, point, control_point_left, control_point_right) {
     this.points.splice(index, 0, point);
     this.control_points.splice(index*2, 0, control_point_left);
@@ -456,10 +487,14 @@ document.addEventListener('DOMContentLoaded', function() {
 }, false);
 
 function mouseMove(evt) {
-  var delta = vec2.fromValues(evt.movementX, evt.movementY);
-  vec2.div(delta, delta, vec2.fromValues(canva.width, canva.height));
-  delta[1] *= -1;
-  editor.MouseMove(delta);
+  var pt = vec2.fromValues(evt.offsetX, 512-evt.offsetY);
+  var data = {
+    delta: vec2.fromValues(evt.movementX, evt.movementY),
+    absolute: renderer.ToWorldCoordinate(pt)
+  };
+  vec2.div(data.delta, data.delta, vec2.fromValues(canva.width, canva.height));
+  data.delta[1] *= -1;
+  editor.MouseMove(data);
 }
 
 function mouseUp(evt) {
