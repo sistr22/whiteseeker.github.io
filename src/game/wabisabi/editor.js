@@ -49,7 +49,15 @@ class Editor {
 
   Tick(delta_ms) {
     this.SetState(this.state.Tick(this, delta_ms));
+    var lines = [];
+    var percent = audio_controls.currentTime/audio_controls.duration;
+    if(percent > 1.0)
+      percent = 1.0;
+    var world_size = document.getElementById("world_size").value;
+    lines.push(-0.5, world_size*percent);
+    lines.push(0.5, world_size*percent);
     this.renderer.draw();
+    this.renderer.DrawDebugLines(lines, [0.4, 0.4, 0.4, 1.0]);
   }
 
   MouseDown(pos) {

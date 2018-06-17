@@ -391,6 +391,37 @@ class Renderer {
       this.bezier_lines[i].Draw(gl, this.VP);
     }
   }
+
+  DrawDebugLines(lines, color) {
+    var gl = this.gl;
+    var VP = this.VP;
+    if(!this.debug_line_vertex_pos_buffer) {
+      // Create the buffer
+      this.debug_line_vertex_pos_buffer = gl.createBuffer();
+    }
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.debug_line_vertex_pos_buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(lines), gl.STATIC_DRAW);
+    this.debug_line_vertex_pos_buffer.itemSize = 2;
+    this.debug_line_vertex_pos_buffer.numItems = lines.length/2;
+
+    gl.useProgram(BezierLine.program);
+
+    // Set MVP
+    var M = mat4.create();
+    var MVP = mat4.create();
+    mat4.multiply(MVP, VP, M);
+    gl.uniformMatrix4fv(BezierLine.program.uniformMVP, false, MVP);
+    // Set color
+    gl.uniform4fv(BezierLine.program.uniform_color, color);
+    // Set vertex attrib
+    gl.enableVertexAttribArray(BezierLine.program.vertexPositionAttribute);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.debug_line_vertex_pos_buffer);
+    gl.vertexAttribPointer(BezierLine.program.vertexPositionAttribute, this.debug_line_vertex_pos_buffer.itemSize, gl.FLOAT, false, 0, 0);
+    
+    gl.drawArrays(gl.LINES, 0, this.debug_line_vertex_pos_buffer.numItems);
+
+    gl.disableVertexAttribArray(BezierLine.program.vertexPositionAttribute);
+  }
 }
 
 Array.prototype.remove = function(from, to) {
