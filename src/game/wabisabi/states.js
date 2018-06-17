@@ -116,6 +116,22 @@ class StateSelecting extends State {
 
   MouseDown(editor, pos) {
     this.start_point = pos;
+    var click_on_selection = false;
+    // If pointer down on a selected element => translate
+    this.selection.points.forEach((key, elt) => {
+      if(vec2.sqrDist(elt, pos) < 0.0002) {
+        click_on_selection = true;
+      }
+    });
+    if(!click_on_selection) {
+      this.selection.ctrl_points.forEach((key, elt) => {
+        if(vec2.sqrDist(elt, pos) < 0.0002) {
+          click_on_selection = true;
+        }
+      });
+    }
+    if(click_on_selection)
+      return new StateTranslating(this.selection);
     return null;
   }
 
@@ -266,6 +282,10 @@ class StateTranslating extends State {
 
   Tick(editor, delta_ms) {
   }
+
+  MouseUp(editor, pos) {
+    return new StateSelecting(this.selection);
+  }
   
   MouseMove(editor, delta_pos) {
     this.selection.points.forEach((key, elt) => {
@@ -277,9 +297,8 @@ class StateTranslating extends State {
   }
 
   KeyUp(editor, evt) {
-    if(evt.key == "t") {
+    if(evt.key == "t")
       return new StateSelecting(this.selection);
-    }
     return null;
   }
 
