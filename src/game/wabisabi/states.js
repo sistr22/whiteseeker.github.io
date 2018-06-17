@@ -120,6 +120,54 @@ class StateSelecting extends State {
   }
 
   MouseUp(editor, pos) {
+    if(vec2.sqrDist(this.start_point, pos) < 0.0002) {
+      return this.ClickSelect(editor, pos);
+    } else {
+      return this.RectangleSelect(editor, pos);
+    }
+  }
+
+  ClickSelect(editor, pos) {
+    var something_added = false;
+    for (var l = 0 ; l < editor.bezier_lines.length ; l++) {
+      var line = editor.bezier_lines[l];
+      if(!line)
+        continue;
+      for(var p = 0 ; p < line.points.length ; p++) {
+        if(vec2.sqrDist(line.points[p], pos) < 0.0002) {
+          line.points[p].color = [1.0,1.0,0.0,1.0];
+          this.selection.AddPoint(line.points[p], line);
+          something_added = true;
+        }
+
+        for(var cp = 0 ; cp < 2 ; cp++) {
+          var pt = line.control_points[2*p+cp];
+          if(vec2.sqrDist(pt, pos) < 0.0002) {
+            pt.color = [1.0,1.0,1.0,1.0];
+            this.selection.AddCtrlPoint(pt, line);
+            something_added = true;
+          }
+        }
+      }
+    }
+
+    if(!something_added) {
+      this.selection.points.forEach((key, elt) => {
+        elt.color = null;
+      });
+      this.selection.ctrl_points.forEach((key, elt) => {
+        elt.color = null;
+      });
+      this.selection.Clear();
+    }
+
+    if(this.selection.Length() == 0)
+      return new StateIdle();
+    console.log("selected item count: " + this.selection.Length());
+    return null;
+  }
+
+  RectangleSelect(editor, pos) {
     var bottom_left_pt = vec2.create();
     bottom_left_pt[0] = Math.min(this.start_point[0], pos[0]);
     bottom_left_pt[1] = Math.min(this.start_point[1], pos[1]);
