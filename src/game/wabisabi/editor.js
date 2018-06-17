@@ -92,9 +92,7 @@ class Editor {
   }
 
   UiEvent(evt) {
-    if(evt == UiActions.PLAY) {
-      this.SetState(new StatePlay(this));
-    }
+    this.SetState(this.state.UiEvent(this, evt));
   }
 
   Save() {

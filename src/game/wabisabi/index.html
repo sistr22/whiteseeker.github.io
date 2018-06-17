@@ -35,11 +35,13 @@ custom_css: ['game/wabisabi/midi.css']
           </div>
           <div>
             Size in world unit:</br>
-            <input id="world_size" type="number" name="quantity" min="1" value="3">
+            <input id="world_size" type="number" name="quantity" min="1" value="3"></br>
             <!-- Colored FAB button with ripple -->
-            <button class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored" onclick="onPlayClicked()">
+            <!--button class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored" onclick="onPlayClicked()">
               <i class="material-icons">play_arrow</i>
-            </button>
+            </button-->
+            <input type="file" onchange="onTrackSelected(event)"></br>
+            <audio controls id="audio-track-controls" onplay="playClicked()" onpause="pauseClicked()" ondurationchange="trackDurationChanged()" onseeked="trackSeeked()"></audio>
           </div>
         </div>
         Fragment shader<br>

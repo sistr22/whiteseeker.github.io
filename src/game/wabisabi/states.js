@@ -63,6 +63,10 @@ class State {
     console.log("Default state impl of KeyDown, should be overwriten");
     return null;
   }
+  UiEvent(editor, evt) {
+    console.log("Default state impl of UiEvent, should be overwriten");
+    return null;
+  }
 }
 
 class StateIdle extends State {
@@ -88,6 +92,12 @@ class StateIdle extends State {
       editor.renderer.AddBezierLine(line);
       editor.bezier_lines.push(line);
     }
+  }
+
+  UiEvent(editor, evt) {
+    if(evt == UiActions.PLAY)
+      return new StatePlay(editor);
+    return null;
   }
 }
 
@@ -232,18 +242,8 @@ class StateTranslating extends State {
 }
 
 class StatePlay extends State {
-  constructor(editor) {
-    super();
-    // Start play from %age:
-    var start_percent = document.getElementById("slider_world").value;
-    this.elapsed_ms = editor.track_length_ms*start_percent;
-  }
   Tick(editor, delta_ms) {
-    this.elapsed_ms += delta_ms;
-
-    if(this.elapsed_ms >= editor.track_length_ms)
-      this.elapsed_ms = editor.track_length_ms;
-    var percent = this.elapsed_ms/editor.track_length_ms;
+    var percent = audio_controls.currentTime/audio_controls.duration;
     var world_size = document.getElementById("world_size").value;
     var camera_center = editor.renderer.GetCameraCenter();
     camera_center[1] = world_size*percent;
@@ -251,7 +251,7 @@ class StatePlay extends State {
     // Update the slider
     document.getElementById("slider_world").value = percent;
 
-    if(this.elapsed_ms >= editor.track_length_ms)
+    if(audio_controls.currentTime >= audio_controls.duration)
       return new StateIdle();
     return null;
   }
@@ -271,6 +271,11 @@ class StatePlay extends State {
     return null;
   }
   KeyDown(editor, evt) {
+    return null;
+  }
+  UiEvent(editor, evt) {
+    if(evt == UiActions.PAUSE)
+      return new StateIdle();
     return null;
   }
 }

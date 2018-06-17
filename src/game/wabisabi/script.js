@@ -1,5 +1,6 @@
 const UiActions = Object.freeze({
-  PLAY:   Symbol("play")
+  PLAY:   Symbol("play"),
+  PAUSE:   Symbol("pause")
 });
 
 class BezierLine {
@@ -235,12 +236,11 @@ class BezierLine {
       vec2.add(prev, prev, tmp);
       return prev;
     }, vec2.create());
-	
+
 		return res;
   }
 
   BezierPerpAt(t, pt0, pt1, cpt0, cpt1) {
-
     var pts = [pt0
                 , cpt0
                 , cpt1
@@ -252,8 +252,8 @@ class BezierLine {
       vec2.scale(tmp, curr, scalars[i]);
       vec2.add(prev, prev, tmp);
 			return prev;
-		}, vec2.create());
-  
+    }, vec2.create());
+    
     vec2.normalize(value, value);
     return vec2.fromValues(-value[1], value[0]);
   }
@@ -276,7 +276,6 @@ class BezierLine {
       vertices.push(pt_pos[0]);
       vertices.push(pt_pos[1]);
     }
-
     if(!this.line_vertex_pos_buffer) {
       // Create the buffer
       this.line_vertex_pos_buffer = gl.createBuffer();
@@ -335,14 +334,11 @@ class Renderer {
 
     gl.clearColor(0.05, 0.05, 0.3, 1.0);
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
     gl.disable(gl.CULL_FACE);
 
     BezierLine.InitGl(gl);
-
     this.startTime = Date.now() / 1000.0;
   }
 
@@ -407,9 +403,11 @@ var canva = null;
 var renderer = null;
 var last_time = -1;
 var editor = null;
+var audio_controls = null;
 
 document.addEventListener('DOMContentLoaded', function() {
   canva = document.getElementById("canva"); 
+  audio_controls = document.getElementById("audio-track-controls"); 
   renderer = new Renderer(canva);
   renderer.Init();
   editor = new Editor(renderer);
@@ -468,9 +466,40 @@ function onSliderChange(value) {
   renderer.SetCameraCenter(camera_center);
 }
 
-function onPlayClicked() {
+function playClicked() {
   console.log("Play button clicked");
   editor.UiEvent(UiActions.PLAY);
+}
+
+function pauseClicked() {
+  console.log("Pause button clicked");
+  editor.UiEvent(UiActions.PAUSE);
+}
+
+function trackDurationChanged() {
+  editor.track_length_ms = audio_controls.duration * 1000.0;
+}
+
+function onTrackSelected(evt) {
+  console.log("Track selected");
+  var target = evt.currentTarget;
+  var file = target.files[0];
+  var reader = new FileReader();
+  
+  if (target.files && file) {
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      audio_controls.setAttribute('src', e.target.result);
+    }
+    reader.readAsDataURL(file);
+  }
+}
+
+function trackSeeked() {
+  console.log("Track seeked");
+  var percent = audio_controls.currentTime/audio_controls.duration;
+  document.getElementById("slider_world").value = percent;
+  onSliderChange(percent);
 }
 
 function mainLoop() {
