@@ -52,19 +52,16 @@ class Bezier {
     return vec2.fromValues(-d[1]/q, d[0]/q);
   }
   Derivative(t) {
+    // TODO: Test which method is the quickest
     /*var nt = 1.0 - t;
     var scalars = [-3.0*nt*nt, 3.0*(1.0 - 4.0*t + 3.0*t*t), 3.0*(2.0*t - 3.0*t*t), 3.0*t*t];
-
     var value = this.points.reduce(function(prev, curr, i) {
       var tmp = vec2.create();
       vec2.scale(tmp, curr, scalars[i]);
       vec2.add(prev, prev, tmp);
       return prev;
     }, vec2.create());
-
     return value;*/
-
-
     var mt = 1-t,
         a,b,c=0,
         p = this.dpoints[0];
@@ -91,5 +88,30 @@ class Bezier {
       a*p[0][0] + b*p[1][0] + c*p[2][0] + d*p[3][0],
       a*p[0][1] + b*p[1][1] + c*p[2][1] + d*p[3][1]);
     return ret;
+  }
+}
+
+class MultiBezier {
+  constructor(...curves) {
+    this.beziers = [];
+    for(var i = 0 ; i < curves.length ; i++) {
+      this.beziers.push(curves[i]);
+    }
+  }
+
+  GetLUT(steps) {
+    var result = [];
+    for(var i = 0 ; i < this.beziers.length ; i++) {
+      result = result.concat(this.beziers[i].GetLUT(steps));
+    }
+    return result;
+  }
+
+  GetNormals(steps) {
+    var result = [];
+    for(var i = 0 ; i < this.beziers.length ; i++) {
+      result = result.concat(this.beziers[i].GetNormals(steps));
+    }
+    return result;
   }
 }

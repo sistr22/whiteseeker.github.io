@@ -33,8 +33,9 @@ class Editor {
       var objectStore = thiz.db.createObjectStore("level");
     };
 
-    var bezier_line_2 = new Bezier([[-0.2,0.0],[-0.2, 0.2],[0.2, -0.1],[0.2,0.0]]);
-    this.bezier_line_2_renderer = new BezierRenderer(bezier_line_2);
+    var bezier_line_1 = new Bezier([[-0.2,0.0],[-0.2, 0.2],[0.2, -0.1],[0.2,0.0]]);
+    var bezier_line_2 = new Bezier([[0.2,0.0],[0.2, 0.1],[0.4, -0.1],[0.4,0.0]]);
+    this.bezier_line_2_renderer = new BezierRenderer(new MultiBezier(bezier_line_1, bezier_line_2));
   }
 
   RemoveBezierLine(bezier_line) {
