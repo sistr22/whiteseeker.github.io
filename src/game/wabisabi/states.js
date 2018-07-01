@@ -332,7 +332,17 @@ class StatePlay extends State {
     renderer.SetCameraCenter(camera_center);
     // Update the slider
     document.getElementById("slider_world").value = percent;
-
+    // Move the player
+    var direction = 0;
+    if(this.goRight == true)
+      direction += 1.0;
+    if(this.goLeft == true)
+      direction -= 1.0;
+    var player_pos = editor.player.GetPosition();
+    player_pos[0] += direction * delta_ms/1000.0;
+    player_pos[1] = camera_center[1];
+    editor.player.SetPosition(player_pos);
+    console.log("direction: " + direction);
     if(audio_controls.currentTime >= audio_controls.duration) {
       editor.debug = this.previousDebugState;
       return new StateIdle();
@@ -352,9 +362,19 @@ class StatePlay extends State {
     return null;
   }
   KeyUp(editor, evt) {
+    if(evt.which == 37 /*left arrow*/) {
+      this.goLeft = false;
+    } else if(evt.which == 39 /*right arrow*/) {
+      this.goRight = false;
+    }
     return null;
   }
   KeyDown(editor, evt) {
+    if(evt.which == 37 /*left arrow*/) {
+      this.goLeft = true;
+    } else if(evt.which == 39 /*right arrow*/) {
+      this.goRight = true;
+    }
     return null;
   }
   UiEvent(editor, evt) {

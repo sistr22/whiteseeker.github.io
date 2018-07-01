@@ -12,6 +12,7 @@ class Editor {
     this.track_length_ms = 5000;
     this.copy_slot = null;
     this.debug = true;
+    this.player = new Player(renderer.gl);
 
     var request = indexedDB.open("saveFiles", dbVersion);
     this.db = null;
@@ -31,6 +32,9 @@ class Editor {
       // Create an objectStore for this database
       var objectStore = thiz.db.createObjectStore("level");
     };
+
+    var bezier_line_2 = new Bezier([[-0.2,0.0],[-0.2, 0.2],[0.2, -0.1],[0.2,0.0]]);
+    this.bezier_line_2_renderer = new BezierRenderer(bezier_line_2);
   }
 
   RemoveBezierLine(bezier_line) {
@@ -58,11 +62,14 @@ class Editor {
     var world_size = document.getElementById("world_size").value;
     lines.push(-0.5, world_size*percent);
     lines.push(0.5, world_size*percent);
-    if(this.debug)
+    if(this.debug) {
       this.renderer.drawDebug();
-    else
+      this.bezier_line_2_renderer.Draw(this.renderer.gl, this.renderer.VP);
+    } else
       this.renderer.draw();
     this.renderer.DrawDebugLines(lines, [0.4, 0.4, 0.4, 1.0]);
+
+    this.player.Draw(this.renderer.gl, this.renderer.VP, [0.4, 1.0, 0.0, 1.0]);
   }
 
   MouseDown(pos) {

@@ -5,6 +5,172 @@ const UiActions = Object.freeze({
   SHOW_DEBUG: Symbol("show_debug"),
 });
 
+class BezierRenderer {
+  constructor(bezier) {
+    this.bezier = bezier;
+  }
+
+  Draw(gl, VP) {
+    this.Retesselate(gl);
+    this.DrawLines(gl, VP, [1.0, 1.0, 1.0, 1.0]);
+    /*this.DrawDebugLines(gl, VP, [-0.2, 0.0, 0.2, 0.0] ,[1.0, 1.0, 0.0, 1.0], gl.LINES);
+    var dbg_pt = [];
+    for(var i = 0 ; i < this.tesselation_points.length ; i++) {
+      dbg_pt.push(this.tesselation_points[i][0]);
+      dbg_pt.push(this.tesselation_points[i][1]);
+    }
+    this.DrawDebugLines(gl, VP, dbg_pt ,[1.0, 1.0, 1.0, 1.0], gl.LINE_STRIP);
+
+    var dbg_normals = [];
+    for(var i = 0 ; i < this.normals.length ; i++) {
+      dbg_normals.push(this.tesselation_points[i][0]);
+      dbg_normals.push(this.tesselation_points[i][1]);
+      dbg_normals.push(this.tesselation_points[i][0]+this.normals[i][0]);
+      dbg_normals.push(this.tesselation_points[i][1]+this.normals[i][1]);
+      //console.log("norm: " + this.normals[0] + ", " + this.normals[1]);
+    }
+    this.DrawDebugLines(gl, VP, dbg_normals ,[1.0, 0.0, 0.0, 1.0], gl.LINES);*/
+  }
+  DrawLines(gl, VP, color) {
+    gl.useProgram(BezierRenderer.program);
+    // Set MVP
+    var M = mat4.create();
+    var MVP = mat4.create();
+    mat4.multiply(MVP, VP, M);
+    gl.uniformMatrix4fv(BezierRenderer.program.uniformMVP, false, MVP);
+    // Set color
+    gl.uniform4fv(BezierRenderer.program.uniform_color, color);
+    // Set vertex attrib
+    gl.enableVertexAttribArray(BezierRenderer.program.vertexPositionAttribute);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.line_vertex_pos_buffer);
+    gl.vertexAttribPointer(BezierRenderer.program.vertexPositionAttribute, this.line_vertex_pos_buffer.itemSize, gl.FLOAT, false, 0, 0);
+    
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.line_vertex_pos_buffer.numItems);
+
+    gl.disableVertexAttribArray(BezierRenderer.program.vertexPositionAttribute);
+  }
+  DrawDebugLines(gl, VP, lines, color, primitive) {
+      // Create debig buffer if necessary
+    if(!this.debug_line_vertex_pos_buffer)
+      this.debug_line_vertex_pos_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.debug_line_vertex_pos_buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(lines), gl.STATIC_DRAW);
+    this.debug_line_vertex_pos_buffer.itemSize = 2;
+    this.debug_line_vertex_pos_buffer.numItems = lines.length/2;
+
+    gl.useProgram(BezierRenderer.program);
+
+    // Set MVP
+    var M = mat4.create();
+    var MVP = mat4.create();
+    mat4.multiply(MVP, VP, M);
+    gl.uniformMatrix4fv(BezierRenderer.program.uniformMVP, false, MVP);
+    // Set color
+    gl.uniform4fv(BezierRenderer.program.uniform_color, color);
+    // Set vertex attrib
+    gl.enableVertexAttribArray(BezierRenderer.program.vertexPositionAttribute);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.debug_line_vertex_pos_buffer);
+    gl.vertexAttribPointer(BezierRenderer.program.vertexPositionAttribute, this.debug_line_vertex_pos_buffer.itemSize, gl.FLOAT, false, 0, 0);
+    
+    gl.drawArrays(primitive, 0, this.debug_line_vertex_pos_buffer.numItems);
+
+    gl.disableVertexAttribArray(BezierRenderer.program.vertexPositionAttribute);
+  }
+
+  Retesselate(gl) {
+    this.tesselation_points = this.bezier.GetLUT();
+    var tesselation_points = this.tesselation_points;
+    this.normals = this.bezier.GetNormals();
+    var normals = this.normals;
+    var vertices = [];
+    var thickness = 0.005;
+    for(var i = 0 ; i < tesselation_points.length ; i++) {
+      var pt_neg = vec2.create();
+      var vec_to_add = vec2.create();
+      vec2.scale(vec_to_add, normals[i], thickness);
+      vec2.negate(vec_to_add, vec_to_add);
+      vec2.add(pt_neg, tesselation_points[i], vec_to_add);
+      vertices.push(pt_neg[0]);
+      vertices.push(pt_neg[1]);
+
+      var pt_pos = vec2.create();
+      vec2.scale(vec_to_add, normals[i], thickness);
+      vec2.add(pt_pos, tesselation_points[i], vec_to_add);
+      vertices.push(pt_pos[0]);
+      vertices.push(pt_pos[1]);
+    }
+
+    // Create the buffer if necessary
+    if(!this.line_vertex_pos_buffer)
+      this.line_vertex_pos_buffer = gl.createBuffer();
+    // Load the buffer
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.line_vertex_pos_buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+    this.line_vertex_pos_buffer.itemSize = 2;
+    this.line_vertex_pos_buffer.numItems = vertices.length/2;
+  }
+
+  static InitGl(gl) {
+    // Create our buffers
+    BezierRenderer.point_vertex_pos_buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, BezierRenderer.point_vertex_pos_buffer);
+    var vertices = [
+      0.5, 0.5,
+      -0.5, 0.5,
+      0.5, -0.5,
+      -0.5, -0.5,
+    ];
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+    BezierRenderer.point_vertex_pos_buffer.itemSize = 2;
+    BezierRenderer.point_vertex_pos_buffer.numItems = 4;
+    BezierRenderer.ReloadShader(gl);
+  }
+
+  static ReloadShader(gl) {
+    if (BezierRenderer.program)
+      gl.deleteProgram(BezierRenderer.program);
+    var fragmentShader = BezierRenderer.getShader(gl, "shader-fs");
+    var vertexShader = BezierRenderer.getShader(gl, "shader-vs");
+    BezierRenderer.program = gl.createProgram();
+    gl.attachShader(BezierRenderer.program, vertexShader);
+    gl.attachShader(BezierRenderer.program, fragmentShader);
+    gl.linkProgram(BezierRenderer.program);
+    BezierRenderer.program.vertexPositionAttribute = gl.getAttribLocation(BezierRenderer.program, "aVertexPosition");
+    BezierRenderer.program.uniformMVP = gl.getUniformLocation(BezierRenderer.program, "MVP");
+    BezierRenderer.program.uniform_color = gl.getUniformLocation(BezierRenderer.program, "color");
+    if (!gl.getProgramParameter(BezierRenderer.program, gl.LINK_STATUS)) {
+      alert("Shader error !");
+    }
+  }
+
+  static getShader(gl, id) {
+    var shaderScript = document.getElementById(id);
+    if (!shaderScript) {
+      console.log("element id: " + id + " not found in the page");
+      return null;
+    }
+
+    var shader;
+    if (id.endsWith("fs")) {
+      shader = gl.createShader(gl.FRAGMENT_SHADER);
+    } else if (id.endsWith("vs")) {
+      shader = gl.createShader(gl.VERTEX_SHADER);
+    } else {
+      return null;
+    }
+
+    gl.shaderSource(shader, shaderScript.value);
+    gl.compileShader(shader);
+
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      alert(gl.getShaderInfoLog(shader));
+      return null;
+    }
+
+    return shader;
+  }
+}
+
 class BezierLine {
   constructor(pts, ctrl_pts) { // cp stand for control point
     console.assert(2*pts.length == ctrl_pts.length, "pts length: %d ; ctrl pts length: %d", pts.length, ctrl_pts.length);
@@ -381,6 +547,7 @@ class Renderer {
     gl.disable(gl.CULL_FACE);
 
     BezierLine.InitGl(gl);
+    BezierRenderer.InitGl(gl);
     this.startTime = Date.now() / 1000.0;
   }
 
