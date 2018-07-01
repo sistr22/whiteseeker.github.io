@@ -41,22 +41,22 @@ class Player {
     }
 
     Draw(gl, VP, color) {
-      gl.useProgram(BezierLine.program);
+      gl.useProgram(BezierRenderer.program);
       // Set MVP
       var M = mat4.create();
       mat4.translate(M, M, vec3.fromValues(this.pos[0], this.pos[1], 0.0));
       var MVP = mat4.create();
       mat4.multiply(MVP, VP, M);
-      gl.uniformMatrix4fv(BezierLine.program.uniformMVP, false, MVP);
+      gl.uniformMatrix4fv(BezierRenderer.program.uniformMVP, false, MVP);
       // Set color
-      gl.uniform4fv(BezierLine.program.uniform_color, color);
+      gl.uniform4fv(BezierRenderer.program.uniform_color, color);
       // Set vertex attrib
-      gl.enableVertexAttribArray(BezierLine.program.vertexPositionAttribute);
+      gl.enableVertexAttribArray(BezierRenderer.program.vertexPositionAttribute);
       gl.bindBuffer(gl.ARRAY_BUFFER, this.vertex_pos_buffer);
-      gl.vertexAttribPointer(BezierLine.program.vertexPositionAttribute, this.vertex_pos_buffer.itemSize, gl.FLOAT, false, 0, 0);
+      gl.vertexAttribPointer(BezierRenderer.program.vertexPositionAttribute, this.vertex_pos_buffer.itemSize, gl.FLOAT, false, 0, 0);
       
       gl.drawArrays(gl.TRIANGLE_FAN, 0, this.vertex_pos_buffer.numItems);
 
-      gl.disableVertexAttribArray(BezierLine.program.vertexPositionAttribute);
+      gl.disableVertexAttribArray(BezierRenderer.program.vertexPositionAttribute);
     }
 }

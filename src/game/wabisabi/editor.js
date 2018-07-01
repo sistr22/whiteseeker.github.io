@@ -33,9 +33,9 @@ class Editor {
       var objectStore = thiz.db.createObjectStore("level");
     };
 
-    var bezier_line_1 = new Bezier([[-0.2,0.0],[-0.2, 0.2],[0.2, -0.1],[0.2,0.0]]);
-    var bezier_line_2 = new Bezier([[0.2,0.0],[0.2, 0.1],[0.4, -0.1],[0.4,0.0]]);
-    this.bezier_line_2_renderer = new BezierRenderer(new MultiBezier(bezier_line_1, bezier_line_2));
+    //var bezier_line_1 = new Bezier([[-0.2,0.0],[-0.2, 0.2],[0.2, -0.1],[0.2,0.0]]);
+    //var bezier_line_2 = new Bezier([[0.2,0.0],[0.2, 0.1],[0.4, -0.1],[0.4,0.0]]);
+    //this.bezier_line_2_renderer = new BezierRenderer(new MultiBezier(bezier_line_1, bezier_line_2));
   }
 
   RemoveBezierLine(bezier_line) {
@@ -65,9 +65,11 @@ class Editor {
     lines.push(0.5, world_size*percent);
     if(this.debug) {
       this.renderer.drawDebug();
-      this.bezier_line_2_renderer.Draw(this.renderer.gl, this.renderer.VP);
-    } else
+      //this.bezier_line_2_renderer.DrawDebug(this.renderer.gl, this.renderer.VP);
+    } else {
       this.renderer.draw();
+      //this.bezier_line_2_renderer.Draw(this.renderer.gl, this.renderer.VP);
+    }
     this.renderer.DrawDebugLines(lines, [0.4, 0.4, 0.4, 1.0]);
 
     this.player.Draw(this.renderer.gl, this.renderer.VP, [0.4, 1.0, 0.0, 1.0]);
@@ -163,7 +165,7 @@ class Editor {
         points.push(Wabisabi.Vec2.endVec2(builder));
       }
       var flat_pts = Wabisabi.Bezier.createPointsVector(builder, points);
-
+      /*
       var control_points = [];
       for(var pt = 0 ; pt < bezier_line.control_points.length ; pt++) {
         Wabisabi.Vec2.startVec2(builder);
@@ -172,10 +174,10 @@ class Editor {
         control_points.push(Wabisabi.Vec2.endVec2(builder));
       }
       var flat_ctrl_pts = Wabisabi.Bezier.createControlPointsVector(builder, control_points);
-
+      */
       Wabisabi.Bezier.startBezier(builder);
       Wabisabi.Bezier.addPoints(builder, flat_pts);
-      Wabisabi.Bezier.addControlPoints(builder, flat_ctrl_pts);
+      //Wabisabi.Bezier.addControlPoints(builder, flat_ctrl_pts);
       obstacles.push(Wabisabi.Bezier.endBezier(builder));
     }
     
@@ -217,12 +219,13 @@ class Editor {
           var pt = obstacle.points(i);
           points.push(vec2.fromValues(pt.x(), pt.y()));
         }
-        var ctrl_points = [];
+        /*var ctrl_points = [];
         for(var i = 0 ; i < obstacle.controlPointsLength() ; i++) {
           var pt = obstacle.controlPoints(i);
           ctrl_points.push(vec2.fromValues(pt.x(), pt.y()));
-        }
-        var line = new BezierLine(points, ctrl_points);
+        }*/
+        //var line = new BezierLine(points, ctrl_points);
+        var line = new Bezier(points);
         this.renderer.AddBezierLine(line);
         this.bezier_lines.push(line);
       }

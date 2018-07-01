@@ -7,6 +7,28 @@ class Bezier {
     this._normals = [];
     this.Update();
   }
+  Clone() {
+    var pts = [];
+    for(var i = 0 ; i < this.points.length ; i++) {
+      pts.push(vec2.clone(this.points[i]));
+    }
+    var result = new Bezier(pts);
+    return result;
+  }
+  GetControlPoints() {
+    return this.points;
+  }
+  Barycenter() {
+    var barycenter = vec2.fromValues(0, 0);
+    vec2.add(barycenter, barycenter, this.points[0]);
+    vec2.add(barycenter, barycenter, this.points[3]);
+    vec2.div(barycenter, barycenter, vec2.fromValues(2, 2));
+    return barycenter;
+  }
+  Translate(val) {
+    for(var i = 0 ; i < this.points.length ; i++)
+      vec2.add(this.points[i], this.points[i], val);
+  }
   Update() {
     // one-time compute derivative coordinates
     this.dpoints = [];
@@ -99,6 +121,54 @@ class MultiBezier {
     }
   }
 
+  AddPointAtIndex(index, point, control_point_left, control_point_right) {
+    /*this.points.splice(index, 0, point);
+    this.control_points.splice(index*2, 0, control_point_left);
+    this.control_points.splice(index*2+1, 0, control_point_right);*/
+  }
+
+  AddPoint(previous_point, point, control_point_left, control_point_right) {
+    /*if(!previous_point)
+      return;
+    // Find index of the selected point
+    var idx = -1;
+    for(var i = 0 ; i < this.points.length ; i++) {
+      if(previous_point == this.points[i])
+        idx = i;
+    }
+    console.log("index found: " + idx);
+    if(idx == -1)
+      return;
+    this.AddPointAtIndex(idx+1, point, control_point_left, control_point_right);*/
+  }
+
+  DeletePointAtIndex(index) {
+    /*this.points.remove(index, index);
+    this.control_points.remove(index*2, index*2+1);*/
+  }
+
+  Clone() {
+    var cloned_bezier = [];
+    for(var i = 0 ; i < this.beziers.length ; i++) {
+      cloned_bezier.push(this.beziers[i].Clone());
+    }
+    return new MultiBezier(...cloned_bezier);
+  }
+
+  Barycenter() {
+    var barycenter = vec2.fromValues(0, 0);
+    for(var i = 0 ; i < this.beziers.length ; i++) {
+      barycenter.add(barycenter, barycenter, this.beziers[i].Barycenter());
+    }
+    vec2.div(barycenter, barycenter, vec2.fromValues(this.beziers.length, this.beziers.length));
+    return barycenter;
+  }
+
+  Translate(val) {
+    for(var i = 0 ; i < this.beziers.length ; i++)
+      this.beziers[i].Translate(val);
+  }
+
   GetLUT(steps) {
     var result = [];
     for(var i = 0 ; i < this.beziers.length ; i++) {
@@ -111,6 +181,14 @@ class MultiBezier {
     var result = [];
     for(var i = 0 ; i < this.beziers.length ; i++) {
       result = result.concat(this.beziers[i].GetNormals(steps));
+    }
+    return result;
+  }
+
+  GetControlPoints() {
+    var result = this.beziers[0].GetControlPoints();
+    for(var i = 1 ; i < this.beziers.length ; i++) {
+      result = result.concat(this.beziers[i].GetControlPoints().slice(1));
     }
     return result;
   }

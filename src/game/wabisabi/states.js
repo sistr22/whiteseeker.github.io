@@ -13,23 +13,23 @@ Array.prototype.unique = function() {
 class Selection {
   constructor() {
     this.points = new Map();
-    this.ctrl_points = new Map();
+    //this.ctrl_points = new Map();
   }
 
   AddPoint(point, bezier_line) {
     this.points.set(point, bezier_line);
   }
 
-  AddCtrlPoint(ctrl_point, bezier_line) {
+  /*AddCtrlPoint(ctrl_point, bezier_line) {
     this.ctrl_points.set(ctrl_point, bezier_line);
-  }
+  }*/
 
   Length() {
-    return this.ctrl_points.size + this.points.size;
+    return /*this.ctrl_points.size +*/ this.points.size;
   }
 
   Clear() {
-    this.ctrl_points.clear();
+    //this.ctrl_points.clear();
     this.points.clear();
   }
 }
@@ -103,7 +103,11 @@ class StateIdle extends State {
       pt = editor.renderer.ToWorldCoordinate(pt);
       var pt_left = vec2.fromValues(pt[0]-0.1, pt[1]);
       var pt_right = vec2.fromValues(pt[0]+0.1, pt[1]);
-      var line = new BezierLine([pt_left, pt_right], [vec2.clone(pt_left), vec2.fromValues(pt_left[0], pt_left[1]+0.2), vec2.fromValues(pt_right[0], pt_right[1]+0.2), vec2.clone(pt_right)]);
+      var line = new Bezier([
+        pt_left,
+        vec2.fromValues(pt_left[0], pt_left[1]+0.2),
+        vec2.fromValues(pt_right[0], pt_right[1]+0.2),
+        pt_right]);
       editor.renderer.AddBezierLine(line);
       editor.bezier_lines.push(line);
     }
@@ -138,13 +142,13 @@ class StateSelecting extends State {
         click_on_selection = true;
       }
     });
-    if(!click_on_selection) {
+    /*if(!click_on_selection) {
       this.selection.ctrl_points.forEach((key, elt) => {
         if(vec2.sqrDist(elt, pos) < 0.0002) {
           click_on_selection = true;
         }
       });
-    }
+    }*/
     if(click_on_selection)
       return new StateTranslating(this.selection);
     return null;
@@ -162,9 +166,9 @@ class StateSelecting extends State {
       this.selection.points.forEach((key, elt) => {
         elt.color = null;
       });
-      this.selection.ctrl_points.forEach((key, elt) => {
+      /*this.selection.ctrl_points.forEach((key, elt) => {
         elt.color = null;
-      });
+      });*/
       this.selection.Clear();
     }
 
@@ -187,14 +191,14 @@ class StateSelecting extends State {
           something_added = true;
         }
 
-        for(var cp = 0 ; cp < 2 ; cp++) {
+        /*for(var cp = 0 ; cp < 2 ; cp++) {
           var pt = line.control_points[2*p+cp];
           if(vec2.sqrDist(pt, pos) < 0.0002) {
             pt.color = [1.0,1.0,1.0,1.0];
             this.selection.AddCtrlPoint(pt, line);
             something_added = true;
           }
-        }
+        }*/
       }
     }
     return something_added;
@@ -222,7 +226,7 @@ class StateSelecting extends State {
           something_added = true;
         }
 
-        for(var cp = 0 ; cp < 2 ; cp++) {
+        /*for(var cp = 0 ; cp < 2 ; cp++) {
           var pt = line.control_points[2*p+cp];
           if(pt[0] >= bottom_left_pt[0] && pt[0] <= top_right_pt[0] &&
             pt[1] >= bottom_left_pt[1] && pt[1] <= top_right_pt[1]) {
@@ -230,7 +234,7 @@ class StateSelecting extends State {
             this.selection.AddCtrlPoint(pt, line);
             something_added = true;
           }
-        }
+        }*/
       }
     }
     return something_added;
@@ -247,9 +251,9 @@ class StateSelecting extends State {
       this.selection.points.forEach((key, elt) => {
         elt.color = null;
       });
-      this.selection.ctrl_points.forEach((key, elt) => {
+      /*this.selection.ctrl_points.forEach((key, elt) => {
         elt.color = null;
-      });
+      });*/
       return new StateIdle();
     } else if(evt.ctrlKey && evt.which == 67 /*c*/) {
       if(this.selection.points.size == 1) {
@@ -300,9 +304,9 @@ class StateTranslating extends State {
     this.selection.points.forEach((key, elt) => {
       vec2.add(elt, elt, data.delta);
     });
-    this.selection.ctrl_points.forEach((key, elt) => {
+    /*this.selection.ctrl_points.forEach((key, elt) => {
       vec2.add(elt, elt, data.delta);
-    });
+    });*/
   }
 
   KeyUp(editor, evt) {
