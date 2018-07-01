@@ -117,9 +117,10 @@ class Bezier {
 class MultiBezier {
   constructor(...curves) {
     this.beziers = [];
-    for(var i = 0 ; i < curves.length ; i++) {
+    for(var i = 0 ; i < curves.length ; i++)
       this.beziers.push(curves[i]);
-    }
+    for(var i = 1 ; i < this.beziers.length ; i++)
+      this.beziers[i].points[0] = this.beziers[i-1].points[3];
   }
 
   AddPointAtIndex(index, point, control_point_left, control_point_right) {
@@ -143,9 +144,45 @@ class MultiBezier {
     this.AddPointAtIndex(idx+1, point, control_point_left, control_point_right);*/
   }
 
-  DeletePointAtIndex(index) {
+  DeletePoint(point) {
     /*this.points.remove(index, index);
     this.control_points.remove(index*2, index*2+1);*/
+    var i = 0, j = 0, found = false;
+    for(i = 0 ; i < this.beziers.length ; i++) {
+      for(j = 0 ; j < 4 ; j++) {
+        if(this.beziers[i].points[j] == point) {
+          found = true;
+          break;
+        }
+      }
+    }
+
+    if(found) {
+      if(this.beziers.length == 1 && (j == 0 || j == 3)) {
+        this.beziers = [];
+      } else {
+        if(i == 0 && j == 0) {
+          // edge cases: removing the first point
+          this.beziers = this.beziers.splice(1);
+        } else if(i == this.beziers.length-1 && j == 3) {
+          // edge cases: removing the last point
+          this.beziers = this.beziers.splice(this.beziers.length-1);
+        } else {
+          // General cases
+          if(j == 3) {
+            // Create the new bezier that will replace the 2 existing one
+            var newBezier = new Bezier([
+              this.beziers[i].points[0],
+              this.beziers[i].points[1],
+              this.beziers[i+1].points[2],
+              this.beziers[i+1].points[3]]);
+            this.beziers.splice(i, 2, newBezier);
+          } else {
+            console.log("Can't delete ! j == " + j);
+          }
+        }
+      }
+    }
   }
 
   Clone() {
@@ -192,5 +229,9 @@ class MultiBezier {
       result = result.concat(this.beziers[i].GetControlPoints().slice(1));
     }
     return result;
+  }
+
+  BezierCount() {
+    return this.beziers.length;
   }
 }

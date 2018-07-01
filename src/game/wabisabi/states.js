@@ -103,11 +103,11 @@ class StateIdle extends State {
       pt = editor.renderer.ToWorldCoordinate(pt);
       var pt_left = vec2.fromValues(pt[0]-0.1, pt[1]);
       var pt_right = vec2.fromValues(pt[0]+0.1, pt[1]);
-      var line = new Bezier([
+      var line = new MultiBezier(new Bezier([
         pt_left,
         vec2.fromValues(pt_left[0], pt_left[1]+0.2),
         vec2.fromValues(pt_right[0], pt_right[1]+0.2),
-        pt_right]);
+        pt_right]));
       editor.renderer.AddBezierLine(line);
       editor.bezier_lines.push(line);
     }
@@ -184,10 +184,11 @@ class StateSelecting extends State {
       var line = editor.bezier_lines[l];
       if(!line)
         continue;
-      for(var p = 0 ; p < line.points.length ; p++) {
-        if(vec2.sqrDist(line.points[p], pos) < 0.0002) {
-          line.points[p].color = [1.0,1.0,0.0,1.0];
-          this.selection.AddPoint(line.points[p], line);
+      var bezierPts = line.GetControlPoints();
+      for(var p = 0 ; p < bezierPts.length ; p++) {
+        if(vec2.sqrDist(bezierPts[p], pos) < 0.0002) {
+          bezierPts[p].color = [1.0,1.0,0.0,1.0];
+          this.selection.AddPoint(bezierPts[p], line);
           something_added = true;
         }
 
@@ -251,9 +252,6 @@ class StateSelecting extends State {
       this.selection.points.forEach((key, elt) => {
         elt.color = null;
       });
-      /*this.selection.ctrl_points.forEach((key, elt) => {
-        elt.color = null;
-      });*/
       return new StateIdle();
     } else if(evt.ctrlKey && evt.which == 67 /*c*/) {
       if(this.selection.points.size == 1) {
@@ -281,7 +279,7 @@ class StateSelecting extends State {
     this.selection.points.forEach((key, elt) => {
       console.log(key);
       key.DeletePoint(elt);
-      if(key.points.length == 0)
+      if(key.BezierCount() == 0)
         editor.RemoveBezierLine(key);
     });
   }

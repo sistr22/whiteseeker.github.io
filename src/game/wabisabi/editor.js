@@ -33,9 +33,9 @@ class Editor {
       var objectStore = thiz.db.createObjectStore("level");
     };
 
-    var bezier_line_1 = new Bezier([[-0.2,0.0],[-0.2, 0.2],[0.2, -0.1],[0.2,0.0]]);
-    var bezier_line_2 = new Bezier([[0.2,0.0],[0.2, 0.1],[0.4, -0.1],[0.4,0.0]]);
-    this.bezier_line_2_renderer = new BezierRenderer(new MultiBezier(bezier_line_1, bezier_line_2));
+    //var bezier_line_1 = new Bezier([[-0.2,0.0],[-0.2, 0.2],[0.2, -0.1],[0.2,0.0]]);
+    //var bezier_line_2 = new Bezier([[0.2,0.0],[0.2, 0.1],[0.4, -0.1],[0.4,0.0]]);
+    //this.bezier_line_2_renderer = new BezierRenderer(new MultiBezier(bezier_line_1, bezier_line_2));
   }
 
   RemoveBezierLine(bezier_line) {
@@ -65,10 +65,10 @@ class Editor {
     lines.push(0.5, world_size*percent);
     if(this.debug) {
       this.renderer.drawDebug();
-      this.bezier_line_2_renderer.DrawDebug(this.renderer.gl, this.renderer.VP);
+      //this.bezier_line_2_renderer.DrawDebug(this.renderer.gl, this.renderer.VP);
     } else {
       this.renderer.draw();
-      this.bezier_line_2_renderer.Draw(this.renderer.gl, this.renderer.VP);
+      //this.bezier_line_2_renderer.Draw(this.renderer.gl, this.renderer.VP);
     }
     this.renderer.DrawDebugLines(lines, [0.4, 0.4, 0.4, 1.0]);
 
@@ -158,10 +158,11 @@ class Editor {
     for(var b = 0 ; b < this.bezier_lines.length ; b++) {;
       var bezier_line = this.bezier_lines[b];
       var points = [];
-      for(var pt = 0 ; pt < bezier_line.points.length ; pt++) {
+      var bezierPts = bezier_line.GetControlPoints();
+      for(var pt = 0 ; pt < bezierPts.length ; pt++) {
         Wabisabi.Vec2.startVec2(builder);
-        Wabisabi.Vec2.addX(builder, bezier_line.points[pt][0]);
-        Wabisabi.Vec2.addY(builder, bezier_line.points[pt][1]);
+        Wabisabi.Vec2.addX(builder, bezierPts[pt][0]);
+        Wabisabi.Vec2.addY(builder, bezierPts[pt][1]);
         points.push(Wabisabi.Vec2.endVec2(builder));
       }
       var flat_pts = Wabisabi.Bezier.createPointsVector(builder, points);
@@ -225,7 +226,7 @@ class Editor {
           ctrl_points.push(vec2.fromValues(pt.x(), pt.y()));
         }*/
         //var line = new BezierLine(points, ctrl_points);
-        var line = new Bezier(points);
+        var line = new MultiBezier(new Bezier(points));
         this.renderer.AddBezierLine(line);
         this.bezier_lines.push(line);
       }
