@@ -104,10 +104,8 @@ class BezierRenderer {
   }
 
   Retesselate(gl) {
-    this.tesselation_points = this.bezier.GetLUT();
-    var tesselation_points = this.tesselation_points;
-    this.normals = this.bezier.GetNormals();
-    var normals = this.normals;
+    var tesselation_points = this.bezier.GetLUT();
+    var normals = this.bezier.GetNormals();
     var vertices = [];
     var thickness = 0.005;
     for(var i = 0 ; i < tesselation_points.length ; i++) {

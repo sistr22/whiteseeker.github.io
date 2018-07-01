@@ -33,9 +33,9 @@ class Editor {
       var objectStore = thiz.db.createObjectStore("level");
     };
 
-    //var bezier_line_1 = new Bezier([[-0.2,0.0],[-0.2, 0.2],[0.2, -0.1],[0.2,0.0]]);
-    //var bezier_line_2 = new Bezier([[0.2,0.0],[0.2, 0.1],[0.4, -0.1],[0.4,0.0]]);
-    //this.bezier_line_2_renderer = new BezierRenderer(new MultiBezier(bezier_line_1, bezier_line_2));
+    var bezier_line_1 = new Bezier([[-0.2,0.0],[-0.2, 0.2],[0.2, -0.1],[0.2,0.0]]);
+    var bezier_line_2 = new Bezier([[0.2,0.0],[0.2, 0.1],[0.4, -0.1],[0.4,0.0]]);
+    this.bezier_line_2_renderer = new BezierRenderer(new MultiBezier(bezier_line_1, bezier_line_2));
   }
 
   RemoveBezierLine(bezier_line) {
@@ -65,10 +65,10 @@ class Editor {
     lines.push(0.5, world_size*percent);
     if(this.debug) {
       this.renderer.drawDebug();
-      //this.bezier_line_2_renderer.DrawDebug(this.renderer.gl, this.renderer.VP);
+      this.bezier_line_2_renderer.DrawDebug(this.renderer.gl, this.renderer.VP);
     } else {
       this.renderer.draw();
-      //this.bezier_line_2_renderer.Draw(this.renderer.gl, this.renderer.VP);
+      this.bezier_line_2_renderer.Draw(this.renderer.gl, this.renderer.VP);
     }
     this.renderer.DrawDebugLines(lines, [0.4, 0.4, 0.4, 1.0]);
 

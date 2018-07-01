@@ -84,6 +84,7 @@ class Bezier {
       return prev;
     }, vec2.create());
     return value;*/
+    this.Update();
     var mt = 1-t,
         a,b,c=0,
         p = this.dpoints[0];
