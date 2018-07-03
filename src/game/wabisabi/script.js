@@ -216,7 +216,6 @@ class Renderer {
   }
 
   RemoveBezierLine(bezier_line) {
-    
     var index = -1;
     for(var i = 0 ; i < this.bezier_lines.length ; i++) {
       if(this.bezier_lines[i].bezier == bezier_line) {

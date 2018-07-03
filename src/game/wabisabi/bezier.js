@@ -142,11 +142,40 @@ class MultiBezier {
     if(idx == -1)
       return;
     this.AddPointAtIndex(idx+1, point, control_point_left, control_point_right);*/
+    let i = 0, j = 0, found = false;
+    for(i = 0 ; i < this.beziers.length ; i++) {
+      for(j = 0 ; j < 4 ; j++) {
+        if(this.beziers[i].points[j] == previous_point) {
+          found = true;
+          console.log("point found i,j = " + i + "," + j);
+          break;
+        }
+      }
+      if(found)
+        break;
+    }
+
+    if(!found) {
+      console.log("Couldn't find the point, strange !");
+      return;
+    }
+    if(j % 3 != 0) {
+      console.log("You need to select a point on the path, not a control point");
+      return;
+    }
+
+    if(i == this.beziers.length-1 && j == 3) {
+      // Edge case: Add a point at the end of the curve
+      let bezier = new Bezier([this.beziers[i].points[j], control_point_left, control_point_right, point]);
+      this.beziers.push(bezier);
+    } else {
+      console.log("Not implemented ! i = " + i + " j = " + j + " this.beziers.length = " + this.beziers.length);
+    }
+
+
   }
 
   DeletePoint(point) {
-    /*this.points.remove(index, index);
-    this.control_points.remove(index*2, index*2+1);*/
     var i = 0, j = 0, found = false;
     for(i = 0 ; i < this.beziers.length ; i++) {
       for(j = 0 ; j < 4 ; j++) {
@@ -155,6 +184,8 @@ class MultiBezier {
           break;
         }
       }
+      if(found)
+        break;
     }
 
     if(found) {

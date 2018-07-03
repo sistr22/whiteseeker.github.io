@@ -191,15 +191,6 @@ class StateSelecting extends State {
           this.selection.AddPoint(bezierPts[p], line);
           something_added = true;
         }
-
-        /*for(var cp = 0 ; cp < 2 ; cp++) {
-          var pt = line.control_points[2*p+cp];
-          if(vec2.sqrDist(pt, pos) < 0.0002) {
-            pt.color = [1.0,1.0,1.0,1.0];
-            this.selection.AddCtrlPoint(pt, line);
-            something_added = true;
-          }
-        }*/
       }
     }
     return something_added;
@@ -219,23 +210,14 @@ class StateSelecting extends State {
       var line = editor.bezier_lines[l];
       if(!line)
         continue;
-      for(var p = 0 ; p < line.points.length ; p++) {
-        if(line.points[p][0] >= bottom_left_pt[0] && line.points[p][0] <= top_right_pt[0] &&
-          line.points[p][1] >= bottom_left_pt[1] && line.points[p][1] <= top_right_pt[1]) {
-          line.points[p].color = [1.0,1.0,0.0,1.0];
-          this.selection.AddPoint(line.points[p], line);
+      var bezierPts = line.GetControlPoints();
+      for(var p = 0 ; p < bezierPts.length ; p++) {
+        if(bezierPts[p][0] >= bottom_left_pt[0] && bezierPts[p][0] <= top_right_pt[0] &&
+          bezierPts[p][1] >= bottom_left_pt[1] && bezierPts[p][1] <= top_right_pt[1]) {
+          bezierPts[p].color = [1.0,1.0,0.0,1.0];
+          this.selection.AddPoint(bezierPts[p], line);
           something_added = true;
         }
-
-        /*for(var cp = 0 ; cp < 2 ; cp++) {
-          var pt = line.control_points[2*p+cp];
-          if(pt[0] >= bottom_left_pt[0] && pt[0] <= top_right_pt[0] &&
-            pt[1] >= bottom_left_pt[1] && pt[1] <= top_right_pt[1]) {
-            pt.color = [1.0,1.0,1.0,1.0];
-            this.selection.AddCtrlPoint(pt, line);
-            something_added = true;
-          }
-        }*/
       }
     }
     return something_added;

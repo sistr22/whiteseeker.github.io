@@ -226,7 +226,14 @@ class Editor {
           ctrl_points.push(vec2.fromValues(pt.x(), pt.y()));
         }*/
         //var line = new BezierLine(points, ctrl_points);
-        var line = new MultiBezier(new Bezier(points));
+        let beziers = [];
+        if(points.length < 4)
+          break;
+        for(let p = 1 ; p < points.length ; p += 3) {
+          beziers.push(new Bezier(points.slice(p-1, p+3)));
+        }
+
+        var line = new MultiBezier(...beziers);
         this.renderer.AddBezierLine(line);
         this.bezier_lines.push(line);
       }
