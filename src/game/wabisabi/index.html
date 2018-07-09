@@ -48,6 +48,7 @@ custom_css: ['game/wabisabi/midi.css']
             <div>Debug draw<input type="checkbox" onchange="debugDrawToggled(this);" checked></div>
           </div>
         </div>
+        <div id="timelines"></div>
         Fragment shader<br>
         <textarea rows="15" style="width:100%;" id="shader-fs">
 precision mediump float;
@@ -73,6 +74,8 @@ void main(void) {
     </main>
   </div>
 
+  <script src="vis/vis.js"></script>
+  <link href="vis/vis.css" rel="stylesheet" type="text/css" />
   <script type="text/javascript" src="/scripts/gl-matrix-2.4.0.min.js"></script>
   <script type="text/javascript" src="/scripts/flatbuffers.min.js"></script>
   <script type="text/javascript" src="level_generated.js"></script>

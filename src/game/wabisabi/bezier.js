@@ -18,6 +18,9 @@ class Bezier {
   GetControlPoints() {
     return this.points;
   }
+  Get(t) {
+    return this.Compute(t);
+  }
   Barycenter() {
     var barycenter = vec2.fromValues(0, 0);
     vec2.add(barycenter, barycenter, this.points[0]);
@@ -67,6 +70,34 @@ class Bezier {
       this._normals.push(this.__normal(t/steps));
     }
     return this._normals;
+  }
+  __extrema() {
+    var dims = [0, 1],
+        result={},
+        roots=[],
+        p, mfn;
+    dims.forEach(function(dim) {
+      mfn = function(v) { return v[dim]; };
+      p = this.dpoints[0].map(mfn);
+      result[dim] = utils.droots(p);
+      if(this.order === 3) {
+        p = this.dpoints[1].map(mfn);
+        result[dim] = result[dim].concat(utils.droots(p));
+      }
+      result[dim] = result[dim].filter(function(t) { return (t>=0 && t<=1); });
+      roots = roots.concat(result[dim].sort());
+    }.bind(this));
+    roots = roots.sort().filter(function(v,idx) { return (roots.indexOf(v) === idx); });
+    result.values = roots;
+    return result;
+  }
+  BBox() {
+    let extrema = this.__extrema(), result = {};
+    let dims = [0, 1];
+    dims.forEach(function(d) {
+      result[d] = utils.getminmax(this, d, extrema[d]);
+    }.bind(this));
+    return result;
   }
   __normal(t) {
     var d = this.Derivative(t);
@@ -123,25 +154,7 @@ class MultiBezier {
       this.beziers[i].points[0] = this.beziers[i-1].points[3];
   }
 
-  AddPointAtIndex(index, point, control_point_left, control_point_right) {
-    /*this.points.splice(index, 0, point);
-    this.control_points.splice(index*2, 0, control_point_left);
-    this.control_points.splice(index*2+1, 0, control_point_right);*/
-  }
-
   AddPoint(previous_point, point, control_point_left, control_point_right) {
-    /*if(!previous_point)
-      return;
-    // Find index of the selected point
-    var idx = -1;
-    for(var i = 0 ; i < this.points.length ; i++) {
-      if(previous_point == this.points[i])
-        idx = i;
-    }
-    console.log("index found: " + idx);
-    if(idx == -1)
-      return;
-    this.AddPointAtIndex(idx+1, point, control_point_left, control_point_right);*/
     let i = 0, j = 0, found = false;
     for(i = 0 ; i < this.beziers.length ; i++) {
       for(j = 0 ; j < 4 ; j++) {
@@ -168,8 +181,39 @@ class MultiBezier {
       // Edge case: Add a point at the end of the curve
       let bezier = new Bezier([this.beziers[i].points[j], control_point_left, control_point_right, point]);
       this.beziers.push(bezier);
-    } else {
-      console.log("Not implemented ! i = " + i + " j = " + j + " this.beziers.length = " + this.beziers.length);
+    } else if(i == 0 && j == 0) {
+      // Edge case add after very first node
+      let bezier1 = new Bezier([
+        this.beziers[0].points[0],
+        this.beziers[0].points[1],
+        control_point_left,
+        point]);
+      let bezier2 = new Bezier([
+        point,
+        control_point_right,
+        this.beziers[0].points[2],
+        this.beziers[0].points[3]]);
+      this.beziers.splice(0, 1, bezier1, bezier2);
+    }else {
+      console.log("i = " + i + " j = " + j + " this.beziers.length = " + this.beziers.length);
+      if(j != 3) {
+        // As the first point of a bezier curve is the same as the
+        // last point of the previous bezier curve and vice versa, j should always be 3
+        console.log("WOW, j is not 3 ? wtf !! Makes no sense !");
+        return;
+      }
+      let tmp =this.beziers[i+1].points[3]
+      let bezier1 = new Bezier([
+        this.beziers[i+1].points[0],
+        this.beziers[i+1].points[1],
+        control_point_left,
+        point]);
+      let bezier2 = new Bezier([
+        point,
+        control_point_right,
+        this.beziers[i+1].points[2],
+        tmp]);
+      this.beziers.splice(i+1, 1, bezier1, bezier2);
     }
 
 
@@ -202,7 +246,7 @@ class MultiBezier {
           // General cases
           if(j == 3) {
             // Create the new bezier that will replace the 2 existing one
-            var newBezier = new Bezier([
+            let newBezier = new Bezier([
               this.beziers[i].points[0],
               this.beziers[i].points[1],
               this.beziers[i+1].points[2],
@@ -231,6 +275,14 @@ class MultiBezier {
     }
     vec2.div(barycenter, barycenter, vec2.fromValues(this.beziers.length, this.beziers.length));
     return barycenter;
+  }
+
+  BBox() {
+    var bbox = this.beziers[0].BBox();
+    for(var i=1; i<this.beziers.length; i++) {
+      utils.expandbox(bbox, this.beziers[i].BBox());
+    }
+    return bbox;
   }
 
   Translate(val) {
@@ -264,5 +316,38 @@ class MultiBezier {
 
   BezierCount() {
     return this.beziers.length;
+  }
+
+  Project(point) {
+    // step 1: coarse check
+    var LUT = this.GetLUT(), l = LUT.length-1,
+        closest = utils.closest(LUT, point),
+        mdist = closest.mdist,
+        mpos = closest.mpos;
+    if (mpos===0 || mpos===l) {
+      var t = mpos/l, pt = this.compute(t);
+      pt.t = t;
+      pt.d = mdist;
+      return pt;
+    }
+
+    // step 2: fine check
+    var ft, t, p, d,
+        t1 = (mpos-1)/l,
+        t2 = (mpos+1)/l,
+        step = 0.1/l;
+    mdist += 1;
+    for(t=t1,ft=t; t<t2+step; t+=step) {
+      p = this.Compute(t);
+      d = utils.dist(point, p);
+      if (d<mdist) {
+        mdist = d;
+        ft = t;
+      }
+    }
+    p = this.Compute(ft);
+    p.t = ft;
+    p.d = mdist;
+    return p;
   }
 }

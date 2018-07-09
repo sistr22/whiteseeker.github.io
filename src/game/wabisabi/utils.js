@@ -152,21 +152,27 @@ var utils = {
   },
 
   dist: function(p1, p2) {
-    var dx = p1.x - p2.x,
-        dy = p1.y - p2.y;
+    var dx = p1[0] - p2[0]],
+        dy = p1[1] - p2[1]]
     return sqrt(dx*dx+dy*dy);
+  },
+
+  sqDist: function(p1, p2) {
+    var dx = p1[0] - p2[0]],
+        dy = p1[1] - p2[1]]
+    return dx*dx+dy*dy;
   },
 
   closest: function(LUT, point) {
     var mdist = pow(2,63), mpos, d;
     LUT.forEach(function(p, idx) {
-      d = utils.dist(point, p);
+      d = utils.sqDist(point, p);
       if (d<mdist) {
         mdist = d;
         mpos = idx;
       }
     });
-    return { mdist:mdist, mpos:mpos };
+    return { mdist:sqrt(mdist), mpos:mpos };
   },
 
   abcratio: function(t, n) {
@@ -286,7 +292,7 @@ var utils = {
     if(list.indexOf(1)===-1) { list.push(1); }
     for(var i=0,len=list.length; i<len; i++) {
       t = list[i];
-      c = curve.get(t);
+      c = curve.Get(t);
       if(c[d] < min) { min = c[d]; }
       if(c[d] > max) { max = c[d]; }
     }
@@ -448,18 +454,14 @@ var utils = {
   },
 
   expandbox: function(bbox, _bbox) {
-    if(_bbox.x.min < bbox.x.min) { bbox.x.min = _bbox.x.min; }
-    if(_bbox.y.min < bbox.y.min) { bbox.y.min = _bbox.y.min; }
-    if(_bbox.z && _bbox.z.min < bbox.z.min) { bbox.z.min = _bbox.z.min; }
-    if(_bbox.x.max > bbox.x.max) { bbox.x.max = _bbox.x.max; }
-    if(_bbox.y.max > bbox.y.max) { bbox.y.max = _bbox.y.max; }
-    if(_bbox.z && _bbox.z.max > bbox.z.max) { bbox.z.max = _bbox.z.max; }
-    bbox.x.mid = (bbox.x.min + bbox.x.max)/2;
-    bbox.y.mid = (bbox.y.min + bbox.y.max)/2;
-    if(bbox.z) { bbox.z.mid = (bbox.z.min + bbox.z.max)/2; }
-    bbox.x.size = bbox.x.max - bbox.x.min;
-    bbox.y.size = bbox.y.max - bbox.y.min;
-    if(bbox.z) { bbox.z.size = bbox.z.max - bbox.z.min; }
+    if(_bbox[0].min < bbox[0].min) { bbox[0].min = _bbox[0].min; }
+    if(_bbox[1].min < bbox[1].min) { bbox[1].min = _bbox[1].min; }
+    if(_bbox[0].max > bbox[0].max) { bbox[0].max = _bbox[0].max; }
+    if(_bbox[1].max > bbox[1].max) { bbox[1].max = _bbox[1].max; }
+    bbox[0].mid = (bbox[0].min + bbox[0].max)/2;
+    bbox[1].mid = (bbox[1].min + bbox[1].max)/2;
+    bbox[0].size = bbox[0].max - bbox[0].min;
+    bbox[1].size = bbox[1].max - bbox[1].min;
   },
 
   pairiteration: function(c1, c2, curveIntersectionThreshold) {

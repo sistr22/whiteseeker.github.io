@@ -13,23 +13,17 @@ Array.prototype.unique = function() {
 class Selection {
   constructor() {
     this.points = new Map();
-    //this.ctrl_points = new Map();
   }
 
   AddPoint(point, bezier_line) {
     this.points.set(point, bezier_line);
   }
 
-  /*AddCtrlPoint(ctrl_point, bezier_line) {
-    this.ctrl_points.set(ctrl_point, bezier_line);
-  }*/
-
   Length() {
-    return /*this.ctrl_points.size +*/ this.points.size;
+    return this.points.size;
   }
 
   Clear() {
-    //this.ctrl_points.clear();
     this.points.clear();
   }
 }
@@ -70,13 +64,21 @@ class State {
 }
 
 class StateIdle extends State {
+  constructor(editor) {
+    super();
+    editor.renderer.bezier_lines.forEach( (bezier) => {
+      bezier.showBBox = true;
+      bezier.showCtrlPoints = false;
+    });
+  }
   Tick(editor, delta_ms) {
   }
   MouseUp(editor, pos) {
     this.last_pos_mouse = pos;
   }
   MouseDown(editor, pos) {
-    var state = new StateSelecting();
+    //let state = new StateSelecting();
+    let state = new StateSelectingObject();
     state.MouseDown(editor, pos);
     return state;
   }
@@ -91,7 +93,7 @@ class StateIdle extends State {
       var translate_vector = vec2.fromValues(0, 0);
       vec2.sub(translate_vector, this.last_pos_mouse, barycenter);
       bezier_line.Translate(translate_vector);
-      editor.renderer.AddBezierLine(bezier_line);
+      editor.renderer.AddBezierLine(bezier_line).showBBox = true;
       editor.bezier_lines.push(bezier_line);
     }
     return null;
@@ -108,7 +110,7 @@ class StateIdle extends State {
         vec2.fromValues(pt_left[0], pt_left[1]+0.2),
         vec2.fromValues(pt_right[0], pt_right[1]+0.2),
         pt_right]));
-      editor.renderer.AddBezierLine(line);
+      editor.renderer.AddBezierLine(line).showBBox = true;
       editor.bezier_lines.push(line);
     }
   }
@@ -117,6 +119,144 @@ class StateIdle extends State {
     if(evt == UiActions.PLAY)
       return new StatePlay(editor);
     return null;
+  }
+}
+
+class StateSelectingObject extends State {
+
+  constructor(selection) {
+    super();
+    if(selection)
+      this.selection = selection;
+    else
+      this.selection = new Selection();
+  }
+  
+  Tick(editor, delta_ms) {
+  }
+
+  MouseDown(editor, pos) {
+    this.start_point = pos;
+    var click_on_selection = false;
+    // If pointer down on a selected element => translate
+    /*this.selection.points.forEach((key, elt) => {
+      if(vec2.sqrDist(elt, pos) < 0.0002) {
+        click_on_selection = true;
+      }
+    });
+    if(click_on_selection)
+      return new StateTranslating(this.selection);*/
+    return null;
+  }
+
+  MouseUp(editor, pos) {
+    var something_added = false;
+
+    if(vec2.sqrDist(this.start_point, pos) < 0.0002) {
+      something_added = this.ClickSelect(editor, pos);
+    } else {
+      something_added = this.RectangleSelect(editor, pos);
+    }
+
+    if(!something_added) {
+      this.selection.points.forEach((key, elt) => {
+        elt.color = null;
+      });
+      this.selection.Clear();
+    }
+
+    if(this.selection.Length() == 0)
+      return new StateIdle(editor);
+    console.log("selected item count: " + this.selection.Length());
+    return null;
+  }
+
+  ClickSelect(editor, pos) {
+    var something_added = false;
+    for (var l = 0 ; l < editor.bezier_lines.length ; l++) {
+      var line = editor.bezier_lines[l];
+      if(!line)
+        continue;
+      var bbox = line.BBox();
+      if(pos[0] < bbox[0].max && pos[0] > bbox[0].min
+          && pos[1] < bbox[1].max && pos[1] > bbox[1].min) {
+        this.selection.AddPoint(line, line);
+        line.color = [1.0, 1.0, 0.0, 1.0];
+        something_added = true;
+      }
+    }
+    return something_added;
+  }
+
+  RectangleSelect(editor, pos) {
+    /*var bottom_left_pt = vec2.create();
+    bottom_left_pt[0] = Math.min(this.start_point[0], pos[0]);
+    bottom_left_pt[1] = Math.min(this.start_point[1], pos[1]);
+
+    var top_right_pt = vec2.create();
+    top_right_pt[0] = Math.max(this.start_point[0], pos[0]);
+    top_right_pt[1] = Math.max(this.start_point[1], pos[1]);*/
+
+    var something_added = false;
+    /*for (var l = 0 ; l < editor.bezier_lines.length ; l++) {
+      var line = editor.bezier_lines[l];
+      if(!line)
+        continue;
+      var bezierPts = line.GetControlPoints();
+      for(var p = 0 ; p < bezierPts.length ; p++) {
+        if(bezierPts[p][0] >= bottom_left_pt[0] && bezierPts[p][0] <= top_right_pt[0] &&
+          bezierPts[p][1] >= bottom_left_pt[1] && bezierPts[p][1] <= top_right_pt[1]) {
+          bezierPts[p].color = [1.0,1.0,0.0,1.0];
+          this.selection.AddPoint(bezierPts[p], line);
+          something_added = true;
+        }
+      }
+    }*/
+    return something_added;
+  }
+
+  MouseMove(editor, data) {
+    this.last_pos_mouse = data.absolute;
+  }
+
+  KeyDown(editor, evt) {
+    /*if(evt.key == "t") {
+      return new StateTranslating(this.selection);
+    } else if(evt.which == 8 /*backspace*//*) {
+      this.Delete(editor);
+      this.selection.points.forEach((key, elt) => {
+        elt.color = null;
+      });
+      return new StateIdle(editor);
+    } else if(evt.ctrlKey && evt.which == 67 /*c*//*) {
+      if(this.selection.points.size == 1) {
+        console.log("Copying the bezier line");
+        var key_value = this.selection.points.entries().next().value;
+        editor.copy_slot = key_value[1].Clone();
+      }
+    }*/
+    return null;
+  }
+
+  KeyPress(editor, evt) {
+    /*if(evt.key == "+") {
+      if(this.selection.points.size == 1) {
+        console.log("Add point");
+        var key_value = this.selection.points.entries().next().value;
+        var y = this.last_pos_mouse[1];
+        key_value[1].AddPoint(key_value[0], this.last_pos_mouse, vec2.fromValues(-0.1, y), vec2.fromValues(0.1, y));
+      }
+    }*/
+  }
+
+  Delete(editor) {
+    /*console.log("Deleting selection");
+    this.selection.points.forEach((key, elt) => {
+      console.log(key);
+      key.DeletePoint(elt);
+      if(key.BezierCount() == 0)
+        editor.RemoveBezierLine(key);
+    });*/
   }
 }
 
@@ -142,13 +282,6 @@ class StateSelecting extends State {
         click_on_selection = true;
       }
     });
-    /*if(!click_on_selection) {
-      this.selection.ctrl_points.forEach((key, elt) => {
-        if(vec2.sqrDist(elt, pos) < 0.0002) {
-          click_on_selection = true;
-        }
-      });
-    }*/
     if(click_on_selection)
       return new StateTranslating(this.selection);
     return null;
@@ -166,14 +299,11 @@ class StateSelecting extends State {
       this.selection.points.forEach((key, elt) => {
         elt.color = null;
       });
-      /*this.selection.ctrl_points.forEach((key, elt) => {
-        elt.color = null;
-      });*/
       this.selection.Clear();
     }
 
     if(this.selection.Length() == 0)
-      return new StateIdle();
+      return new StateIdle(editor);
     console.log("selected item count: " + this.selection.Length());
     return null;
   }
@@ -224,6 +354,7 @@ class StateSelecting extends State {
   }
 
   MouseMove(editor, data) {
+    this.last_pos_mouse = data.absolute;
   }
 
   KeyDown(editor, evt) {
@@ -234,7 +365,7 @@ class StateSelecting extends State {
       this.selection.points.forEach((key, elt) => {
         elt.color = null;
       });
-      return new StateIdle();
+      return new StateIdle(editor);
     } else if(evt.ctrlKey && evt.which == 67 /*c*/) {
       if(this.selection.points.size == 1) {
         console.log("Copying the bezier line");
@@ -250,8 +381,8 @@ class StateSelecting extends State {
       if(this.selection.points.size == 1) {
         console.log("Add point");
         var key_value = this.selection.points.entries().next().value;
-        var y = key_value[0][1];
-        key_value[1].AddPoint(key_value[0], vec2.fromValues(0.0, y), vec2.fromValues(-0.1, y), vec2.fromValues(0.1, y));
+        var y = this.last_pos_mouse[1];
+        key_value[1].AddPoint(key_value[0], this.last_pos_mouse, vec2.fromValues(-0.1, y), vec2.fromValues(0.1, y));
       }
     }
   }
@@ -329,7 +460,7 @@ class StatePlay extends State {
     console.log("direction: " + direction);
     if(audio_controls.currentTime >= audio_controls.duration) {
       editor.debug = this.previousDebugState;
-      return new StateIdle();
+      return new StateIdle(editor);
     }
     return null;
   }
@@ -364,7 +495,7 @@ class StatePlay extends State {
   UiEvent(editor, evt) {
     if(evt == UiActions.PAUSE) {
       editor.debug = this.previousDebugState?true:false;
-      return new StateIdle();
+      return new StateIdle(editor);
     }
     return null;
   }

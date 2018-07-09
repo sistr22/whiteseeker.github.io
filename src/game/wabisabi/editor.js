@@ -6,9 +6,9 @@ window.indexedDB = window.indexedDB || window.webkitIndexedDB || window.mozIndex
 
 class Editor {
   constructor(renderer) {
-    this.state = new StateIdle();
-    this.bezier_lines = [];
     this.renderer = renderer;
+    this.state = new StateIdle(this);
+    this.bezier_lines = [];
     this.track_length_ms = 5000;
     this.copy_slot = null;
     this.debug = true;
@@ -32,10 +32,28 @@ class Editor {
       // Create an objectStore for this database
       var objectStore = thiz.db.createObjectStore("level");
     };
-
-    //var bezier_line_1 = new Bezier([[-0.2,0.0],[-0.2, 0.2],[0.2, -0.1],[0.2,0.0]]);
-    //var bezier_line_2 = new Bezier([[0.2,0.0],[0.2, 0.1],[0.4, -0.1],[0.4,0.0]]);
-    //this.bezier_line_2_renderer = new BezierRenderer(new MultiBezier(bezier_line_1, bezier_line_2));
+    let timelines_container = document.getElementById("timelines");
+    var items = new vis.DataSet([
+      {
+        start: 5,
+        end: 15,
+        content: 'Anim 1'
+        // Optional: fields 'id', 'type', 'group', 'className', 'style'
+      }
+      // more items...
+    ]);
+    var options = {
+      width: '100%',
+      height: '300px',
+      margin: {
+        item: 20
+      },
+      start: 0,
+      end: 70,
+      max: 70,
+      min: 0
+    };
+    this.timeline = new vis.Timeline(timelines_container, items, options);
   }
 
   RemoveBezierLine(bezier_line) {
@@ -63,13 +81,7 @@ class Editor {
     var world_size = document.getElementById("world_size").value;
     lines.push(-0.5, world_size*percent);
     lines.push(0.5, world_size*percent);
-    if(this.debug) {
-      this.renderer.drawDebug();
-      //this.bezier_line_2_renderer.DrawDebug(this.renderer.gl, this.renderer.VP);
-    } else {
-      this.renderer.draw();
-      //this.bezier_line_2_renderer.Draw(this.renderer.gl, this.renderer.VP);
-    }
+    this.renderer.draw();
     this.renderer.DrawDebugLines(lines, [0.4, 0.4, 0.4, 1.0]);
 
     this.player.Draw(this.renderer.gl, this.renderer.VP, [0.4, 1.0, 0.0, 1.0]);
@@ -199,6 +211,7 @@ class Editor {
     transaction.objectStore("level").get("current_level").onsuccess = function (event) {
       var buf = event.target.result;
       thiz.Load(buf);
+      thiz.SetState(new StateIdle(thiz));
     };
   }
   
@@ -220,12 +233,6 @@ class Editor {
           var pt = obstacle.points(i);
           points.push(vec2.fromValues(pt.x(), pt.y()));
         }
-        /*var ctrl_points = [];
-        for(var i = 0 ; i < obstacle.controlPointsLength() ; i++) {
-          var pt = obstacle.controlPoints(i);
-          ctrl_points.push(vec2.fromValues(pt.x(), pt.y()));
-        }*/
-        //var line = new BezierLine(points, ctrl_points);
         let beziers = [];
         if(points.length < 4)
           break;

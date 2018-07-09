@@ -12,15 +12,16 @@ class BezierRenderer {
 
   Draw(gl, VP) {
     this.Retesselate(gl);
-    this.DrawLines(gl, VP, [1.0, 1.0, 1.0, 1.0]);
+    this.DrawLines(gl, VP, this.bezier.color || [1.0, 1.0, 1.0, 1.0]);
+    if(this.showBBox)
+      this.DrawBBox(gl, VP);
   }
 
-  DrawDebug(gl, VP) {
-    this.Draw(gl, VP);
-    var ctrl_points = this.bezier.GetControlPoints();
+  DrawControlPoint() {
+    let ctrl_points = this.bezier.GetControlPoints();
     if(ctrl_points.length == 0)
       return;
-    var lines = [];
+    let lines = [];
     this.DrawPoint(gl, VP, ctrl_points[0], ctrl_points[0].color ? ctrl_points[0].color : [0.0, 1.0, 1.0, 1.0]);
     for(var i = 1 ; i < ctrl_points.length ; i+=3){
       var cl = ctrl_points[i].color ? ctrl_points[i].color : [0.0, 0.0, 1.0, 1.0];
@@ -34,6 +35,18 @@ class BezierRenderer {
       lines.push(ctrl_points[i+2][0], ctrl_points[i+2][1], ctrl_points[i+1][0], ctrl_points[i+1][1]);
     }
     this.DrawDebugLines(gl, VP, lines, [0.0, 0.0, 1.0, 1.0], gl.LINES);
+  }
+
+  DrawBBox(gl, VP) {
+    let bbox = this.bezier.BBox();
+    //console.log(bbox);
+    let lines = [];
+    lines.push(bbox[0].min, bbox[1].min); // bottom left
+    lines.push(bbox[0].min, bbox[1].max); // bottom right
+    lines.push(bbox[0].max, bbox[1].max); // top right
+    lines.push(bbox[0].max, bbox[1].min); // top left
+    lines.push(bbox[0].min, bbox[1].min); // bottom left
+    this.DrawDebugLines(gl, VP, lines, [0.0, 0.0, 1.0, 1.0], gl.LINE_STRIP);
   }
 
   DrawPoint(gl, VP, pt, color) {
@@ -212,7 +225,9 @@ class Renderer {
   }
 
   AddBezierLine(line) {
-    this.bezier_lines.push(new BezierRenderer(line));
+    let br = new BezierRenderer(line)
+    this.bezier_lines.push(br);
+    return br;
   }
 
   RemoveBezierLine(bezier_line) {
@@ -301,15 +316,6 @@ class Renderer {
     gl.clear(gl.COLOR_BUFFER_BIT);
     for (var i = 0; i < this.bezier_lines.length; i++) {
       this.bezier_lines[i].Draw(gl, this.VP);
-    }
-  }
-
-  drawDebug() {
-    var gl = this.gl;
-    var now = Date.now() / 1000.0 - this.startTime;
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    for (var i = 0; i < this.bezier_lines.length; i++) {
-      this.bezier_lines[i].DrawDebug(gl, this.VP);
     }
   }
 
